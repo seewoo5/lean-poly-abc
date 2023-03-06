@@ -21,9 +21,11 @@ example (p : k[X]) : ℕ := (factors p).sizeof
 
 -- definitions
 
+-- Wronskian: W(a, b) = ab' - a'b
 def wronskian (a b : k[X]) : k[X] :=
   a * b.derivative - a.derivative * b
 
+-- Radical of polynomial = product of irreducible factors
 def poly_rad (a: k[X]) : k[X] := 
   (factors a).to_finset.prod id
 
@@ -58,29 +60,46 @@ begin
   rw ← wronskian_anticomm,
 end
 
+lemma wronskian_deg_plus_one_le_deg_sum (a b : k[X]) : (wronskian a b).degree + 1 ≤ a.degree + b.degree := sorry 
+
 
 -- properties of degree
+/- poly_deg_mul_dist: deg(ab) = deg(a) + deg(b)
+Already in mathlib: `polynomial.degree_mul`
+-/
 lemma poly_deg_mul_dist (a b : k[X]) : (a * b).degree = a.degree + b.degree := 
 begin 
   exact polynomial.degree_mul,
 end
-/- deg (a * b) = deg a + deg b
 
-> polynomial.degree_mul
-
+/- poly_deg_pow: deg(a^n) = n • deg(a)
+Already in mathlib: `polynomial.degree_pow`
 -/
-
 lemma poly_deg_pow (a : k[X]) (n : ℕ) : (a^n).degree = n • a.degree := polynomial.degree_pow a n
 
 
 -- properties of radical
 
+/- `poly_rad_mul_dist`
+
+For any coprime polynomial a and b, rad(a*b) = rad(a) * rad(b)
+
+Proof) ...
+-/
 lemma poly_rad_mul_dist (a b : k[X]) (hc: is_coprime a b) : 
   poly_rad a * poly_rad b = poly_rad (a * b) := sorry
 
+/- `poly_rad_eq_pow`
+
+For any polynomial a and n ∈ ℤ_+, rad(a^n) = rad(a)
+
+Proof) ...
+-/
 lemma poly_rad_eq_pow (a: k[X]) (n: nat) (hn: n > 0) : poly_rad (a^n) = poly_rad(a) := sorry
 
-/- poly_prod_deg_add
+/- `poly_rad_deg_le_deg` deg(rad(a)) ≤ deg(a)
+
+Proof)
 a = Product of all (factors a)
 
 Fact 1.
@@ -113,8 +132,20 @@ lemma poly_rad_deg_le_deg (a: k[X]) : (poly_rad a).degree ≤ a.degree := sorry
 
 
 
--- ABC for polynomials
-theorem poly_abc (a b c : k[X]) (hsum: a + b + c = 0) (hab: is_coprime a b) (hbc: is_coprime b c) (hca: is_coprime c a): max (max (a.degree) (b.degree)) (c.degree) + 1 <= (poly_rad (a*b*c)).degree := 
+/- ABC for polynomials (Mason-Stothers theorem)
+
+For coprime polynomials a, b, c satisfying a + b + c = 0, not all constant (i.e. at least one of a, b, c, has nonzero derivative) we have max {deg(a), deg(b), deg(c)} + 1 ≤ deg(rad(abc))
+
+Proof by Noah Snyder, "An Alternative Proof of Mason's Theorem", also on Wikipedia)
+
+1. Show that W(a, b) = W(b, c) = W(c, a) =: W. `wronskian_eq_of_sum_zero`
+2. W != 0 by assumptions (coprime & nonvanishing derivative)
+3. gcd(a, a'), gcd(b, b'), gcd(c, c') divides W. These three are all coprime so there product also divides W, and we get the inequality on degrees: deg(gcd(a, a')) + deg(gcd(b, b')) + deg(gcd(c, c')) ≤ deg W
+4. deg(gcd(a, a')) + (number of distinct roots of a) ≥ deg(a), and similar for b and c. Here roots are taken in some algebraic closure.
+5. deg(W) + 1 ≤ deg(a) + deg(b). `wronskian_deg_plus_one_le_deg_sum` 
+6. Combine 3, 4, 5 gives deg(c) + 1 ≤ (number of distinct roots of abc), which is what we want to prove.
+-/
+theorem poly_abc (a b c : k[X]) (hsum: a + b + c = 0) (hab: is_coprime a b) (hbc: is_coprime b c) (hca: is_coprime c a) (h_d_nonzero: ¬ (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0)): max (max (a.degree) (b.degree)) (c.degree) + 1 <= (poly_rad (a*b*c)).degree := 
 begin
   sorry
 end
@@ -122,7 +153,10 @@ end
 
 /- FLT for polynomials
 
-Proof) Apply ABC for polynomials with triple (a, b, c) where a^n + b^n + c^n = 0
+For coprime polynomials a, b, c satisfying a^n + b^n + c^n = 0, n ≥ 3 then a, b, c are all constant.
+(We assume that the characteristic of the field is zero. In fact, the theorem is true when the characteristic does not divide n.)
+
+Proof) Apply ABC for polynomials with triple (a^n, b^n, c^n):
 
 -> max (deg a^n, deg b^n, deg c^n) = n * max (deg a, deg b, deg c) + 1
 ≤ deg (rad (a^n * b^n * c^n)) 
@@ -131,11 +165,11 @@ Proof) Apply ABC for polynomials with triple (a, b, c) where a^n + b^n + c^n = 0
 ≤ deg a + deg b + deg c
 ≤ 3 * max (deg a, deg b, deg c)
 
-and contradiction follows from n ≥ 3.
+and from n ≥ 3, we should have max (deg a, deg b, deg c) = ⟂, i.e. at least one of a, b, c is zero.
 
 -/
 
-theorem poly_flt (a b c : k[X]) (n : nat) (hn: n ≥ 3) (hsum: a^n + b^n + c^n = 0) (hab : is_coprime a b) (hbc : is_coprime b c) (hca : is_coprime c a) : a * b * c = 0:=
+theorem poly_flt (a b c : k[X]) (n : nat) (hn: n ≥ 3) (hsum: a^n + b^n + c^n = 0) (hab : is_coprime a b) (hbc : is_coprime b c) (hca : is_coprime c a) : (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
 begin
   sorry
 end
