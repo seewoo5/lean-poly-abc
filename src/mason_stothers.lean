@@ -5,19 +5,15 @@ import data.polynomial.derivative
 import ring_theory.unique_factorization_domain
 
 noncomputable theory
-open classical
 
-open_locale polynomial
+open_locale polynomial classical
 
 open polynomial
 open unique_factorization_monoid
 
 variables {R : Type*} [comm_ring R]
 variables {k: Type*} [field k]
-variables [decidable_eq k[X]]
 variables (k_char_0 : ring_char k = 0)
-
-example (p : k[X]) : ℕ := (factors p).sizeof
 
 -- definitions
 
