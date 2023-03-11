@@ -41,6 +41,14 @@ def poly_rad (a: k[X]) : k[X] :=
 
 -- properties of Wronskian
 
+@[simp]
+lemma wronskian_zero_left (a : k[X]) : wronskian 0 a = 0 :=
+by simp_rw wronskian; simp only [zero_mul, derivative_zero, sub_self]
+
+@[simp]
+lemma wronskian_zero_right (a : k[X]) : wronskian a 0 = 0 :=
+by simp_rw wronskian; simp only [derivative_zero, mul_zero, sub_self]
+
 lemma wronskian_neg_left (a b : k[X]) : wronskian (-a) b = - (wronskian a b) :=
 by simp_rw [wronskian, derivative_neg]; ring
 
@@ -57,7 +65,7 @@ by rw [wronskian, mul_comm, sub_self]
 lemma wronskian_anticomm (a b : k[X]) : wronskian a b = - wronskian b a :=
 by rw [wronskian, wronskian]; ring
 
-lemma wronskian_eq_of_sum_zero (a b c : k[X])
+lemma wronskian_eq_of_sum_zero {a b c : k[X]}
   (h : a + b + c = 0) : wronskian a b = wronskian b c :=
 begin
   rw ← neg_eq_iff_add_eq_zero at h,
@@ -438,14 +446,45 @@ begin
   exact div_rad_dvd_diff_induction _ _ nzx nzy hc (hx nzx) (hy nzy),
 end
 
+theorem div_rad_dvd_wronskian (a b : k[X]) : div_rad a ∣ wronskian a b :=
+begin
+  by_cases a_nz : a = 0,
+  { subst a_nz, rw wronskian_zero_left b, exact dvd_zero _, },
+  rw wronskian,
+  apply dvd_sub,
+  { apply dvd_mul_of_dvd_left, 
+    apply (div_rad_dvd_self _ a_nz), },
+  { apply dvd_mul_of_dvd_left,
+    apply (div_rad_dvd_diff_always a_nz), },
+end
 
 -- Lemma 2.1.3
 #check polynomial.degree_le_of_dvd
 
-
-lemma coprime_wronskian_eq_zero_const (a b : k[X]) (hw: wronskian a b = 0) (hc: is_coprime a b) : (a.derivative = 0 ∧ b.derivative = 0) :=
+lemma dvd_deriv_iff_deriv_eq_zero
+  {a : k[X]} (a_dvd_a_deriv : a ∣ a.derivative) : a.derivative = 0 :=
 begin
-  sorry,
+  by_cases a_nz : a = 0,
+  { rw a_nz, simp only [derivative_zero], },
+  by_contra deriv_nz,
+  have deriv_lt := degree_derivative_lt a_nz,
+  have le_deriv := polynomial.degree_le_of_dvd a_dvd_a_deriv deriv_nz,
+  have lt_self := le_deriv.trans_lt deriv_lt,
+  simp only [lt_self_iff_false] at lt_self, exact lt_self,
+end
+
+lemma coprime_wronskian_eq_zero_const 
+  {a b : k[X]} (hw: wronskian a b = 0) 
+  (hc: is_coprime a b) : (a.derivative = 0 ∧ b.derivative = 0) :=
+begin
+  rw [wronskian, sub_eq_iff_eq_add, zero_add] at hw,
+  split,
+  { apply dvd_deriv_iff_deriv_eq_zero,
+    apply hc.dvd_of_dvd_mul_right,
+    rw ←hw, exact dvd_mul_right _ _, },
+  { apply dvd_deriv_iff_deriv_eq_zero,
+    apply hc.symm.dvd_of_dvd_mul_left,
+    rw hw, exact dvd_mul_left _ _, },
 end
 
 /- ABC for polynomials (Mason-Stothers theorem)
