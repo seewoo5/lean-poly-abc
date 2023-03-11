@@ -254,12 +254,6 @@ end
 
 lemma div_rad_dvd_diff_one : div_rad_dvd_diff (1 : k[X]) := div_rad_dvd_diff_const 1
 
-
-lemma div_rad_dvd_diff_unit (u : k[X]) (hu : is_unit u) : div_rad_dvd_diff u :=
-begin
-  sorry,
-end
-
 lemma div_rad_eq {x a : k[X]} (ha : a ≠ 0) : x = div_rad a ↔ x * (poly_rad a) = a :=
 begin
   have rad_nz := poly_rad_ne_zero ha,
@@ -272,6 +266,28 @@ begin
   { intro eq, rw div_rad, 
     apply euclidean_domain.eq_div_of_mul_eq_left _ eq,
     exact rad_nz, },
+end
+
+lemma mul_div_rad_poly_rad {a : k[X]} (ha : a ≠ 0) : (div_rad a) * (poly_rad a) = a :=
+begin
+  rw ← div_rad_eq ha,
+end
+
+lemma div_rad_unit (u : k[X]) (hu : is_unit u) : is_unit (div_rad u) :=
+begin
+  have u_neq_0 : u ≠ 0 := by
+    intro h; subst h; revert hu; exact not_is_unit_zero,
+  rw is_unit_iff_exists_inv at ⊢ hu,
+  rcases hu with ⟨inv_u, eq_u⟩,
+  use poly_rad u * inv_u,
+  rw [←mul_assoc, mul_div_rad_poly_rad u_neq_0],
+  exact eq_u,
+end 
+
+lemma div_rad_dvd_diff_unit (u : k[X]) (hu : is_unit u) : div_rad_dvd_diff u :=
+begin
+  rw div_rad_dvd_diff,
+  sorry,
 end
 
 -- lemma div_rad_coprime_mul (a b : k[X]) (ha : a ≠ 0) (hb : b ≠ 0) (hc : is_coprime a b) : div_rad(a * b) = (div_rad a) * (div_rad b) :=
@@ -344,12 +360,6 @@ begin
     ... = a^n * a : by simp,
   },
   rw pow_eq,
-end
-
-
-lemma mul_div_rad_poly_rad {a : k[X]} (ha : a ≠ 0) : (div_rad a) * (poly_rad a) = a :=
-begin
-  rw ← div_rad_eq ha,
 end
 
 lemma div_rad_coprime_mul {a b : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc: is_coprime a b) : div_rad (a * b) = (div_rad a) * (div_rad b) :=
