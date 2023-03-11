@@ -273,7 +273,7 @@ begin
   rw ← div_rad_eq ha,
 end
 
-lemma div_rad_unit (u : k[X]) (hu : is_unit u) : is_unit (div_rad u) :=
+lemma div_rad_unit {u : k[X]} (hu : is_unit u) : is_unit (div_rad u) :=
 begin
   have u_neq_0 : u ≠ 0 := by
     intro h; subst h; revert hu; exact not_is_unit_zero,
@@ -284,11 +284,12 @@ begin
   exact eq_u,
 end 
 
-lemma div_rad_dvd_diff_unit (u : k[X]) (hu : is_unit u) : div_rad_dvd_diff u :=
+lemma div_rad_dvd_diff_unit {u : k[X]} (hu : is_unit u) : div_rad_dvd_diff u :=
 begin
   rw div_rad_dvd_diff,
-  sorry,
+  exact (div_rad_unit hu).dvd,
 end
+
 
 -- lemma div_rad_coprime_mul (a b : k[X]) (ha : a ≠ 0) (hb : b ≠ 0) (hc : is_coprime a b) : div_rad(a * b) = (div_rad a) * (div_rad b) :=
 -- begin
@@ -408,10 +409,8 @@ begin
   apply induction_on_coprime a,
 
   simp only [ne.def, eq_self_iff_true, not_true, is_empty.forall_iff],
-  intro x,
-  intro ux,
-  intro nzx,
-  exact div_rad_dvd_diff_unit x ux,
+  intros _ ux _,
+  exact div_rad_dvd_diff_unit ux,
 
   sorry,
 
