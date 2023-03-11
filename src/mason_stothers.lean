@@ -412,21 +412,31 @@ begin
   intros _ ux _,
   exact div_rad_dvd_diff_unit ux,
 
-  sorry,
+  { intros p i hp _,
+    cases i with i,
+    { rw pow_zero, exact div_rad_dvd_diff_one, },
+    { rw (show i.succ = i + 1, by refl),
+      refine div_rad_dvd_diff_prime_power p _ hp i,
+      simp only [ne.def, pow_eq_zero_iff, nat.succ_pos'] at ha,
+      exact ha, }, },
 
-  intros x y,
+  intros x y hpxy hx hy xy_nz,
   have hc : is_coprime x y,
   {
-    sorry,
+    apply euclidean_domain.is_coprime_of_dvd _ _,
+
+    simp at xy_nz,
+    tauto,
+    intros p hp p_nz p_div_x p_div_y,
+    have pu := hpxy p p_div_x p_div_y,
+    simp at hp,
+    exact hp pu,
   },
 
-  intro _,
-
+  rw mul_ne_zero_iff at xy_nz,
+  cases xy_nz with nzx nzy,
+  exact div_rad_dvd_diff_induction _ _ nzx nzy hc (hx nzx) (hy nzy),
 end
-
--- poly_mod_rad_div_diff_prime_pow
-
--- lemma poly_mod_rad_div_dif (a: k[X]): (a / (poly_rad a)) ∣ a.derivative := sorry
 
 
 -- Lemma 2.1.3
