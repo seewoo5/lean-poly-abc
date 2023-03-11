@@ -265,7 +265,7 @@ begin
   sorry,
 end
 
-lemma mul_div_rad_poly_rad {x a : k[X]} (ha : a ≠ 0) : (div_rad a) * (poly_rad a) = a :=
+lemma mul_div_rad_poly_rad {a : k[X]} (ha : a ≠ 0) : (div_rad a) * (poly_rad a) = a :=
 begin
   rw ← div_rad_eq ha,
 end
@@ -276,7 +276,7 @@ begin
   rw poly_rad_mul_dist ha hb hc,
   set c := a * b with eq_c,
   rw [←mul_div_rad_poly_rad ha, ←mul_div_rad_poly_rad hb] at eq_c,
-  rw eq_c, ring_nf, exact c, exact c, simp, tauto,
+  rw eq_c, ring_nf, simp, tauto,
 end
 
 lemma div_rad_dvd_diff_prime_power (a: k[X]) (pa: prime a) (n: ℕ) : div_rad_dvd_diff (a^n) :=
