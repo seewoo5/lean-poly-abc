@@ -394,7 +394,24 @@ end
 
 theorem div_rad_dvd_diff_always {a : k[X]} (ha : a ≠ 0) : div_rad_dvd_diff a :=
 begin
+  revert ha,
   apply induction_on_coprime a,
+
+  simp only [ne.def, eq_self_iff_true, not_true, is_empty.forall_iff],
+  intro x,
+  intro ux,
+  intro nzx,
+  exact div_rad_dvd_diff_unit x ux,
+
+  sorry,
+
+  intros x y,
+  have hc : is_coprime x y,
+  {
+    sorry,
+  },
+
+  intro _,
 
 end
 
