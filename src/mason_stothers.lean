@@ -8,9 +8,12 @@ import ring_theory.unique_factorization_domain
 import ring_theory.euclidean_domain
 -- import ring_theory.principal_ideal_domain
 import algebra.divisibility.units
+import algebra.divisibility.basic
 import algebra.associated
 import algebra.big_operators.multiset.basic
 import algebra.group.basic
+import algebra.group_power.basic
+
 
 noncomputable theory
 
@@ -142,7 +145,7 @@ end
 
 -- properties of radical
 
-/- `poly_rad_mul_dist`
+/- `poly_rad_coprime_mul`
 
 For any coprime polynomial a and b, rad(a*b) = rad(a) * rad(b)
 
@@ -151,7 +154,7 @@ Proof)
 2. Prime factors of a*b equal to the disjoint union of those of a and b. `poly_coprime_mul_prime_factors_disj_union`
 3. By definition of radical, we're done.
 -/
-lemma poly_rad_mul_dist {a b : k[X]} (ha: a ≠ 0) (hb: b ≠ 0) (hc: is_coprime a b) : 
+lemma poly_rad_coprime_mul {a b : k[X]} (ha: a ≠ 0) (hb: b ≠ 0) (hc: is_coprime a b) : 
   poly_rad (a * b) = poly_rad a * poly_rad b :=
 begin
   simp_rw poly_rad,
@@ -177,14 +180,9 @@ begin
   exact ne_of_gt hn,
 end
 
-lemma poly_rad_eq_pow (a: k[X]) (n: nat) (hn: n > 0) : poly_rad (a^n) = poly_rad(a) :=
+lemma poly_rad_eq_pow (a: k[X]) {n: nat} (hn: n > 0) : poly_rad (a^n) = poly_rad(a) :=
 begin
   simp_rw [poly_rad, prime_factors_eq_pow a n hn],
-end
-
-lemma poly_rad_prime_eq (a : k[X]) (ha: prime a) : poly_rad a = a :=
-begin
-  sorry,
 end
 
 /- `poly_rad_deg_le_deg` deg(rad(a)) ≤ deg(a)
@@ -246,6 +244,22 @@ def div_rad (a : k[X]) : k[X] := a / (poly_rad a)
 
 def div_rad_dvd_diff (a: k[X]) : Prop := (div_rad a) ∣ a.derivative
 
+
+lemma div_rad_dvd_diff_const (u : k) : div_rad_dvd_diff (polynomial.C u) :=
+begin
+  rw div_rad_dvd_diff,
+  rw derivative_C,
+  exact dvd_zero _,
+end
+
+lemma div_rad_dvd_diff_one : div_rad_dvd_diff (1 : k[X]) := div_rad_dvd_diff_const 1
+
+
+lemma div_rad_dvd_diff_unit (u : k[X]) (hu : is_unit u) : div_rad_dvd_diff u :=
+begin
+  sorry,
+end
+
 lemma div_rad_eq {x a : k[X]} (ha : a ≠ 0) : x = div_rad a ↔ x * (poly_rad a) = a :=
 begin
   have rad_nz := poly_rad_ne_zero ha,
@@ -260,31 +274,129 @@ begin
     exact rad_nz, },
 end
 
-lemma div_rad_prime_pow (a : k[X]) (n : ℕ) (pa : prime a) (ha : a ≠ 0) : div_rad (a^n) = a^(n-1) :=
+-- lemma div_rad_coprime_mul (a b : k[X]) (ha : a ≠ 0) (hb : b ≠ 0) (hc : is_coprime a b) : div_rad(a * b) = (div_rad a) * (div_rad b) :=
+-- begin
+--   simp_rw div_rad,
+--   rw poly_rad_coprime_mul ha hb hc,
+--   symmetry,
+--   exact div_mul_div_comm a (poly_rad a) b (poly_rad b),
+-- end
+
+lemma poly_rad_prime_eq (a : k[X]) (ha: prime a) : poly_rad a = normalize a :=
 begin
-  sorry,
+  rw poly_rad,
+  rw prime_factors,
+  have ia := ha.irreducible,
+  have na := normalized_factors_irreducible ia,
+  rw na,
+  simp only [multiset.to_finset_singleton, id.def, finset.prod_singleton],
 end
+
+lemma poly_rad_prime_pow (a : k[X]) (ha: prime a) (n : ℕ) (hn : n > 0): poly_rad (a^n) = normalize a :=
+begin
+  rw (poly_rad_eq_pow a hn),
+  exact (poly_rad_prime_eq a ha),
+end
+
+lemma dvd_normalize_pow (a : k[X]) (n : ℕ) (ha : a ≠ 0) : (normalize a) ∣ a^(n + 1) :=
+begin
+  have na := associated_normalize a,
+  have na2 := associated.symm na,
+  rw associated at na2,
+  rcases na2 with ⟨u, eq⟩,
+  have eq2 : a^(n+1) = (normalize a) * (u * a^n),
+  {
+    calc a^(n+1) = a^n * a^1 : pow_add a n 1
+    ... = a^1 * a^n : mul_comm _ _
+    ... = a * a^n : by simp
+    ... = (normalize a * u) * a^n : by rw eq
+    ... = (normalize a) * (u * a^n) : mul_assoc (normalize a) u (a^n)
+  },
+  exact dvd.intro (u * a^n) (eq2.symm),
+end
+
+
+lemma dvd_rad_prime_pow (a : k[X]) (n : ℕ) (pa : prime a) (ha : a ≠ 0) : associated (div_rad (a^(n+1))) (a^n) :=
+begin
+  rw div_rad,
+  rw (poly_rad_prime_pow a pa (n + 1) (by dec_trivial)),
+  have na := associated_normalize a,
+  rw associated.comm at na,
+  have hna : normalize a ≠ 0 :=
+  begin
+    intro h,
+    rw normalize_eq_zero at h,
+    exact ha h,
+  end,
+  have h2 := associated.refl (a^(n+1)),
+  have h3 : (a^(n+1) / (normalize a)) * (normalize a) = a^(n+1) :=
+    begin
+      have w := euclidean_domain.mul_div_assoc (normalize a) (dvd_normalize_pow a n ha),
+      have w2 := euclidean_domain.mul_div_cancel_left (a^(n+1)) hna,
+      rw mul_comm (normalize a) (a^(n+1) / normalize a) at w,
+      exact eq.trans (w.symm) w2,
+    end,
+    apply associated.of_mul_right _ (normalize_associated a) hna,
+    rw h3,
+  have pow_eq : a^(n+1) = a^n * a,
+  {
+    calc a^(n+1) = a^n * a^1 : pow_add a n 1
+    ... = a^n * a : by simp,
+  },
+  rw pow_eq,
+end
+
 
 lemma mul_div_rad_poly_rad {a : k[X]} (ha : a ≠ 0) : (div_rad a) * (poly_rad a) = a :=
 begin
   rw ← div_rad_eq ha,
 end
 
-lemma div_rad_mul_eq (a b : k[X]) (ha : a ≠ 0) (hb : b ≠ 0) (hc: is_coprime a b) : div_rad (a * b) = (div_rad a) * (div_rad b) :=
+lemma div_rad_coprime_mul {a b : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc: is_coprime a b) : div_rad (a * b) = (div_rad a) * (div_rad b) :=
 begin
   symmetry, rw div_rad_eq _,
-  rw poly_rad_mul_dist ha hb hc,
+  rw poly_rad_coprime_mul ha hb hc,
   set c := a * b with eq_c,
   rw [←mul_div_rad_poly_rad ha, ←mul_div_rad_poly_rad hb] at eq_c,
   rw eq_c, ring_nf, simp, tauto,
 end
 
-lemma div_rad_dvd_diff_prime_power (a: k[X]) (pa: prime a) (n: ℕ) : div_rad_dvd_diff (a^n) :=
+lemma div_rad_dvd_diff_prime_power (a: k[X]) (ha : a ≠ 0) (pa: prime a) (n: ℕ) : div_rad_dvd_diff (a^(n+1)) :=
 begin
-  sorry,
+  rw div_rad_dvd_diff,
+  rw derivative_pow a (n+1),
+  have a_pow_assoc := dvd_rad_prime_pow a n pa ha,
+  rw associated.dvd_iff_dvd_left a_pow_assoc,
+  simp only [nat.cast_add, algebra_map.coe_one, map_add, C_eq_nat_cast, map_one, nat.add_succ_sub_one, add_zero],
+  rw [mul_comm, ←mul_assoc],
+  simp,
 end
 
-lemma div_rad_dvd_diff_induction (a b: k[X]) (h: is_coprime a b) : div_rad_dvd_diff a -> div_rad_dvd_diff b -> div_rad_dvd_diff (a*b) := sorry
+lemma div_rad_dvd_self (a : k[X]) (ha: a ≠ 0) : div_rad a ∣ a :=
+begin
+  rw div_rad,
+  exact euclidean_domain.div_dvd_of_dvd (div_rad_dvd a ha),
+end
+
+lemma div_rad_dvd_diff_induction (a b: k[X]) (ha: a ≠ 0) (hb : b ≠ 0) (hc: is_coprime a b) : div_rad_dvd_diff a -> div_rad_dvd_diff b -> div_rad_dvd_diff (a*b) :=
+begin
+  intros xa xb,
+  rw div_rad_dvd_diff,
+  rw div_rad_dvd_diff at xa xb,
+  rw derivative_mul,
+  have a_dvd := div_rad_dvd_self a ha,
+  have b_dvd := div_rad_dvd_self b hb,
+  have a_b_diff_dvd := mul_dvd_mul a_dvd xb,
+  have a_diff_b_dvd := mul_dvd_mul xa b_dvd,
+  rw ← (div_rad_coprime_mul ha hb hc) at a_b_diff_dvd a_diff_b_dvd,
+  exact dvd_add a_diff_b_dvd a_b_diff_dvd,
+end
+
+theorem div_rad_dvd_diff_always {a : k[X]} (ha : a ≠ 0) : div_rad_dvd_diff a :=
+begin
+  apply induction_on_coprime a,
+
+end
 
 -- poly_mod_rad_div_diff_prime_pow
 
