@@ -32,7 +32,9 @@ variables {k: Type*} [field k]
 def wronskian (a b : k[X]) : k[X] :=
   a * b.derivative - a.derivative * b
 
--- Radical of polynomial = product of monic (normalized) factors
+/- Radical of polynomial: poly_rad(a) = product of monic (normalized) factors.
+Note that there's a notion of `normalization_monoid` that somehow generalizes the concept of polynomial ring, leading coefficient, and monic polynomial.
+-/
 def prime_factors (a: k[X]) : finset (k[X]) := 
   (normalized_factors a).to_finset
 
@@ -40,7 +42,7 @@ def poly_rad (a: k[X]) : k[X] :=
   (prime_factors a).prod id
 
 
--- properties of Wronskian
+-- Basic properties of Wronskian
 
 @[simp]
 lemma wronskian_zero_left (a : k[X]) : wronskian 0 a = 0 :=
@@ -65,18 +67,6 @@ by rw [wronskian, mul_comm, sub_self]
 
 lemma wronskian_anticomm (a b : k[X]) : wronskian a b = - wronskian b a :=
 by rw [wronskian, wronskian]; ring
-
-lemma wronskian_eq_of_sum_zero {a b c : k[X]}
-  (h : a + b + c = 0) : wronskian a b = wronskian b c :=
-begin
-  rw ← neg_eq_iff_add_eq_zero at h,
-  rw ← h,
-  rw wronskian_neg_right,
-  rw wronskian_add_right,
-  rw wronskian_self,
-  rw add_zero,
-  rw ← wronskian_anticomm,
-end
 
 lemma polynomial.degree_ne_bot {a : k[X]} (ha : a ≠ 0) : a.degree ≠ ⊥ :=
   by intro h; rw polynomial.degree_eq_bot at h; exact ha h
@@ -482,23 +472,6 @@ begin
   exact div_rad_dvd_deriv_induction _ _ nzx nzy hc (hx nzx) (hy nzy),
 end
 
-theorem div_rad_dvd_wronskian_left (a b : k[X]) : div_rad a ∣ wronskian a b :=
-begin
-  by_cases a_nz : a = 0,
-  { subst a_nz, rw wronskian_zero_left b, exact dvd_zero _, },
-  rw wronskian,
-  apply dvd_sub,
-  { apply dvd_mul_of_dvd_left, 
-    apply (div_rad_dvd_self _ a_nz), },
-  { apply dvd_mul_of_dvd_left,
-    apply (div_rad_dvd_deriv_always a_nz), },
-end
-
-theorem div_rad_dvd_wronskian_right (a b : k[X]) : div_rad b ∣ wronskian a b :=
-begin
-  rw [wronskian_anticomm, dvd_neg],
-  exact div_rad_dvd_wronskian_left _ _,
-end
 
 lemma dvd_deriv_iff_deriv_eq_zero
   {a : k[X]} (a_dvd_a_deriv : a ∣ a.derivative) : a.derivative = 0 :=
@@ -527,7 +500,7 @@ For coprime polynomials a, b, c satisfying a + b + c = 0 and deg(a) ≥ deg(rad(
 Proof is based on this online note by Franz Lemmermeyer http://www.fen.bilkent.edu.tr/~franz/ag05/ag-02.pdf, which is essentially based on Noah Snyder's proof ("An Alternative Proof of Mason's Theorem"), but slightly deriverent.
 
 1. Show that W(a, b) = W(b, c) = W(c, a) =: W. `wronskian_eq_of_sum_zero`
-2. (a / rad(a)) | W, and same for b and c. `poly_mod_rad_div_deriv`
+2. (a / rad(a)) | W, and same for b and c. `div_rad_dvd_wronskian_left` and `div_rad_dvd_wronskian_right`
 3. a / rad(a), b / rad(b), c / rad(c) are all coprime, so their product abc / rad(abc) also divides W. `poly_coprime_div_mul_div`
 4. Using the assumption on degrees, deduce that deg (abc / rad(abc)) > deg W.
 5. By `polynomial.degree_le_of_dvd`, W = 0.
@@ -539,6 +512,38 @@ Proof is based on this online note by Franz Lemmermeyer http://www.fen.bilkent.e
 lemma poly_ne_zero_deg_nbot (a : k[X]) (ha : a ≠ 0) : a.degree ≠ ⊥ :=
 begin
   by intro h; rw polynomial.degree_eq_bot at h; exact ha h,
+end
+
+-- Lemma for Step 1. Follows from basic properties of Wronskian (proved before).
+lemma wronskian_eq_of_sum_zero {a b c : k[X]}
+  (h : a + b + c = 0) : wronskian a b = wronskian b c :=
+begin
+  rw ← neg_eq_iff_add_eq_zero at h,
+  rw ← h,
+  rw wronskian_neg_right,
+  rw wronskian_add_right,
+  rw wronskian_self,
+  rw add_zero,
+  rw ← wronskian_anticomm,
+end
+
+-- Lemmata for Step 2. Mostly follows from `div_rad_dvd_self` and `div_rad_dvd_deriv_always`.
+theorem div_rad_dvd_wronskian_left (a b : k[X]) : div_rad a ∣ wronskian a b :=
+begin
+  by_cases a_nz : a = 0,
+  { subst a_nz, rw wronskian_zero_left b, exact dvd_zero _, },
+  rw wronskian,
+  apply dvd_sub,
+  { apply dvd_mul_of_dvd_left, 
+    apply (div_rad_dvd_self _ a_nz), },
+  { apply dvd_mul_of_dvd_left,
+    apply (div_rad_dvd_deriv_always a_nz), },
+end
+
+theorem div_rad_dvd_wronskian_right (a b : k[X]) : div_rad b ∣ wronskian a b :=
+begin
+  rw [wronskian_anticomm, dvd_neg],
+  exact div_rad_dvd_wronskian_left _ _,
 end
 
 -- Lemma for Step 6.
