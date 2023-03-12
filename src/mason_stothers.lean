@@ -241,10 +241,6 @@ Fact 3.
     (factors a).to_finset is a subset of (factors a)
   
 -/
-lemma poly_rad_deg_le_deg (a: k[X]) : (poly_rad a).degree ≤ a.degree :=
-begin
-  sorry,
-end
 
 lemma div_rad_dvd (a : k[X]) (ha : a ≠ 0): poly_rad a ∣ a :=
 begin
@@ -299,6 +295,23 @@ end
 lemma mul_div_rad_poly_rad {a : k[X]} (ha : a ≠ 0) : (div_rad a) * (poly_rad a) = a :=
 begin
   rw ← div_rad_eq ha,
+end
+
+lemma poly_rad_deg_le_deg {a: k[X]} (ha : a ≠ 0) : (poly_rad a).degree ≤ a.degree :=
+begin
+  set rhs := a.degree with eq_rhs,
+  rw ←mul_div_rad_poly_rad ha at eq_rhs,
+  rw [←zero_add (poly_rad a).degree, eq_rhs, degree_mul],
+  rw with_bot.add_le_add_iff_right,
+  { cases le_or_lt 0 (div_rad a).degree with h h,
+    exact h, 
+    exfalso, 
+    simp only [polynomial.degree_eq_bot, nat.with_bot.lt_zero_iff] at h,
+    have eqn := mul_div_rad_poly_rad ha,
+    rw h at eqn, simp at eqn, rw eqn at ha, simp at ha, exact ha, },
+  { intro h, rw polynomial.degree_eq_bot at h,
+    have eqn := mul_div_rad_poly_rad ha,
+    rw h at eqn, simp at eqn, rw eqn at ha, simp at ha, exact ha, },
 end
 
 lemma div_rad_unit {u : k[X]} (hu : is_unit u) : is_unit (div_rad u) :=
