@@ -241,10 +241,6 @@ Fact 3.
     (factors a).to_finset is a subset of (factors a)
   
 -/
-lemma poly_rad_deg_le_deg (a: k[X]) : (poly_rad a).degree ≤ a.degree :=
-begin
-  sorry,
-end
 
 lemma div_rad_dvd (a : k[X]) (ha : a ≠ 0): poly_rad a ∣ a :=
 begin
@@ -299,6 +295,23 @@ end
 lemma mul_div_rad_poly_rad {a : k[X]} (ha : a ≠ 0) : (div_rad a) * (poly_rad a) = a :=
 begin
   rw ← div_rad_eq ha,
+end
+
+lemma poly_rad_deg_le_deg {a: k[X]} (ha : a ≠ 0) : (poly_rad a).degree ≤ a.degree :=
+begin
+  set rhs := a.degree with eq_rhs,
+  rw ←mul_div_rad_poly_rad ha at eq_rhs,
+  rw [←zero_add (poly_rad a).degree, eq_rhs, degree_mul],
+  rw with_bot.add_le_add_iff_right,
+  { cases le_or_lt 0 (div_rad a).degree with h h,
+    exact h, 
+    exfalso, 
+    simp only [polynomial.degree_eq_bot, nat.with_bot.lt_zero_iff] at h,
+    have eqn := mul_div_rad_poly_rad ha,
+    rw h at eqn, simp at eqn, rw eqn at ha, simp at ha, exact ha, },
+  { intro h, rw polynomial.degree_eq_bot at h,
+    have eqn := mul_div_rad_poly_rad ha,
+    rw h at eqn, simp at eqn, rw eqn at ha, simp at ha, exact ha, },
 end
 
 lemma div_rad_unit {u : k[X]} (hu : is_unit u) : is_unit (div_rad u) :=
@@ -684,7 +697,35 @@ begin
   tauto,
 end
 
--- lemma char_zero_deriv_zero_iff_const {a : k[X]} (chz : ring_char k = 0) : a.derivative = 0 ↔ 
+protected lemma nat.with_bot.add_le_add 
+  {a b c d : with_bot ℕ}
+  (h1 : a ≤ b) (h2 : c ≤ d) : a + c ≤ b + d :=
+begin
+  by_cases hb : b = ⊥,
+  { subst hb, simp at h1, subst h1, simp },
+  by_cases hc : c = ⊥,
+  { subst hc, simp only [with_bot.add_bot, bot_le], }, 
+  calc a + c ≤ b + c : by rw with_bot.add_le_add_iff_right hc; exact h1
+  ... ≤ b + d : by rw with_bot.add_le_add_iff_left hb; exact h2
+end
+
+protected lemma nat.with_bot.smul_le_smul 
+  {n : ℕ} {a b : with_bot ℕ}
+  (h : a ≤ b) : n • a ≤ n • b :=
+begin
+  induction n with n ih,
+  simp, rw [succ_nsmul, succ_nsmul],
+  apply nat.with_bot.add_le_add h ih,
+end
+
+protected lemma nat.with_bot.smul_max 
+  {n : ℕ} {a b : with_bot ℕ} : n • max a b = max (n • a) (n • b) :=
+begin
+  apply le_antisymm,
+  rw [nsmul_eq_mul, le_max_iff, ←nsmul_eq_mul],
+  sorry,
+  sorry,
+end
 
 theorem poly_flt_char_zero (a b c : k[X]) (n : ℕ) (chz : ring_char k = 0) (hn: 3 ≤ n) (hsum: a^n + b^n + c^n = 0) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hab : is_coprime a b) (hbc : is_coprime b c) (hca : is_coprime c a) : (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
 begin
@@ -702,16 +743,28 @@ begin
   set md := (max (max a.degree b.degree) c.degree),
   have hdeg_2 : n • (max (max a.degree b.degree) c.degree) < n • (max (max a.degree b.degree) c.degree) :=
   begin
-    calc n • (max (max a.degree b.degree) c.degree) = max (n • (max a.degree b.degree)) (n • c.degree) : sorry
-    ... = max (max (n • a.degree) (n • b.degree)) (n • c.degree) : sorry
-    ... = max (max (a^n).degree (b^n).degree) (c^n).degree : by simp_rw← degree_pow 
+    calc n • (max (max a.degree b.degree) c.degree) = max (n • (max a.degree b.degree)) (n • c.degree) : by rw nat.with_bot.smul_max
+    ... = max (max (n • a.degree) (n • b.degree)) (n • c.degree) : by rw nat.with_bot.smul_max
+    ... = max (max (a^n).degree (b^n).degree) (c^n).degree : by simp only [polynomial.degree_pow]
     ... < (poly_rad (a^n * b^n * c^n)).degree : hdeg_1
-    ... = (poly_rad ((a*b*c)^n)).degree : sorry
+    ... = (poly_rad ((a*b*c)^n)).degree : by rw [mul_pow, mul_pow]
     ... = (poly_rad (a*b*c)).degree : by rw poly_rad_pow (a*b*c) np
-    ... ≤ (a*b*c).degree : poly_rad_deg_le_deg (a*b*c)
-    ... = a.degree + b.degree + c.degree : by simp_rw degree_mul
-    ... ≤ 3 • (max (max a.degree b.degree) c.degree) : sorry
-    ... ≤ n • (max (max a.degree b.degree) c.degree) : sorry,
+    ... ≤ (a*b*c).degree : poly_rad_deg_le_deg (by simp only [ne.def, mul_eq_zero]; tauto)
+    ... = a.degree + b.degree + c.degree : by simp only [degree_mul]
+    ... ≤ 3 • (max (max a.degree b.degree) c.degree) : _,
+    set m := max (max a.degree b.degree) c.degree with def_m,
+    have eq_3m : 3 • m = m + m + m := begin
+      rw (show 3 = 2 + 1, by refl),
+      rw [add_smul, two_smul, one_smul],
+    end,
+    rw eq_3m,
+    apply nat.with_bot.add_le_add,
+    apply nat.with_bot.add_le_add,
+    { rw def_m, apply le_max_of_le_left _,
+      exact le_max_left _ _ }, 
+    { rw def_m, apply le_max_of_le_left _,
+      exact le_max_right _ _ },
+    { exact le_max_right _ _ },
   end,
   have hdeg_3 : md < md :=
   begin
