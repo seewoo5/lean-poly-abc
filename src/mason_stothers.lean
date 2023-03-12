@@ -1,22 +1,20 @@
+import algebra.associated
+import algebra.big_operators.multiset.basic
+import algebra.char_p.basic
+import algebra.divisibility.basic
+import algebra.divisibility.units
+import algebra.group.basic
+import algebra.group_power.basic
+import algebra.order.smul
 import data.polynomial.basic
 import data.finset.basic
 import data.multiset.basic
--- import order.disjoint
 import data.polynomial.derivative
-import ring_theory.polynomial.content
-import ring_theory.unique_factorization_domain
-import ring_theory.euclidean_domain
--- import ring_theory.principal_ideal_domain
-import algebra.divisibility.units
-import algebra.divisibility.basic
-import algebra.associated
-import algebra.big_operators.multiset.basic
-import algebra.group.basic
-import algebra.group_power.basic
-import algebra.char_p.basic
 import init.data.nat.lemmas
 import order.with_bot
-import algebra.order.smul
+import ring_theory.euclidean_domain
+import ring_theory.polynomial.content
+import ring_theory.unique_factorization_domain
 
 noncomputable theory
 
@@ -25,10 +23,10 @@ open_locale polynomial classical
 open polynomial
 open unique_factorization_monoid
 
-variables {R : Type*} [comm_ring R]
 variables {k: Type*} [field k]
 
--- definitions
+
+-- Definitions
 
 -- Wronskian: W(a, b) = ab' - a'b
 def wronskian (a b : k[X]) : k[X] :=
@@ -95,34 +93,22 @@ begin
     exact polynomial.degree_derivative_lt ha, },
 end 
 
--- lemma wronskian_deg_plus_one_le_deg_sum (a b : k[X]) : (wronskian a b).degree + 1 ≤ a.degree + b.degree := sorry 
 
 
--- properties of degree
-/- poly_deg_mul_dist: deg(ab) = deg(a) + deg(b)
-Already in mathlib: `polynomial.degree_mul`
--/
-lemma poly_deg_mul_dist (a b : k[X]) : (a * b).degree = a.degree + b.degree := 
-begin 
-  exact polynomial.degree_mul,
-end
+-- properties of radicals
 
-/- poly_deg_pow: deg(a^n) = n • deg(a)
-Already in mathlib: `polynomial.degree_pow`
--/
-lemma poly_deg_pow (a : k[X]) (n : ℕ) : (a^n).degree = n • a.degree := polynomial.degree_pow a n
 
 -- is_coprime.mul_dvd
-lemma poly_coprime_div_mul_div (a b c : k[X]) (hc: is_coprime a b) (hadiv: a ∣ c) (hbdiv : b ∣ c) : (a * b) ∣ c :=
-begin
-  exact is_coprime.mul_dvd hc hadiv hbdiv,
-end
+-- lemma poly_coprime_div_mul_div (a b c : k[X]) (hc: is_coprime a b) (hadiv: a ∣ c) (hbdiv : b ∣ c) : (a * b) ∣ c :=
+-- begin
+--   exact is_coprime.mul_dvd hc hadiv hbdiv,
+-- end
 
 -- is_coprime.dvd_of_dvd_mul_left
-lemma poly_coprime_div_cancel (a b c : k[X]) (hc: is_coprime a b) (hdiv: a ∣ (b * c)) : a ∣ c :=
-begin
-  exact is_coprime.dvd_of_dvd_mul_left hc hdiv,
-end
+-- lemma poly_coprime_div_cancel (a b c : k[X]) (hc: is_coprime a b) (hdiv: a ∣ (b * c)) : a ∣ c :=
+-- begin
+--   exact is_coprime.dvd_of_dvd_mul_left hc hdiv,
+-- end
 
 -- coprime polynomials have disjoint prime factors (as multisets)
 lemma poly_coprime_disjoint_factors {a b : k[X]} (hc: is_coprime a b) : (normalized_factors a).disjoint (normalized_factors b):=
@@ -150,13 +136,12 @@ end
 
 
 -- unique_factorization_monoid.normalized_factors_mul
-
-lemma poly_coprime_mul_disj_union_factors (a b : k[X]) (ha: a ≠ 0) (hb: b ≠ 0) (hc: is_coprime a b) : (normalized_factors (a * b)) = (normalized_factors a) + (normalized_factors b) :=
-begin
-  apply unique_factorization_monoid.normalized_factors_mul,
-  exact ha,
-  exact hb,
-end
+-- lemma poly_coprime_mul_disj_union_factors (a b : k[X]) (ha: a ≠ 0) (hb: b ≠ 0) (hc: is_coprime a b) : (normalized_factors (a * b)) = (normalized_factors a) + (normalized_factors b) :=
+-- begin
+--   apply unique_factorization_monoid.normalized_factors_mul,
+--   exact ha,
+--   exact hb,
+-- end
 
 lemma poly_coprime_mul_prime_factors_disj_union {a b : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : is_coprime a b) : 
   prime_factors (a * b) = (prime_factors a).disj_union (prime_factors b) (poly_coprime_disjoint_prime_factors hc) :=
@@ -176,8 +161,7 @@ end
 For any coprime polynomial a and b, rad(a*b) = rad(a) * rad(b)
 
 Proof)
-1. Prime factors of a and Prime factors of b are disjoint. `poly_coprime_disjoint_factors`
-2. Prime factors of a*b equal to the disjoint union of those of a and b. `poly_coprime_mul_prime_factors_disj_union`
+1. Prime factors of a*b equal to the disjoint union of those of a and b. `poly_coprime_mul_prime_factors_disj_union`
 3. By definition of radical, we're done.
 -/
 lemma poly_rad_coprime_mul {a b : k[X]} (ha: a ≠ 0) (hb: b ≠ 0) (hc: is_coprime a b) : 
@@ -190,9 +174,9 @@ end
 
 /- `poly_rad_pow`
 
-For any polynomial a and n ∈ ℤ_+, rad(a^n) = rad(a)
+For any polynomial a and n ∈ ℕ with n > 0, rad(a^n) = rad(a)
 
-Proof) ...
+Proof) Show that the prime factors of a and a^n are the same (below `prime_factors_eq_pow`), and the result follows.
 -/
 lemma prime_factors_eq_pow (a: k[X]) (n: ℕ) (hn: n > 0) : 
   prime_factors (a^n) = prime_factors a :=
@@ -265,19 +249,30 @@ begin
   exact zero_not_mem_normalized_factors _,
 end 
 
+
+/- Main lemma: a / (poly_rad a) divides a'.
+
+The below proof is based on induction.
+To be precise, we use `unique_factorization_monoid.induction_on_coprime` and to reduce to the cases when
+1. a is a unit
+2. a is a power of prime
+3. if the statement is true for coprime a and b, then it is also true for a*b. (induction step)
+-/
+
+-- define div_rad(a) as a / rad(a)
 def div_rad (a : k[X]) : k[X] := a / (poly_rad a)
 
-def div_rad_dvd_diff (a: k[X]) : Prop := (div_rad a) ∣ a.derivative
+def div_rad_dvd_deriv (a: k[X]) : Prop := (div_rad a) ∣ a.derivative
 
 
-lemma div_rad_dvd_diff_const (u : k) : div_rad_dvd_diff (polynomial.C u) :=
+lemma div_rad_dvd_deriv_const (u : k) : div_rad_dvd_deriv (polynomial.C u) :=
 begin
-  rw div_rad_dvd_diff,
+  rw div_rad_dvd_deriv,
   rw derivative_C,
   exact dvd_zero _,
 end
 
-lemma div_rad_dvd_diff_one : div_rad_dvd_diff (1 : k[X]) := div_rad_dvd_diff_const 1
+lemma div_rad_dvd_deriv_one : div_rad_dvd_deriv (1 : k[X]) := div_rad_dvd_deriv_const 1
 
 lemma div_rad_eq {x a : k[X]} (ha : a ≠ 0) : x = div_rad a ↔ x * (poly_rad a) = a :=
 begin
@@ -326,9 +321,9 @@ begin
   exact eq_u,
 end 
 
-lemma div_rad_dvd_diff_unit {u : k[X]} (hu : is_unit u) : div_rad_dvd_diff u :=
+lemma div_rad_dvd_deriv_unit {u : k[X]} (hu : is_unit u) : div_rad_dvd_deriv u :=
 begin
-  rw div_rad_dvd_diff,
+  rw div_rad_dvd_deriv,
   exact (div_rad_unit hu).dvd,
 end
 
@@ -414,9 +409,9 @@ begin
   rw eq_c, ring_nf, simp, tauto,
 end
 
-lemma div_rad_dvd_diff_prime_power (a: k[X]) (ha : a ≠ 0) (pa: prime a) (n: ℕ) : div_rad_dvd_diff (a^(n+1)) :=
+lemma div_rad_dvd_deriv_prime_power (a: k[X]) (ha : a ≠ 0) (pa: prime a) (n: ℕ) : div_rad_dvd_deriv (a^(n+1)) :=
 begin
-  rw div_rad_dvd_diff,
+  rw div_rad_dvd_deriv,
   rw derivative_pow a (n+1),
   have a_pow_assoc := dvd_rad_prime_pow a n pa ha,
   rw associated.dvd_iff_dvd_left a_pow_assoc,
@@ -425,40 +420,47 @@ begin
   simp,
 end
 
+-- div_rad(a) divides a.
 lemma div_rad_dvd_self (a : k[X]) (ha: a ≠ 0) : div_rad a ∣ a :=
 begin
   rw div_rad,
   exact euclidean_domain.div_dvd_of_dvd (div_rad_dvd a ha),
 end
 
-lemma div_rad_dvd_diff_induction (a b: k[X]) (ha: a ≠ 0) (hb : b ≠ 0) (hc: is_coprime a b) : div_rad_dvd_diff a -> div_rad_dvd_diff b -> div_rad_dvd_diff (a*b) :=
+/- Induction step of the main lemma.
+If the lemma is true for coprime a and b, then it is also true for (a*b).
+Proof uses Leibniz rule `derivative_mul`, `div_rad_dvd_self`, and the fact that div_rad is multiplicative for coprime pairs `div_rad_coprime_mul`.
+-/
+lemma div_rad_dvd_deriv_induction (a b: k[X]) (ha: a ≠ 0) (hb : b ≠ 0) (hc: is_coprime a b) : div_rad_dvd_deriv a -> div_rad_dvd_deriv b -> div_rad_dvd_deriv (a*b) :=
 begin
   intros xa xb,
-  rw div_rad_dvd_diff,
-  rw div_rad_dvd_diff at xa xb,
+  rw div_rad_dvd_deriv,
+  rw div_rad_dvd_deriv at xa xb,
   rw derivative_mul,
   have a_dvd := div_rad_dvd_self a ha,
   have b_dvd := div_rad_dvd_self b hb,
-  have a_b_diff_dvd := mul_dvd_mul a_dvd xb,
-  have a_diff_b_dvd := mul_dvd_mul xa b_dvd,
-  rw ← (div_rad_coprime_mul ha hb hc) at a_b_diff_dvd a_diff_b_dvd,
-  exact dvd_add a_diff_b_dvd a_b_diff_dvd,
+  have a_b_deriv_dvd := mul_dvd_mul a_dvd xb,
+  have a_deriv_b_dvd := mul_dvd_mul xa b_dvd,
+  rw ← (div_rad_coprime_mul ha hb hc) at a_b_deriv_dvd a_deriv_b_dvd,
+  exact dvd_add a_deriv_b_dvd a_b_deriv_dvd,
 end
 
-theorem div_rad_dvd_diff_always {a : k[X]} (ha : a ≠ 0) : div_rad_dvd_diff a :=
+
+-- The final proof of the main lemma based on the above lemmata.
+theorem div_rad_dvd_deriv_always {a : k[X]} (ha : a ≠ 0) : div_rad_dvd_deriv a :=
 begin
   revert ha,
   apply induction_on_coprime a,
 
   simp only [ne.def, eq_self_iff_true, not_true, is_empty.forall_iff],
   intros _ ux _,
-  exact div_rad_dvd_diff_unit ux,
+  exact div_rad_dvd_deriv_unit ux,
 
   { intros p i hp _,
     cases i with i,
-    { rw pow_zero, exact div_rad_dvd_diff_one, },
+    { rw pow_zero, exact div_rad_dvd_deriv_one, },
     { rw (show i.succ = i + 1, by refl),
-      refine div_rad_dvd_diff_prime_power p _ hp i,
+      refine div_rad_dvd_deriv_prime_power p _ hp i,
       simp only [ne.def, pow_eq_zero_iff, nat.succ_pos'] at ha,
       exact ha, }, },
 
@@ -477,7 +479,7 @@ begin
 
   rw mul_ne_zero_iff at xy_nz,
   cases xy_nz with nzx nzy,
-  exact div_rad_dvd_diff_induction _ _ nzx nzy hc (hx nzx) (hy nzy),
+  exact div_rad_dvd_deriv_induction _ _ nzx nzy hc (hx nzx) (hy nzy),
 end
 
 theorem div_rad_dvd_wronskian_left (a b : k[X]) : div_rad a ∣ wronskian a b :=
@@ -489,7 +491,7 @@ begin
   { apply dvd_mul_of_dvd_left, 
     apply (div_rad_dvd_self _ a_nz), },
   { apply dvd_mul_of_dvd_left,
-    apply (div_rad_dvd_diff_always a_nz), },
+    apply (div_rad_dvd_deriv_always a_nz), },
 end
 
 theorem div_rad_dvd_wronskian_right (a b : k[X]) : div_rad b ∣ wronskian a b :=
@@ -497,9 +499,6 @@ begin
   rw [wronskian_anticomm, dvd_neg],
   exact div_rad_dvd_wronskian_left _ _,
 end
-
--- Lemma 2.1.3
-#check polynomial.degree_le_of_dvd
 
 lemma dvd_deriv_iff_deriv_eq_zero
   {a : k[X]} (a_dvd_a_deriv : a ∣ a.derivative) : a.derivative = 0 :=
@@ -513,6 +512,36 @@ begin
   simp only [lt_self_iff_false] at lt_self, exact lt_self,
 end
 
+protected lemma is_coprime.div_rad {a b : k[X]} (ha : a ≠ 0) (hb : b ≠ 0)
+  (h : is_coprime a b) : is_coprime (div_rad a) (div_rad b) :=
+begin
+  rw ←mul_div_rad_poly_rad ha at h,
+  rw ←mul_div_rad_poly_rad hb at h,
+  exact h.of_mul_left_left.of_mul_right_left,
+end
+
+/- ABC for polynomials (Mason-Stothers theorem)
+
+For coprime polynomials a, b, c satisfying a + b + c = 0 and deg(a) ≥ deg(rad(abc)), we have a' = b' = c' = 0.
+
+Proof is based on this online note by Franz Lemmermeyer http://www.fen.bilkent.edu.tr/~franz/ag05/ag-02.pdf, which is essentially based on Noah Snyder's proof ("An Alternative Proof of Mason's Theorem"), but slightly deriverent.
+
+1. Show that W(a, b) = W(b, c) = W(c, a) =: W. `wronskian_eq_of_sum_zero`
+2. (a / rad(a)) | W, and same for b and c. `poly_mod_rad_div_deriv`
+3. a / rad(a), b / rad(b), c / rad(c) are all coprime, so their product abc / rad(abc) also divides W. `poly_coprime_div_mul_div`
+4. Using the assumption on degrees, deduce that deg (abc / rad(abc)) > deg W.
+5. By `polynomial.degree_le_of_dvd`, W = 0.
+6. Since W(a, b) = ab' - a'b = 0 and a and b are coprime, a' = 0. Similarly we have b' = c' = 0. `coprime_wronskian_eq_zero_const`
+-/
+
+
+-- Lemma to ignore degree = ⊥ case when a polynomial is nonzero.
+lemma poly_ne_zero_deg_nbot (a : k[X]) (ha : a ≠ 0) : a.degree ≠ ⊥ :=
+begin
+  by intro h; rw polynomial.degree_eq_bot at h; exact ha h,
+end
+
+-- Lemma for Step 6.
 lemma coprime_wronskian_eq_zero_const 
   {a b : k[X]} (hw: wronskian a b = 0) 
   (hc: is_coprime a b) : (a.derivative = 0 ∧ b.derivative = 0) :=
@@ -527,35 +556,10 @@ begin
     rw hw, exact dvd_mul_left _ _, },
 end
 
-lemma poly_ne_zero_deg_nbot (a : k[X]) (ha : a ≠ 0) : a.degree ≠ ⊥ :=
-begin
-  by intro h; rw polynomial.degree_eq_bot at h; exact ha h,
-end
-
-/- ABC for polynomials (Mason-Stothers theorem)
-
-For coprime polynomials a, b, c satisfying a + b + c = 0 and deg(a) ≥ deg(rad(abc)), we have a' = b' = c' = 0.
-
-Proof is based on this online note by Franz Lemmermeyer http://www.fen.bilkent.edu.tr/~franz/ag05/ag-02.pdf, which is essentially based on Noah Snyder's proof ("An Alternative Proof of Mason's Theorem"), but slightly different.
-
-1. Show that W(a, b) = W(b, c) = W(c, a) =: W. `wronskian_eq_of_sum_zero`
-2. (a / rad(a)) | W, and same for b and c. `poly_mod_rad_div_diff`
-3. a / rad(a), b / rad(b), c / rad(c) are all coprime, so their product abc / rad(abc) also divides W. `poly_coprime_div_mul_div`
-4. Using the assumption on degrees, deduce that deg (abc / rad(abc)) > deg W.
-5. By `polynomial.degree_le_of_dvd`, W = 0.
-6. Since W(a, b) = ab' - a'b = 0 and a and b are coprime, a' = 0. Similarly we have b' = c' = 0. `coprime_wronskian_eq_zero_const`
--/
-
-protected lemma is_coprime.div_rad {a b : k[X]} (ha : a ≠ 0) (hb : b ≠ 0)
-  (h : is_coprime a b) : is_coprime (div_rad a) (div_rad b) :=
-begin
-  rw ←mul_div_rad_poly_rad ha at h,
-  rw ←mul_div_rad_poly_rad hb at h,
-  exact h.of_mul_left_left.of_mul_right_left,
-end
-
+-- Proof of the main theorem (polynomial ABC).
 theorem poly_abc (a b c : k[X]) (hsum: a + b + c = 0) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hab: is_coprime a b) (hbc: is_coprime b c) (hca: is_coprime c a) (hdeg : (poly_rad (a * b * c)).degree ≤ a.degree) : (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
 begin
+  -- 1, 2.
   have wbc := wronskian_eq_of_sum_zero hsum,
   have ara_dvd_w := div_rad_dvd_wronskian_left a b,
   have brb_dvd_w := div_rad_dvd_wronskian_right a b,
@@ -563,6 +567,7 @@ begin
   set w := wronskian a b with wab,
   rw ←wbc at crc_dvd_w,
 
+  -- 3.
   have hab_c := hca.symm.mul_left hbc,
   have hab_nz : a * b ≠ 0 := 
     by simp only [ne.def, mul_eq_zero]; tauto,
@@ -608,6 +613,8 @@ begin
     rw ←wbc at ineq,
     exact ineq.trans_le deg_comp_2, 
   end,
+
+  -- 5.
   have w_z : w = 0 :=
   begin
     by_contra w_nz,
@@ -619,6 +626,8 @@ begin
     simp only [lt_self_iff_false] at wf,
     exact wf,
   end,
+
+  -- 6.
   cases (coprime_wronskian_eq_zero_const w_z hab) with daz dbz,
   rw wbc at w_z,
   cases (coprime_wronskian_eq_zero_const w_z hbc) with _ dcz,
@@ -626,6 +635,10 @@ begin
 end
 
 
+/- Alternative version with maximum of degrees.
+Corollary 2.1.5 of Franz's note.
+Here we need an assumption that their derivatives are not all zero - otherwise the statement itself is false as stated.
+-/
 theorem poly_abc_max_ver (a b c : k[X]) (chn : ring_char k = 0) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hsum : a + b + c = 0) (hab : is_coprime a b) (hbc : is_coprime b c) (hca : is_coprime c a) (hnderiv : ¬(a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0)): max (max a.degree b.degree) c.degree < (poly_rad (a*b*c)).degree :=
 begin
   have hadeg : a.degree < (poly_rad (a*b*c)).degree :=
@@ -664,12 +677,16 @@ begin
   end,
   exact max_lt (max_lt hadeg hbdeg) hcdeg,
 end
+
+
 /- FLT for polynomials
 
-For coprime polynomials a, b, c satisfying a^n + b^n + c^n = 0, n ≥ 3 then a, b, c are all constant.
+For coprime polynomials a, b, c satisfying a^n + b^n + c^n = 0, n ≥ 3 then a, b, c are all constant (i.e. all of their derivatives are zero).
 (We assume that the characteristic of the field is zero. In fact, the theorem is true when the characteristic does not divide n.)
 
-Proof) Apply ABC for polynomials with triple (a^n, b^n, c^n):
+Proof)
+1. By contradiction. Assume that
+2. Apply ABC for polynomials with triple (a^n, b^n, c^n):
 
 -> max (deg a^n, deg b^n, deg c^n) = n * max (deg a, deg b, deg c) + 1
 ≤ deg (rad (a^n * b^n * c^n)) 
@@ -698,6 +715,10 @@ begin
   tauto,
 end
 
+
+/- Lemmata related to arithmetics and inequalities `with_bot ℕ`.
+Need this since the type of `polynomial.degree` is not exactly `ℕ`, but `with_bot ℕ` since the degree of zero polynomial is defined as `⊥`.
+-/
 protected lemma nat.with_bot.add_le_add 
   {a b c d : with_bot ℕ}
   (h1 : a ≤ b) (h2 : c ≤ d) : a + c ≤ b + d :=
@@ -729,6 +750,8 @@ begin
   right, rw eqn, refine ⟨rfl, _⟩, exact nat.with_bot.smul_le_smul (le_of_lt ab),
 end
 
+
+-- FLT for polynomials (when characteristic is zero).
 theorem poly_flt_char_zero (a b c : k[X]) (n : ℕ) (chz : ring_char k = 0) (hn: 3 ≤ n) (hsum: a^n + b^n + c^n = 0) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hab : is_coprime a b) (hbc : is_coprime b c) (hca : is_coprime c a) : (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
 begin
   have hap : a^n ≠ 0 := pow_ne_zero _ ha,
