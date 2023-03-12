@@ -663,6 +663,36 @@ begin
   tauto,
 end
 
+protected lemma nat.with_bot.add_le_add 
+  {a b c d : with_bot ℕ}
+  (h1 : a ≤ b) (h2 : c ≤ d) : a + c ≤ b + d :=
+begin
+  by_cases hb : b = ⊥,
+  { subst hb, simp at h1, subst h1, simp },
+  by_cases hc : c = ⊥,
+  { subst hc, simp only [with_bot.add_bot, bot_le], }, 
+  calc a + c ≤ b + c : by rw with_bot.add_le_add_iff_right hc; exact h1
+  ... ≤ b + d : by rw with_bot.add_le_add_iff_left hb; exact h2
+end
+
+protected lemma nat.with_bot.smul_le_smul 
+  {n : ℕ} {a b : with_bot ℕ}
+  (h : a ≤ b) : n • a ≤ n • b :=
+begin
+  induction n with n ih,
+  simp, rw [succ_nsmul, succ_nsmul],
+  apply nat.with_bot.add_le_add h ih,
+end
+
+protected lemma nat.with_bot.smul_max 
+  {n : ℕ} {a b : with_bot ℕ} : n • max a b = max (n • a) (n • b) :=
+begin
+  apply le_antisymm,
+  rw [nsmul_eq_mul, le_max_iff, ←nsmul_eq_mul],
+  sorry,
+  sorry,
+end
+
 theorem poly_flt_char_zero (a b c : k[X]) (n : ℕ) (chz : ring_char k = 0) (hn: n ≥ 3) (hsum: a^n + b^n + c^n = 0) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hab : is_coprime a b) (hbc : is_coprime b c) (hca : is_coprime c a) : (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
 begin
   have hap : a^n ≠ 0 := pow_ne_zero _ ha,
@@ -678,15 +708,28 @@ begin
   have hdeg_1 := poly_abc_max_ver (a^n) (b^n) (c^n) chz hap hbp hcp hsum habp hbcp hcap,
   have hdeg_2 : n • (max (max a.degree b.degree) c.degree) < 3 • (max (max a.degree b.degree) c.degree) :=
   begin
-    calc n • (max (max a.degree b.degree) c.degree) = max (n • (max a.degree b.degree)) (n • c.degree) : sorry
-    ... = max (max (n • a.degree) (n • b.degree)) (n • c.degree) : sorry
-    ... = max (max (a^n).degree (b^n).degree) (c^n).degree : sorry
+    calc n • (max (max a.degree b.degree) c.degree) = max (n • (max a.degree b.degree)) (n • c.degree) : by rw nat.with_bot.smul_max
+    ... = max (max (n • a.degree) (n • b.degree)) (n • c.degree) : by rw nat.with_bot.smul_max
+    ... = max (max (a^n).degree (b^n).degree) (c^n).degree : by simp only [polynomial.degree_pow]
     ... < (poly_rad (a^n * b^n * c^n)).degree : hdeg_1
-    ... = (poly_rad ((a*b*c)^n)).degree : sorry
+    ... = (poly_rad ((a*b*c)^n)).degree : by rw [mul_pow, mul_pow]
     ... = (poly_rad (a*b*c)).degree : by rw poly_rad_pow (a*b*c) np
     ... ≤ (a*b*c).degree : poly_rad_deg_le_deg (by simp only [ne.def, mul_eq_zero]; tauto)
-    ... = a.degree + b.degree + c.degree : sorry
-    ... ≤ 3 • (max (max a.degree b.degree) c.degree) : sorry,
+    ... = a.degree + b.degree + c.degree : by simp only [degree_mul]
+    ... ≤ 3 • (max (max a.degree b.degree) c.degree) : _,
+    set m := max (max a.degree b.degree) c.degree with def_m,
+    have eq_3m : 3 • m = m + m + m := begin
+      rw (show 3 = 2 + 1, by refl),
+      rw [add_smul, two_smul, one_smul],
+    end,
+    rw eq_3m,
+    apply nat.with_bot.add_le_add,
+    apply nat.with_bot.add_le_add,
+    { rw def_m, apply le_max_of_le_left _,
+      exact le_max_left _ _ }, 
+    { rw def_m, apply le_max_of_le_left _,
+      exact le_max_right _ _ },
+    { exact le_max_right _ _ },
   end,
   -- have hdeg : (poly_rad (a^n * b^n * c^n)).degree ≤ (a^n).degree :=
   -- begin
