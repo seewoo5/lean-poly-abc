@@ -24,7 +24,6 @@ open_locale polynomial classical
 open polynomial
 open unique_factorization_monoid
 
-variables {R : Type*} [comm_ring R]
 variables {k: Type*} [field k]
 
 -- TODO: doesn't compile - restructuring in progress!
