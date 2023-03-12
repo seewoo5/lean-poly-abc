@@ -240,18 +240,18 @@ For coprime polynomials a, b, c satisfying a^n + b^n + c^n = 0, n ≥ 3 then a, 
 (We assume that the characteristic of the field is zero. In fact, the theorem is true when the characteristic does not divide n.)
 
 Proof)
-1. By contradiction. Assume that
-2. Apply ABC for polynomials with triple (a^n, b^n, c^n):
+1. Assume that at least one of a, b, and c has nonzero derivative.
+2. For the corresponding polynomial (let's say, a), characteristic zero assumption implies that the derivative of its power (let's say, a^n) is also nonzero.
+3. Apply ABC for polynomials `poly_abc_max_ver` with triple (a^n, b^n, c^n) to get an inequality max(deg a^n, deg b^n, deg c^n) < deg rad(a^n*b^n*c^n).
+4. Use properties of degree `degree_pow`, `rad_pow`, and the assumption `3 ≤ n` to deduce a contradiction. Here we need some arithmetic with `nat.with_bot`.
 
--> max (deg a^n, deg b^n, deg c^n) = n * max (deg a, deg b, deg c) + 1
-≤ deg (rad (a^n * b^n * c^n)) 
+-> n * max (deg a, deg b, deg c) = max (deg a^n, deg b^n, deg c^n)
+< deg (rad (a^n * b^n * c^n)) 
 ≤ deg (rad (a * b * c))
 ≤ deg (abc)
 ≤ deg a + deg b + deg c
 ≤ 3 * max (deg a, deg b, deg c)
-
-and from n ≥ 3, we should have max (deg a, deg b, deg c) = ⟂, i.e. at least one of a, b, c is zero.
-
+≤ n * max (deg a, deg b, deg c)
 -/
 
 -- (a^n)' = 0 → a' = 0 when char(k) ∤ n.
