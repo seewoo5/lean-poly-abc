@@ -625,9 +625,43 @@ begin
 end
 
 
-theorem poly_abc_max_ver (a b c : k[X]) (chn : ring_char k = 0) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hsum : a + b + c = 0) (hab : is_coprime a b) (hbc : is_coprime b c) (hca : is_coprime c a) : max (max a.degree b.degree) c.degree < (poly_rad (a*b*c)).degree :=
+theorem poly_abc_max_ver (a b c : k[X]) (chn : ring_char k = 0) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hsum : a + b + c = 0) (hab : is_coprime a b) (hbc : is_coprime b c) (hca : is_coprime c a) (hnderiv : ¬(a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0)): max (max a.degree b.degree) c.degree < (poly_rad (a*b*c)).degree :=
 begin
-  sorry,
+  have hadeg : a.degree < (poly_rad (a*b*c)).degree :=
+  begin
+    have abc_a := poly_abc a b c hsum ha hb hc hab hbc hca,
+    cases lt_or_le a.degree ((poly_rad (a * b * c)).degree) with h h,
+    exact h, exfalso, apply hnderiv, apply abc_a, exact h,
+  end,
+  have hbdeg : b.degree < (poly_rad (a*b*c)).degree :=
+  begin
+    have hsum' : b + c + a = 0,
+    {
+      calc b + c + a = a + b + c : by ring
+      ... = 0 : hsum
+    },
+    have abc_b := poly_abc b c a hsum' hb hc ha hbc hca hab,
+    have hnderiv' : ¬(b.derivative = 0 ∧ c.derivative = 0 ∧ a.derivative = 0) := by tauto,
+    have t : b*c*a = a*b*c := by ring,
+    cases lt_or_le b.degree ((poly_rad (a*b*c)).degree) with h h,
+    exact h,
+    exfalso, apply hnderiv', apply abc_b, rw t, exact h,
+  end,
+  have hcdeg : c.degree < (poly_rad (a*b*c)).degree := 
+  begin
+    have hsum' : c + a + b = 0,
+    {
+      calc c + a + b = a + b + c : by ring
+      ... = 0 : hsum
+    },
+    have abc_c := poly_abc c a b hsum' hc ha hb hca hab hbc,
+    have hnderiv' : ¬(c.derivative = 0 ∧ a.derivative = 0 ∧ b.derivative = 0) := by tauto,
+    have t : c*a*b = a*b*c := by ring,
+    cases lt_or_le c.degree ((poly_rad (a*b*c)).degree) with h h,
+    exact h,
+    exfalso, apply hnderiv', apply abc_c, rw t, exact h,
+  end,
+  exact max_lt (max_lt hadeg hbdeg) hcdeg,
 end
 /- FLT for polynomials
 
@@ -693,7 +727,7 @@ begin
   sorry,
 end
 
-theorem poly_flt_char_zero (a b c : k[X]) (n : ℕ) (chz : ring_char k = 0) (hn: n ≥ 3) (hsum: a^n + b^n + c^n = 0) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hab : is_coprime a b) (hbc : is_coprime b c) (hca : is_coprime c a) : (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
+theorem poly_flt_char_zero (a b c : k[X]) (n : ℕ) (chz : ring_char k = 0) (hn: 3 ≤ n) (hsum: a^n + b^n + c^n = 0) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hab : is_coprime a b) (hbc : is_coprime b c) (hca : is_coprime c a) : (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
 begin
   have hap : a^n ≠ 0 := pow_ne_zero _ ha,
   have hbp : b^n ≠ 0 := pow_ne_zero _ hb,
@@ -706,7 +740,8 @@ begin
   have np : n > 0 := by linarith,
 
   have hdeg_1 := poly_abc_max_ver (a^n) (b^n) (c^n) chz hap hbp hcp hsum habp hbcp hcap,
-  have hdeg_2 : n • (max (max a.degree b.degree) c.degree) < 3 • (max (max a.degree b.degree) c.degree) :=
+  set md := (max (max a.degree b.degree) c.degree),
+  have hdeg_2 : n • (max (max a.degree b.degree) c.degree) < n • (max (max a.degree b.degree) c.degree) :=
   begin
     calc n • (max (max a.degree b.degree) c.degree) = max (n • (max a.degree b.degree)) (n • c.degree) : by rw nat.with_bot.smul_max
     ... = max (max (n • a.degree) (n • b.degree)) (n • c.degree) : by rw nat.with_bot.smul_max
@@ -731,6 +766,11 @@ begin
       exact le_max_right _ _ },
     { exact le_max_right _ _ },
   end,
+  have hdeg_3 : md < md :=
+  begin
+    sorry,
+  end
+
   -- have hdeg : (poly_rad (a^n * b^n * c^n)).degree ≤ (a^n).degree :=
   -- begin
   --   sorry,
