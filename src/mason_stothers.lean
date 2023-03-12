@@ -15,6 +15,9 @@ import ring_theory.euclidean_domain
 import ring_theory.polynomial.content
 import ring_theory.unique_factorization_domain
 
+import .radical
+import .wronskian
+
 noncomputable theory
 
 open_locale polynomial classical
@@ -25,146 +28,6 @@ open unique_factorization_monoid
 variables {k: Type*} [field k]
 
 
--- Definitions
-
--- Wronskian: W(a, b) = ab' - a'b
-def wronskian (a b : k[X]) : k[X] :=
-  a * b.derivative - a.derivative * b
-
-/- Radical of polynomial: rad(a) = product of monic (normalized) factors.
-Note that there's a notion of `normalization_monoid` that somehow generalizes the concept of polynomial ring, leading coefficient, and monic polynomial.
--/
-def prime_factors (a: k[X]) : finset (k[X]) := 
-  (normalized_factors a).to_finset
-
-def rad (a: k[X]) : k[X] := 
-  (prime_factors a).prod id
-
-
--- Basic properties of Wronskian
-
-@[simp]
-lemma wronskian_zero_left (a : k[X]) : wronskian 0 a = 0 :=
-by simp_rw wronskian; simp only [zero_mul, derivative_zero, sub_self]
-
-@[simp]
-lemma wronskian_zero_right (a : k[X]) : wronskian a 0 = 0 :=
-by simp_rw wronskian; simp only [derivative_zero, mul_zero, sub_self]
-
-lemma wronskian_neg_left (a b : k[X]) : wronskian (-a) b = - (wronskian a b) :=
-by simp_rw [wronskian, derivative_neg]; ring
-
-lemma wronskian_neg_right (a b : k[X]) : wronskian a (-b) = - wronskian a b :=
-by simp_rw [wronskian, derivative_neg]; ring
-
-lemma wronskian_add_right (a b c : k[X]) :
-  wronskian a (b + c) = wronskian a b + wronskian a c :=
-by simp_rw [wronskian, derivative_add]; ring
-
-lemma wronskian_self (a : k[X]) : wronskian a a = 0 :=
-by rw [wronskian, mul_comm, sub_self]
-
-lemma wronskian_anticomm (a b : k[X]) : wronskian a b = - wronskian b a :=
-by rw [wronskian, wronskian]; ring
-
-lemma polynomial.degree_ne_bot {a : k[X]} (ha : a ≠ 0) : a.degree ≠ ⊥ :=
-  by intro h; rw polynomial.degree_eq_bot at h; exact ha h
-
-lemma wronskian.deg_lt_add_deg_deg {a b : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) : 
-  (wronskian a b).degree < a.degree + b.degree :=
-begin
-  calc (wronskian a b).degree ≤ max (a * b.derivative).degree (a.derivative * b).degree : polynomial.degree_sub_le _ _
-  ... < a.degree + b.degree : _,
-  rw max_lt_iff, split; rw degree_mul,
-  { rw with_bot.add_lt_add_iff_left (polynomial.degree_ne_bot ha),
-    exact polynomial.degree_derivative_lt hb, },
-  { rw with_bot.add_lt_add_iff_right (polynomial.degree_ne_bot hb),
-    exact polynomial.degree_derivative_lt ha, },
-end 
-
-
-
--- Properties of radicals
-
-/- `rad_coprime_mul`
-
-For any coprime polynomial a and b, rad(a*b) = rad(a) * rad(b)
-
-Proof)
-1. Prime factors of a*b equal to the disjoint union of those of a and b. `coprime_mul_prime_factors_disj_union`
-2. By definition of radical, we're done.
--/
-
--- Coprime polynomials have disjoint prime factors (as multisets)
-lemma coprime_disjoint_factors {a b : k[X]} (hc: is_coprime a b) : (normalized_factors a).disjoint (normalized_factors b):=
-begin
-  intros x hxa hxb,
-  have x_dvd_a := dvd_of_mem_normalized_factors hxa,
-  have x_dvd_b := dvd_of_mem_normalized_factors hxb,
-  have xp := prime_of_normalized_factor x hxa,
-  have x_dvd_gcd := euclidean_domain.dvd_gcd x_dvd_a x_dvd_b,
-  rw ←euclidean_domain.gcd_is_unit_iff at hc,
-  have x_unit := is_unit_of_dvd_unit x_dvd_gcd hc,
-  exact xp.not_unit x_unit,
-end
-
--- Coprime polynomials have disjoint prime factors (as finsets)
-lemma coprime_disjoint_prime_factors {a b : k[X]} (hc: is_coprime a b) : disjoint (prime_factors a) (prime_factors b):=
-begin
-  simp_rw prime_factors,
-  rw finset.disjoint_left,
-  intros x x_in_fa,
-  intro x_in_fb,
-  simp only [multiset.mem_to_finset] at x_in_fa x_in_fb,
-  apply coprime_disjoint_factors hc x_in_fa x_in_fb,
-end
-
--- Prime factors of (a*b) is a disjoint union of those of a and b, when they are coprime.
-lemma coprime_mul_prime_factors_disj_union {a b : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : is_coprime a b) : 
-  prime_factors (a * b) = (prime_factors a).disj_union (prime_factors b) (coprime_disjoint_prime_factors hc) :=
-begin
-  rw [finset.disj_union_eq_union],
-  simp_rw prime_factors, 
-  apply finset.ext,
-  intro x,
-  simp,
-  rw normalized_factors_mul ha hb, simp,
-end
-
--- Main statement
-lemma rad_coprime_mul {a b : k[X]} (ha: a ≠ 0) (hb: b ≠ 0) (hc: is_coprime a b) : 
-  rad (a * b) = rad a * rad b :=
-begin
-  simp_rw rad,
-  rw coprime_mul_prime_factors_disj_union ha hb hc,
-  rw finset.prod_disj_union (coprime_disjoint_prime_factors hc),
-end
-
-/- `rad_pow`
-
-For any polynomial a and n ∈ ℕ with n > 0, rad(a^n) = rad(a)
-
-Proof) Show that the prime factors of a and a^n are the same (below `prime_factors_eq_pow`), and the result follows.
--/
-
--- Polynomial factors are invariant under power.
-lemma prime_factors_eq_pow (a: k[X]) (n: ℕ) (hn: n > 0) : 
-  prime_factors (a^n) = prime_factors a :=
-begin
-  simp_rw prime_factors,
-  simp only [normalized_factors_pow],
-  apply finset.ext,
-  intro x,
-  simp only [multiset.mem_to_finset],
-  rw multiset.mem_nsmul _,
-  exact ne_of_gt hn,
-end
-
--- Main statement.
-lemma rad_pow (a: k[X]) {n: nat} (hn: n > 0) : rad (a^n) = rad(a) :=
-begin
-  simp_rw [rad, prime_factors_eq_pow a n hn],
-end
 
 /- `rad_deg_le_deg` deg(rad(a)) ≤ deg(a)
 
