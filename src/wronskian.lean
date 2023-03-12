@@ -1,3 +1,7 @@
+/- Wronskian of a pair of polynomials.
+Definition and properties.
+-/
+
 import algebra.associated
 import algebra.big_operators.multiset.basic
 import algebra.divisibility.basic
