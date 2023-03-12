@@ -515,20 +515,23 @@ begin
   exact h.of_mul_left_left.of_mul_right_left,
 end
 
-theorem poly_abc (a b c : k[X]) (hsum: a + b + c = 0) (hab: is_coprime a b) (hbc: is_coprime b c) (hca: is_coprime c a) (hdeg : a.degree >= (poly_rad (a * b * c)).degree) : (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
+theorem poly_abc (a b c : k[X]) (hsum: a + b + c = 0) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hab: is_coprime a b) (hbc: is_coprime b c) (hca: is_coprime c a) (hdeg : a.degree >= (poly_rad (a * b * c)).degree) : (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
 begin
   have wbc := wronskian_eq_of_sum_zero hsum,
   have ara_dvd_w := div_rad_dvd_wronskian_left a b,
   have brb_dvd_w := div_rad_dvd_wronskian_right a b,
   have crc_dvd_w := div_rad_dvd_wronskian_right b c,
-  rw ←wbc at crc_dvd_w,
   set w := wronskian a b with wab,
+  rw ←wbc at crc_dvd_w,
 
-  have ha_bc := hab.mul_right hca.symm,
+  have hab_c := hca.symm.mul_left hbc,
   
   have abc_dvd_w : div_rad (a*b*c) ∣ w := begin
     have abc_eq : div_rad (a*b*c) = 
-      (div_rad a)*(div_rad b)*(div_rad c) := sorry,
+      (div_rad a)*(div_rad b)*(div_rad c),
+      {
+        calc div_rad (a*b*c) = div_rad (a*b) * div_rad c : 
+      }
     rw abc_eq,
     apply is_coprime.mul_dvd,
     sorry, sorry, sorry,
