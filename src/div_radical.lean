@@ -42,6 +42,14 @@ begin
   exact polynomial.radical_dvd_self ha,
 end
 
+lemma polynomial.div_radical_ne_zero {a : k[X]} (ha : a ≠ 0) : a.div_radical ≠ 0 :=
+begin
+  have h := ha, rw ←polynomial.mul_radical_div_radical ha at h,
+  intro eqn, rw eqn at h, 
+  simp only [mul_zero, ne.def, eq_self_iff_true, not_true] at h,
+  exact h,
+end
+
 lemma polynomial.div_radical_is_unit {u : k[X]} (hu : is_unit u) : 
   is_unit u.div_radical :=
 begin

@@ -81,3 +81,12 @@ begin
   { rw with_bot.add_lt_add_iff_right (degree_ne_bot hb),
     exact polynomial.degree_derivative_lt ha, },
 end
+
+-- Note: the following is false!
+-- Counterexample: b = a = 1 → 
+-- (wronskian a b).nat_degree = a.nat_degree = b.nat_degree = 0
+/-
+lemma wronskian.nat_degree_lt_add {a b : k[X]} 
+  (ha : a ≠ 0) (hb : b ≠ 0) : 
+  (wronskian a b).nat_degree < a.nat_degree + b.nat_degree := sorry
+-/
