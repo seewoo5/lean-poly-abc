@@ -93,7 +93,7 @@ begin
   rw finset.prod_disj_union (hc.disjoint_prime_factors),
 end
 
-lemma prime_factors_pow (a: k[X]) {n: ℕ} (hn: 0 < n) : 
+lemma prime_factors_pow (a: k[X]) {n: ℕ} (hn: 1 ≤ n) : 
   prime_factors (a^n) = prime_factors a :=
 begin
   simp_rw prime_factors,
@@ -105,7 +105,7 @@ begin
   exact ne_of_gt hn,
 end
 
-lemma polynomial.radical_pow (a: k[X]) {n: nat} (hn: 0 < n) : 
+lemma polynomial.radical_pow (a: k[X]) {n: nat} (hn: 1 ≤ n) : 
   (a^n).radical = a.radical :=
 begin
   simp_rw [polynomial.radical, prime_factors_pow a hn],
@@ -142,11 +142,43 @@ begin
 end
 
 lemma polynomial.radical_prime_pow {a : k[X]} (ha: prime a)
-  {n : ℕ} (hn : 0 < n): (a^n).radical = normalize a :=
+  {n : ℕ} (hn : 1 ≤ n): (a^n).radical = normalize a :=
 begin
   rw (a.radical_pow hn),
   exact (polynomial.radical_prime ha),
 end
+
+/- `poly_rad_deg_le_deg` deg(rad(a)) ≤ deg(a)
+
+Proof)
+a = Product of all (factors a)
+
+Fact 1.
+deg (Product of a_1, a_2, ..., a_n) = Sum (deg a_1), deg a_2, ....
+
+> polynomial.degree_prod
+
+Fact 2. A : multiset is a subset (le) of B : multiset
+-> sum A <= sum B
+
+Fact 2-1. B = A ⊔ (B ∖ A)
+Fact 2-2. sum B = sum (A ⊔ (B \ A)) = sum A + sum (B \ A)
+Fact 2-3. sum (B \ A) : ℕ 
+Fact 2-4. a = b + c in ℕ -> a ≥ b
+
+> multiset.le
+
+Fact 3. 
+  (poly_rad a).deg = (Product of all (factors a).to_finset).deg
+    = Sum (factors a).to_finset  <- Fact 1
+  
+  a.deg = (Product of all (factors a)).deg
+    = Sum (factors a)  <- Fact 1
+
+  Goal : Sum (factors a).to_finset <= Sum (factors a)
+    (factors a).to_finset is a subset of (factors a)
+  
+-/
 
 lemma polynomial.radical_deg_le {a: k[X]} (ha : a ≠ 0) : 
   a.radical.degree ≤ a.degree :=
