@@ -6,11 +6,10 @@ import algebra.divisibility.units
 import algebra.group.basic
 import algebra.group_power.basic
 import algebra.order.smul
-import data.polynomial.basic
 import data.finset.basic
 import data.multiset.basic
+import data.polynomial.basic
 import data.polynomial.derivative
-import init.data.nat.lemmas
 import order.with_bot
 import ring_theory.euclidean_domain
 import ring_theory.polynomial.content
@@ -92,12 +91,12 @@ end
 For any coprime polynomial a and b, rad(a*b) = rad(a) * rad(b)
 
 Proof)
-1. Prime factors of a*b equal to the disjoint union of those of a and b. `poly_coprime_mul_prime_factors_disj_union`
-3. By definition of radical, we're done.
+1. Prime factors of a*b equal to the disjoint union of those of a and b. `coprime_mul_prime_factors_disj_union`
+2. By definition of radical, we're done.
 -/
 
 -- Coprime polynomials have disjoint prime factors (as multisets)
-lemma poly_coprime_disjoint_factors {a b : k[X]} (hc: is_coprime a b) : (normalized_factors a).disjoint (normalized_factors b):=
+lemma coprime_disjoint_factors {a b : k[X]} (hc: is_coprime a b) : (normalized_factors a).disjoint (normalized_factors b):=
 begin
   intros x hxa hxb,
   have x_dvd_a := dvd_of_mem_normalized_factors hxa,
@@ -110,19 +109,19 @@ begin
 end
 
 -- Coprime polynomials have disjoint prime factors (as finsets)
-lemma poly_coprime_disjoint_prime_factors {a b : k[X]} (hc: is_coprime a b) : disjoint (prime_factors a) (prime_factors b):=
+lemma coprime_disjoint_prime_factors {a b : k[X]} (hc: is_coprime a b) : disjoint (prime_factors a) (prime_factors b):=
 begin
   simp_rw prime_factors,
   rw finset.disjoint_left,
   intros x x_in_fa,
   intro x_in_fb,
   simp only [multiset.mem_to_finset] at x_in_fa x_in_fb,
-  apply poly_coprime_disjoint_factors hc x_in_fa x_in_fb,
+  apply coprime_disjoint_factors hc x_in_fa x_in_fb,
 end
 
 -- Prime factors of (a*b) is a disjoint union of those of a and b, when they are coprime.
-lemma poly_coprime_mul_prime_factors_disj_union {a b : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : is_coprime a b) : 
-  prime_factors (a * b) = (prime_factors a).disj_union (prime_factors b) (poly_coprime_disjoint_prime_factors hc) :=
+lemma coprime_mul_prime_factors_disj_union {a b : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : is_coprime a b) : 
+  prime_factors (a * b) = (prime_factors a).disj_union (prime_factors b) (coprime_disjoint_prime_factors hc) :=
 begin
   rw [finset.disj_union_eq_union],
   simp_rw prime_factors, 
@@ -137,8 +136,8 @@ lemma rad_coprime_mul {a b : k[X]} (ha: a ≠ 0) (hb: b ≠ 0) (hc: is_coprime a
   rad (a * b) = rad a * rad b :=
 begin
   simp_rw rad,
-  rw poly_coprime_mul_prime_factors_disj_union ha hb hc,
-  rw finset.prod_disj_union (poly_coprime_disjoint_prime_factors hc),
+  rw coprime_mul_prime_factors_disj_union ha hb hc,
+  rw finset.prod_disj_union (coprime_disjoint_prime_factors hc),
 end
 
 /- `rad_pow`
@@ -299,15 +298,6 @@ begin
   exact (div_rad_unit hu).dvd,
 end
 
-
--- lemma div_rad_coprime_mul (a b : k[X]) (ha : a ≠ 0) (hb : b ≠ 0) (hc : is_coprime a b) : div_rad(a * b) = (div_rad a) * (div_rad b) :=
--- begin
---   simp_rw div_rad,
---   rw rad_coprime_mul ha hb hc,
---   symmetry,
---   exact div_mul_div_comm a (rad a) b (rad b),
--- end
-
 lemma rad_prime_eq (a : k[X]) (ha: prime a) : rad a = normalize a :=
 begin
   rw rad,
@@ -341,7 +331,6 @@ begin
   exact dvd.intro (u * a^n) (eq2.symm),
 end
 
-
 lemma dvd_rad_prime_pow (a : k[X]) (n : ℕ) (pa : prime a) (ha : a ≠ 0) : associated (div_rad (a^(n+1))) (a^n) :=
 begin
   rw div_rad,
@@ -372,15 +361,9 @@ begin
   rw pow_eq,
 end
 
-lemma div_rad_coprime_mul {a b : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc: is_coprime a b) : div_rad (a * b) = (div_rad a) * (div_rad b) :=
-begin
-  symmetry, rw div_rad_eq _,
-  rw rad_coprime_mul ha hb hc,
-  set c := a * b with eq_c,
-  rw [←mul_div_rad_rad ha, ←mul_div_rad_rad hb] at eq_c,
-  rw eq_c, ring_nf, simp, tauto,
-end
-
+/- Main statement of Step 2. For prime powers.
+Note that the exponent is `n+1` instead of `n`.
+-/
 lemma div_rad_dvd_deriv_prime_power (a: k[X]) (ha : a ≠ 0) (pa: prime a) (n: ℕ) : div_rad_dvd_deriv (a^(n+1)) :=
 begin
   rw div_rad_dvd_deriv,
@@ -392,6 +375,20 @@ begin
   simp,
 end
 
+
+-- Step 3.
+
+-- `div_rad` is multiplicative for coprime pairs.
+lemma div_rad_coprime_mul {a b : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc: is_coprime a b) : div_rad (a * b) = (div_rad a) * (div_rad b) :=
+begin
+  symmetry, rw div_rad_eq _,
+  rw rad_coprime_mul ha hb hc,
+  set c := a * b with eq_c,
+  rw [←mul_div_rad_rad ha, ←mul_div_rad_rad hb] at eq_c,
+  rw eq_c, ring_nf, simp, tauto,
+end
+
+
 -- div_rad(a) divides a.
 lemma div_rad_dvd_self (a : k[X]) (ha: a ≠ 0) : div_rad a ∣ a :=
 begin
@@ -399,7 +396,7 @@ begin
   exact euclidean_domain.div_dvd_of_dvd (div_rad_dvd a ha),
 end
 
-/- Induction step of the main lemma.
+/- Main statement of Step 3. Induction step.
 If the lemma is true for coprime a and b, then it is also true for (a*b).
 Proof uses Leibniz rule `derivative_mul`, `div_rad_dvd_self`, and the fact that div_rad is multiplicative for coprime pairs `div_rad_coprime_mul`.
 -/
@@ -418,7 +415,7 @@ begin
 end
 
 
--- The final proof of the main lemma based on the above lemmata.
+-- The final proof of the main lemma based on the above intermediate steps.
 theorem div_rad_dvd_deriv_always {a : k[X]} (ha : a ≠ 0) : div_rad_dvd_deriv a :=
 begin
   revert ha,
@@ -454,19 +451,6 @@ begin
   exact div_rad_dvd_deriv_induction _ _ nzx nzy hc (hx nzx) (hy nzy),
 end
 
-
-lemma dvd_deriv_iff_deriv_eq_zero
-  {a : k[X]} (a_dvd_a_deriv : a ∣ a.derivative) : a.derivative = 0 :=
-begin
-  by_cases a_nz : a = 0,
-  { rw a_nz, simp only [derivative_zero], },
-  by_contra deriv_nz,
-  have deriv_lt := degree_derivative_lt a_nz,
-  have le_deriv := polynomial.degree_le_of_dvd a_dvd_a_deriv deriv_nz,
-  have lt_self := le_deriv.trans_lt deriv_lt,
-  simp only [lt_self_iff_false] at lt_self, exact lt_self,
-end
-
 protected lemma is_coprime.div_rad {a b : k[X]} (ha : a ≠ 0) (hb : b ≠ 0)
   (h : is_coprime a b) : is_coprime (div_rad a) (div_rad b) :=
 begin
@@ -483,7 +467,7 @@ Proof is based on this online note by Franz Lemmermeyer http://www.fen.bilkent.e
 
 1. Show that W(a, b) = W(b, c) = W(c, a) =: W. `wronskian_eq_of_sum_zero`
 2. (a / rad(a)) | W, and same for b and c. `div_rad_dvd_wronskian_left` and `div_rad_dvd_wronskian_right`
-3. a / rad(a), b / rad(b), c / rad(c) are all coprime, so their product abc / rad(abc) also divides W. `poly_coprime_div_mul_div`
+3. a / rad(a), b / rad(b), c / rad(c) are all coprime, so their product abc / rad(abc) also divides W. `coprime_div_mul_div`
 4. Using the assumption on degrees, deduce that deg (abc / rad(abc)) > deg W.
 5. By `polynomial.degree_le_of_dvd`, W = 0.
 6. Since W(a, b) = ab' - a'b = 0 and a and b are coprime, a' = 0. Similarly we have b' = c' = 0. `coprime_wronskian_eq_zero_const`
@@ -528,7 +512,19 @@ begin
   exact div_rad_dvd_wronskian_left _ _,
 end
 
--- Lemma for Step 6.
+-- Lemma for Step 6. `coprime_wronskian_eq_zero_const`
+lemma dvd_deriv_iff_deriv_eq_zero
+  {a : k[X]} (a_dvd_a_deriv : a ∣ a.derivative) : a.derivative = 0 :=
+begin
+  by_cases a_nz : a = 0,
+  { rw a_nz, simp only [derivative_zero], },
+  by_contra deriv_nz,
+  have deriv_lt := degree_derivative_lt a_nz,
+  have le_deriv := polynomial.degree_le_of_dvd a_dvd_a_deriv deriv_nz,
+  have lt_self := le_deriv.trans_lt deriv_lt,
+  simp only [lt_self_iff_false] at lt_self, exact lt_self,
+end
+
 lemma coprime_wronskian_eq_zero_const 
   {a b : k[X]} (hw: wronskian a b = 0) 
   (hc: is_coprime a b) : (a.derivative = 0 ∧ b.derivative = 0) :=
