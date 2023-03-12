@@ -446,7 +446,7 @@ begin
   exact div_rad_dvd_diff_induction _ _ nzx nzy hc (hx nzx) (hy nzy),
 end
 
-theorem div_rad_dvd_wronskian (a b : k[X]) : div_rad a ∣ wronskian a b :=
+theorem div_rad_dvd_wronskian_left (a b : k[X]) : div_rad a ∣ wronskian a b :=
 begin
   by_cases a_nz : a = 0,
   { subst a_nz, rw wronskian_zero_left b, exact dvd_zero _, },
@@ -456,6 +456,12 @@ begin
     apply (div_rad_dvd_self _ a_nz), },
   { apply dvd_mul_of_dvd_left,
     apply (div_rad_dvd_diff_always a_nz), },
+end
+
+theorem div_rad_dvd_wronskian_right (a b : k[X]) : div_rad b ∣ wronskian a b :=
+begin
+  rw [wronskian_anticomm, dvd_neg],
+  exact div_rad_dvd_wronskian_left _ _,
 end
 
 -- Lemma 2.1.3
@@ -501,9 +507,33 @@ Proof is based on this online note by Franz Lemmermeyer http://www.fen.bilkent.e
 6. Since W(a, b) = ab' - a'b = 0 and a and b are coprime, a' = 0. Similarly we have b' = c' = 0. `coprime_wronskian_eq_zero_const`
 -/
 
+protected lemma is_coprime.div_rad {a b : k[X]} (ha : a ≠ 0) (hb : b ≠ 0)
+  (h : is_coprime a b) : is_coprime (div_rad a) (div_rad b) :=
+begin
+  rw ←mul_div_rad_poly_rad ha at h,
+  rw ←mul_div_rad_poly_rad hb at h,
+  exact h.of_mul_left_left.of_mul_right_left,
+end
+
 theorem poly_abc (a b c : k[X]) (hsum: a + b + c = 0) (hab: is_coprime a b) (hbc: is_coprime b c) (hca: is_coprime c a) (hdeg : a.degree >= (poly_rad (a * b * c)).degree) : (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
 begin
-  sorry
+  have wbc := wronskian_eq_of_sum_zero hsum,
+  have ara_dvd_w := div_rad_dvd_wronskian_left a b,
+  have brb_dvd_w := div_rad_dvd_wronskian_right a b,
+  have crc_dvd_w := div_rad_dvd_wronskian_right b c,
+  rw ←wbc at crc_dvd_w,
+  set w := wronskian a b with wab,
+
+  have ha_bc := hab.mul_right hca.symm,
+  
+  have abc_dvd_w : div_rad (a*b*c) ∣ w := begin
+    have abc_eq : div_rad (a*b*c) = 
+      (div_rad a)*(div_rad b)*(div_rad c) := sorry,
+    rw abc_eq,
+    apply is_coprime.mul_dvd,
+    sorry, sorry, sorry,
+  end,
+  sorry,
 end
 
 
