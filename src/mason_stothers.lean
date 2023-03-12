@@ -13,7 +13,9 @@ import algebra.associated
 import algebra.big_operators.multiset.basic
 import algebra.group.basic
 import algebra.group_power.basic
+import algebra.char_p.basic
 import init.data.nat.lemmas
+import order.with_bot
 
 noncomputable theory
 
@@ -185,7 +187,7 @@ begin
   rw finset.prod_disj_union (poly_coprime_disjoint_prime_factors hc),
 end
 
-/- `poly_rad_eq_pow`
+/- `poly_rad_pow`
 
 For any polynomial a and n ∈ ℤ_+, rad(a^n) = rad(a)
 
@@ -203,7 +205,7 @@ begin
   exact ne_of_gt hn,
 end
 
-lemma poly_rad_eq_pow (a: k[X]) {n: nat} (hn: n > 0) : poly_rad (a^n) = poly_rad(a) :=
+lemma poly_rad_pow (a: k[X]) {n: nat} (hn: n > 0) : poly_rad (a^n) = poly_rad(a) :=
 begin
   simp_rw [poly_rad, prime_factors_eq_pow a n hn],
 end
@@ -239,7 +241,10 @@ Fact 3.
     (factors a).to_finset is a subset of (factors a)
   
 -/
--- lemma poly_rad_deg_le_deg (a: k[X]) : (poly_rad a).degree ≤ a.degree := sorry
+lemma poly_rad_deg_le_deg (a: k[X]) : (poly_rad a).degree ≤ a.degree :=
+begin
+  sorry,
+end
 
 lemma div_rad_dvd (a : k[X]) (ha : a ≠ 0): poly_rad a ∣ a :=
 begin
@@ -334,7 +339,7 @@ end
 
 lemma poly_rad_prime_pow (a : k[X]) (ha: prime a) (n : ℕ) (hn : n > 0): poly_rad (a^n) = normalize a :=
 begin
-  rw (poly_rad_eq_pow a hn),
+  rw (poly_rad_pow a hn),
   exact (poly_rad_prime_eq a ha),
 end
 
@@ -508,6 +513,11 @@ begin
     rw hw, exact dvd_mul_left _ _, },
 end
 
+lemma poly_ne_zero_deg_nbot (a : k[X]) (ha : a ≠ 0) : a.degree ≠ ⊥ :=
+begin
+  by intro h; rw polynomial.degree_eq_bot at h; exact ha h,
+end
+
 /- ABC for polynomials (Mason-Stothers theorem)
 
 For coprime polynomials a, b, c satisfying a + b + c = 0 and deg(a) ≥ deg(rad(abc)), we have a' = b' = c' = 0.
@@ -574,8 +584,7 @@ begin
     ... = a.degree + (div_rad (a*b*c)).degree : add_comm _ _
   end,
   have deg_comp_2 : b.degree + c.degree ≤ (div_rad (a*b*c)).degree := begin
-    have a_deg_nbot : a.degree ≠ ⊥ :=
-      by intro h; rw polynomial.degree_eq_bot at h; exact ha h,
+    have a_deg_nbot := poly_ne_zero_deg_nbot a ha,
     rw ←with_bot.add_le_add_iff_left a_deg_nbot,
     rw ←add_assoc _ _ _, exact deg_comp_1,
   end,
@@ -602,6 +611,11 @@ begin
   refine ⟨daz, dbz, dcz⟩, 
 end
 
+
+theorem poly_abc_max_ver (a b c : k[X]) (chn : ring_char k = 0) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hsum : a + b + c = 0) (hab : is_coprime a b) (hbc : is_coprime b c) (hca : is_coprime c a) : max (max a.degree b.degree) c.degree < (poly_rad (a*b*c)).degree :=
+begin
+  sorry,
+end
 /- FLT for polynomials
 
 For coprime polynomials a, b, c satisfying a^n + b^n + c^n = 0, n ≥ 3 then a, b, c are all constant.
@@ -620,7 +634,58 @@ and from n ≥ 3, we should have max (deg a, deg b, deg c) = ⟂, i.e. at least 
 
 -/
 
-theorem poly_flt (a b c : k[X]) (n : ℕ) (hn: n ≥ 3) (hsum: a^n + b^n + c^n = 0) (hab : is_coprime a b) (hbc : is_coprime b c) (hca : is_coprime c a) : (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
+lemma char_ndvd_pow_deriv {a : k[X]} {n : ℕ} (ha : a ≠ 0) (hn : n > 0) (chn : ¬(ring_char k ∣ n)) : (a^n).derivative = 0 → a.derivative = 0 :=
 begin
-  sorry
+  intro apd,
+  rw derivative_pow at apd,
+  have pnz : a^(n-1) ≠ 0 := pow_ne_zero (n-1) ha,
+  have cn_neq_zero : (polynomial.C (↑n : k)) ≠ 0 :=
+  begin
+    simp only [polynomial.C_eq_zero, ne.def],
+    intro cn_eq_zero,
+    have cdvd := ring_char.dvd cn_eq_zero,
+    tauto,
+  end,
+  simp at apd,
+  tauto,
 end
+
+theorem poly_flt_char_zero (a b c : k[X]) (n : ℕ) (chz : ring_char k = 0) (hn: n ≥ 3) (hsum: a^n + b^n + c^n = 0) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hab : is_coprime a b) (hbc : is_coprime b c) (hca : is_coprime c a) : (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
+begin
+  have hap : a^n ≠ 0 := pow_ne_zero _ ha,
+  have hbp : b^n ≠ 0 := pow_ne_zero _ hb,
+  have hcp : c^n ≠ 0 := pow_ne_zero _ hc,
+
+  have habp : is_coprime (a^n) (b^n) := is_coprime.pow hab,
+  have hbcp : is_coprime (b^n) (c^n) := is_coprime.pow hbc,
+  have hcap : is_coprime (c^n) (a^n) := is_coprime.pow hca,
+
+  have np : n > 0 := by linarith,
+
+  have hdeg_1 := poly_abc_max_ver (a^n) (b^n) (c^n) chz hap hbp hcp hsum habp hbcp hcap,
+  have hdeg_2 : n • (max (max a.degree b.degree) c.degree) < 3 • (max (max a.degree b.degree) c.degree) :=
+  begin
+    calc n • (max (max a.degree b.degree) c.degree) = max (n • (max a.degree b.degree)) (n • c.degree) : sorry
+    ... = max (max (n • a.degree) (n • b.degree)) (n • c.degree) : sorry
+    ... = max (max (a^n).degree (b^n).degree) (c^n).degree : sorry
+    ... < (poly_rad (a^n * b^n * c^n)).degree : hdeg_1
+    ... = (poly_rad ((a*b*c)^n)).degree : sorry
+    ... = (poly_rad (a*b*c)).degree : by rw poly_rad_pow (a*b*c) np
+    ... ≤ (a*b*c).degree : poly_rad_deg_le_deg (a*b*c)
+    ... = a.degree + b.degree + c.degree : sorry
+    ... ≤ 3 • (max (max a.degree b.degree) c.degree) : sorry,
+  end,
+  -- have hdeg : (poly_rad (a^n * b^n * c^n)).degree ≤ (a^n).degree :=
+  -- begin
+  --   sorry,
+  -- end,
+
+  -- have pd := poly_abc (a^n) (b^n) (c^n) hsum hap hbp hcp habp hbcp hcap hdeg,
+  -- cases pd with apd bpd,
+  -- cases bpd with bpd cpd,
+  -- have adnz := char_ndvd_pow_deriv ha np chn apd,
+  -- have bdnz := char_ndvd_pow_deriv hb np chn bpd,
+  -- have cdnz := char_ndvd_pow_deriv hc np chn cpd,
+  -- tauto,
+end
+
