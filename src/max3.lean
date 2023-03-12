@@ -36,3 +36,13 @@ theorem max3_lt_iff {a b c d : ℕ} :
 begin
   rw max3, simp only [max_lt_iff], tauto,
 end
+
+theorem add3_le_three_mul_max3 (a b c : ℕ) : 
+  a + b + c ≤ 3 * max3 a b c :=
+begin
+  rw (show 3 = 2 + 1, by exact rfl),
+  rw [nat.succ_mul, two_mul],
+  apply nat.add_le_add _ (le_max3_third _ _ _),
+  apply nat.add_le_add _ (le_max3_second _ _ _),
+  exact le_max3_first _ _ _,
+end 

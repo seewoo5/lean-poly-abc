@@ -199,187 +199,125 @@ begin
   { exfalso, apply hnderiv, apply polynomial.abc; assumption },
 end
 
+theorem polynomial.abc_contra_nat {a b c : k[X]}
+  (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
+  (hab: is_coprime a b) (hbc: is_coprime b c) (hca: is_coprime c a)
+  (hsum: a + b + c = 0)
+  (hnderiv : ¬(a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0)) : 
+  a.nat_degree < (a * b * c).radical.nat_degree :=
+begin
+  rw ←with_bot.coe_lt_coe,
+  rw [←polynomial.degree_eq_nat_degree ha,
+      ←polynomial.degree_eq_nat_degree _],
+  apply polynomial.abc_contra; assumption,
+  exact (a * b * c).radical_ne_zero,
+end
+
+private lemma rot3_add {a b c : k[X]} : a + b + c = b + c + a := by ring_nf
+private lemma rot3_mul {a b c : k[X]} : a * b * c = b * c * a := by ring_nf
+
 theorem polynomial.abc_max3 (chn : ring_char k = 0) 
   {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) 
   (hab : is_coprime a b) (hbc : is_coprime b c) (hca : is_coprime c a) 
   (hsum : a + b + c = 0) 
-  (hnderiv : ¬(a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0)): 
+  (hnderiv : ¬(a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0)) : 
   max3 a.nat_degree b.nat_degree c.nat_degree < (a*b*c).radical.nat_degree :=
 begin
-  have hadeg : a.nat_degree < (poly_rad (a*b*c)).nat_degree :=
-  begin
-    have abc_a := poly_abc a b c hsum ha hb hc hab hbc hca,
-    cases lt_or_le a.nat_degree ((poly_rad (a * b * c)).nat_degree) with h h,
-    exact h, exfalso, apply hnderiv, apply abc_a, exact h,
-  end,
-  have hbdeg : b.nat_degree < (poly_rad (a*b*c)).nat_degree :=
-  begin
-    have hsum' : b + c + a = 0,
-    {
-      calc b + c + a = a + b + c : by ring
-      ... = 0 : hsum
-    },
-    have abc_b := poly_abc b c a hsum' hb hc ha hbc hca hab,
-    have hnderiv' : ¬(b.derivative = 0 ∧ c.derivative = 0 ∧ a.derivative = 0) := by tauto,
-    have t : b*c*a = a*b*c := by ring,
-    cases lt_or_le b.nat_degree ((poly_rad (a*b*c)).nat_degree) with h h,
-    exact h,
-    exfalso, apply hnderiv', apply abc_b, rw t, exact h,
-  end,
-  have hcdeg : c.nat_degree < (poly_rad (a*b*c)).nat_degree := 
-  begin
-    have hsum' : c + a + b = 0,
-    {
-      calc c + a + b = a + b + c : by ring
-      ... = 0 : hsum
-    },
-    have abc_c := poly_abc c a b hsum' hc ha hb hca hab hbc,
-    have hnderiv' : ¬(c.derivative = 0 ∧ a.derivative = 0 ∧ b.derivative = 0) := by tauto,
-    have t : c*a*b = a*b*c := by ring,
-    cases lt_or_le c.nat_degree ((poly_rad (a*b*c)).nat_degree) with h h,
-    exact h,
-    exfalso, apply hnderiv', apply abc_c, rw t, exact h,
-  end,
-  exact max_lt (max_lt hadeg hbdeg) hcdeg,
+  have hadeg : a.nat_degree < (a*b*c).radical.nat_degree :=
+    by apply polynomial.abc_contra_nat; assumption,
+  have hbdeg : b.nat_degree < (a*b*c).radical.nat_degree :=
+    by rw rot3_add at hsum; rw rot3_mul; 
+       apply polynomial.abc_contra_nat; try {assumption}; tauto,
+  have hcdeg : c.nat_degree < (a*b*c).radical.nat_degree :=
+    by rw [rot3_add, rot3_add] at hsum; rw [rot3_mul, rot3_mul]; 
+       apply polynomial.abc_contra_nat; try {assumption}; tauto,
+  rw max3_lt_iff, refine ⟨hadeg, hbdeg, hcdeg⟩, 
 end
--- /- FLT for polynomials
 
--- For coprime polynomials a, b, c satisfying a^n + b^n + c^n = 0, n ≥ 3 then a, b, c are all constant.
--- (We assume that the characteristic of the field is zero. In fact, the theorem is true when the characteristic does not divide n.)
+/- FLT for polynomials
 
--- Proof) Apply ABC for polynomials with triple (a^n, b^n, c^n):
+For coprime polynomials a, b, c satisfying a^n + b^n + c^n = 0, n ≥ 3 then a, b, c are all constant.
+(We assume that the characteristic of the field is zero. In fact, the theorem is true when the characteristic does not divide n.)
 
--- -> max (deg a^n, deg b^n, deg c^n) = n * max (deg a, deg b, deg c) + 1
--- ≤ deg (rad (a^n * b^n * c^n)) 
--- ≤ deg (rad (a * b * c))
--- ≤ deg (abc)
--- ≤ deg a + deg b + deg c
--- ≤ 3 * max (deg a, deg b, deg c)
+Proof) Apply ABC for polynomials with triple (a^n, b^n, c^n):
 
--- and from n ≥ 3, we should have max (deg a, deg b, deg c) = ⟂, i.e. at least one of a, b, c is zero.
+-> max (deg a^n, deg b^n, deg c^n) = n * max (deg a, deg b, deg c) + 1
+≤ deg (rad (a^n * b^n * c^n)) 
+≤ deg (rad (a * b * c))
+≤ deg (abc)
+≤ deg a + deg b + deg c
+≤ 3 * max (deg a, deg b, deg c)
 
--- -/
+and from n ≥ 3, we should have max (deg a, deg b, deg c) = ⟂, i.e. at least one of a, b, c is zero.
 
--- lemma char_ndvd_pow_deriv {a : k[X]} {n : ℕ} (ha : a ≠ 0) (hn : n > 0) (chn : ¬(ring_char k ∣ n)) : (a^n).derivative = 0 → a.derivative = 0 :=
--- begin
---   intro apd,
---   rw derivative_pow at apd,
---   have pnz : a^(n-1) ≠ 0 := pow_ne_zero (n-1) ha,
---   have cn_neq_zero : (polynomial.C (↑n : k)) ≠ 0 :=
---   begin
---     simp only [polynomial.C_eq_zero, ne.def],
---     intro cn_eq_zero,
---     have cdvd := ring_char.dvd cn_eq_zero,
---     tauto,
---   end,
---   simp at apd,
---   tauto,
--- end
+-/
 
--- protected lemma nat.with_bot.add_le_add 
---   {a b c d : with_bot ℕ}
---   (h1 : a ≤ b) (h2 : c ≤ d) : a + c ≤ b + d :=
--- begin
---   by_cases hb : b = ⊥,
---   { subst hb, simp at h1, subst h1, simp },
---   by_cases hc : c = ⊥,
---   { subst hc, simp only [with_bot.add_bot, bot_le], }, 
---   calc a + c ≤ b + c : by rw with_bot.add_le_add_iff_right hc; exact h1
---   ... ≤ b + d : by rw with_bot.add_le_add_iff_left hb; exact h2
--- end
+lemma char_ndvd_pow_deriv {a : k[X]} (n : ℕ) (ha : a ≠ 0) 
+  (hn : n > 0) (chn : ¬(ring_char k ∣ n))
+  (apd : (a^n).derivative = 0) : a.derivative = 0 :=
+begin
+  rw derivative_pow at apd,
+  have pnz : a^(n-1) ≠ 0 := pow_ne_zero (n-1) ha,
+  have cn_neq_zero : (polynomial.C (↑n : k)) ≠ 0 :=
+  begin
+    simp only [polynomial.C_eq_zero, ne.def],
+    intro cn_eq_zero,
+    have cdvd := ring_char.dvd cn_eq_zero,
+    tauto,
+  end,
+  simp at apd,
+  tauto,
+end
 
--- protected lemma nat.with_bot.smul_le_smul 
---   {n : ℕ} {a b : with_bot ℕ}
---   (h : a ≤ b) : n • a ≤ n • b :=
--- begin
---   induction n with n ih,
---   simp, rw [succ_nsmul, succ_nsmul],
---   apply nat.with_bot.add_le_add h ih,
--- end
+theorem polynomial.flt (chz : ring_char k = 0) 
+  {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
+  (hab : is_coprime a b) (hbc : is_coprime b c) (hca : is_coprime c a)
+  {n : ℕ} (hn: 3 ≤ n) (hsum: a^n + b^n + c^n = 0)  : 
+  (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
+begin
+  have hap : a^n ≠ 0 := pow_ne_zero _ ha,
+  have hbp : b^n ≠ 0 := pow_ne_zero _ hb,
+  have hcp : c^n ≠ 0 := pow_ne_zero _ hc,
 
--- protected lemma nat.with_bot.smul_max 
---   {n : ℕ} {a b : with_bot ℕ} : n • max a b = max (n • a) (n • b) :=
--- begin
---   apply eq.symm,
---   rw max_eq_iff,
---   rcases max_cases a b with ⟨eqn, ba⟩ | ⟨eqn, ab⟩,
---   left, rw eqn, refine ⟨rfl, _⟩, exact nat.with_bot.smul_le_smul ba,
---   right, rw eqn, refine ⟨rfl, _⟩, exact nat.with_bot.smul_le_smul (le_of_lt ab),
--- end
+  have habp : is_coprime (a^n) (b^n) := is_coprime.pow hab,
+  have hbcp : is_coprime (b^n) (c^n) := is_coprime.pow hbc,
+  have hcap : is_coprime (c^n) (a^n) := is_coprime.pow hca,
 
--- theorem poly_flt_char_zero (chz : ring_char k = 0) 
---   {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
---   (hab : is_coprime a b) (hbc : is_coprime b c) (hca : is_coprime c a)
---   {n : ℕ} (hn: 3 ≤ n) (hsum: a^n + b^n + c^n = 0)  : 
---   (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
--- begin
---   have hap : a^n ≠ 0 := pow_ne_zero _ ha,
---   have hbp : b^n ≠ 0 := pow_ne_zero _ hb,
---   have hcp : c^n ≠ 0 := pow_ne_zero _ hc,
+  have np : 1 ≤ n := le_trans (by dec_trivial) hn,
 
---   have habp : is_coprime (a^n) (b^n) := is_coprime.pow hab,
---   have hbcp : is_coprime (b^n) (c^n) := is_coprime.pow hbc,
---   have hcap : is_coprime (c^n) (a^n) := is_coprime.pow hca,
+  by_contra ngoal,
 
---   have np : 1 ≤ n := le_trans (by dec_trivial) hn,
-
---   by_contra ngoal,
-
--- /- FLT for polynomials
-
--- For coprime polynomials a, b, c satisfying a^n + b^n + c^n = 0, n ≥ 3 then a, b, c are all constant.
--- (We assume that the characteristic of the field is zero. In fact, the theorem is true when the characteristic does not divide n.)
-
--- Proof) Apply ABC for polynomials with triple (a^n, b^n, c^n):
-
--- -> max (deg a^n, deg b^n, deg c^n) = n * max (deg a, deg b, deg c) + 1
--- ≤ deg (rad (a^n * b^n * c^n)) 
--- ≤ deg (rad (a * b * c))
--- ≤ deg (abc)
--- ≤ deg a + deg b + deg c
--- ≤ 3 * max (deg a, deg b, deg c)
-
--- and from n ≥ 3, we should have max (deg a, deg b, deg c) = ⟂, i.e. at least one of a, b, c is zero.
-
--- -/
---   have hdeg_2 : n • (max (max a.nat_degree b.nat_degree) c.nat_degree) < n • (max (max a.nat_degree b.nat_degree) c.nat_degree) :=
---   begin
---     calc n • (max (max a.nat_degree b.nat_degree) c.nat_degree) = max (n • (max a.nat_degree b.nat_degree)) (n • c.nat_degree) : by rw nat.with_bot.smul_max
---     ... = max (max (n • a.nat_degree) (n • b.nat_degree)) (n • c.nat_degree) : by rw nat.with_bot.smul_max
---     ... = max (max (a^n).nat_degree (b^n).nat_degree) (c^n).nat_degree : by simp only [polynomial.nat_degree_pow]
---     ... < (poly_rad (a^n * b^n * c^n)).nat_degree : _
---     ... = (poly_rad ((a*b*c)^n)).nat_degree : by rw [mul_pow, mul_pow]
---     ... = (poly_rad (a*b*c)).nat_degree : by rw poly_rad_pow (a*b*c) np
---     ... ≤ (a*b*c).nat_degree : poly_rad_deg_le_deg (by simp only [ne.def, mul_eq_zero]; tauto)
---     ... = a.nat_degree + b.nat_degree + c.nat_degree : by simp only [nat_degree_mul]
---     ... ≤ 3 • (max (max a.nat_degree b.nat_degree) c.nat_degree) : _
---     ... ≤ n • (max (max a.nat_degree b.nat_degree) c.nat_degree) : _,
---     { have hdeg_1 := poly_abc_max_ver (a^n) (b^n) (c^n) 
---         chz hap hbp hcp hsum habp hbcp hcap,
---       apply hdeg_1, intro h, apply ngoal,
---       refine ⟨_, _, _⟩;
---       { apply char_ndvd_pow_deriv _ np; try {assumption},
---         rw chz, simp, linarith, tauto, }, },
---     { set m := max (max a.nat_degree b.nat_degree) c.nat_degree with def_m,
---       have eq_3m : 3 • m = m + m + m := begin
---         rw (show 3 = 2 + 1, by refl),
---         rw [add_smul, two_smul, one_smul],
---       end,
---       rw eq_3m,
---       apply nat.with_bot.add_le_add,
---       apply nat.with_bot.add_le_add,
---       { rw def_m, apply le_max_of_le_left _,
---         exact le_max_left _ _ }, 
---       { rw def_m, apply le_max_of_le_left _,
---         exact le_max_right _ _ },
---       { exact le_max_right _ _ }, },
---     { set m := max (max a.nat_degree b.nat_degree) c.nat_degree with def_m,
---       cases le_or_lt 0 m with h h,
---       exact nsmul_le_nsmul h hn,
---       rw nat.with_bot.lt_zero_iff _ at h, rw h,
---       rw (show 3 = 2 + 1, by refl),
---       rw [add_smul, two_smul, one_smul], simp, },
---   end,
---   exfalso, exact (eq.not_lt (eq.refl _)) hdeg_2,
--- end
+  have hdeg_2 : 
+    n * max3 a.nat_degree b.nat_degree c.nat_degree < 
+    n * max3 a.nat_degree b.nat_degree c.nat_degree :=
+  begin
+    calc n * max3 a.nat_degree b.nat_degree c.nat_degree = 
+      max3 (n*a.nat_degree) (n*b.nat_degree) (n*c.nat_degree) : 
+      by rw max3_mul_left _ _ _ _
+    ... = max3 (a^n).nat_degree (b^n).nat_degree (c^n).nat_degree : 
+      by simp only [polynomial.nat_degree_pow]
+    ... < (a^n * b^n * c^n).radical.nat_degree : begin
+      apply polynomial.abc_max3; try {assumption},
+      -- derivatives of a^n, b^n and c^n are not zero: uses char k = 0
+      intro h, rcases h with ⟨ia, ib, ic⟩,
+      apply ngoal,
+      have hndvd : ¬(ring_char k ∣ n) := by rw chz; simp; linarith,
+      refine ⟨_, _, _⟩; apply char_ndvd_pow_deriv n; assumption,
+    end
+    ... = ((a*b*c)^n).radical.nat_degree : by rw [mul_pow, mul_pow]
+    ... = (a*b*c).radical.nat_degree : by rw (a*b*c).radical_pow np
+    ... ≤ (a*b*c).nat_degree : 
+      polynomial.radical_nat_degree_le (by repeat {apply mul_ne_zero}; assumption)
+    ... = a.nat_degree + b.nat_degree + c.nat_degree : begin
+      rw polynomial.nat_degree_mul _ hc,
+      rw polynomial.nat_degree_mul ha hb,
+      exact mul_ne_zero ha hb,
+    end
+    ... ≤ 3 * max3 a.nat_degree b.nat_degree c.nat_degree : 
+      add3_le_three_mul_max3 _ _ _
+    ... ≤ n * max3 a.nat_degree b.nat_degree c.nat_degree :
+      nat.mul_le_mul_right _ hn
+  end,
+  exfalso, exact (eq.not_lt (eq.refl _)) hdeg_2,
+end
 

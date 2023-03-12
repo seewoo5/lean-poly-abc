@@ -180,9 +180,18 @@ Fact 3.
   
 -/
 
-lemma polynomial.radical_deg_le {a: k[X]} (ha : a ≠ 0) : 
+lemma polynomial.radical_degree_le {a: k[X]} (ha : a ≠ 0) : 
   a.radical.degree ≤ a.degree :=
 begin
   have h := polynomial.radical_dvd_self ha,
   exact polynomial.degree_le_of_dvd h ha,
+end
+
+lemma polynomial.radical_nat_degree_le {a: k[X]} (ha : a ≠ 0) : 
+  a.radical.nat_degree ≤ a.nat_degree :=
+begin
+  rw ←with_bot.coe_le_coe,
+  rw ←polynomial.degree_eq_nat_degree ha,
+  rw ←polynomial.degree_eq_nat_degree a.radical_ne_zero,
+  exact polynomial.radical_degree_le ha,
 end
