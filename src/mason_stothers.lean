@@ -1,3 +1,6 @@
+/- Proof of polynomial ABC (Mason-Stothers theorem) and polynomial FLT as a corollary.
+-/
+
 import algebra.associated
 import algebra.big_operators.multiset.basic
 import algebra.char_p.basic
