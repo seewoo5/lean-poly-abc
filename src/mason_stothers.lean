@@ -32,13 +32,13 @@ variables {k: Type*} [field k]
 def wronskian (a b : k[X]) : k[X] :=
   a * b.derivative - a.derivative * b
 
-/- Radical of polynomial: poly_rad(a) = product of monic (normalized) factors.
+/- Radical of polynomial: rad(a) = product of monic (normalized) factors.
 Note that there's a notion of `normalization_monoid` that somehow generalizes the concept of polynomial ring, leading coefficient, and monic polynomial.
 -/
 def prime_factors (a: k[X]) : finset (k[X]) := 
   (normalized_factors a).to_finset
 
-def poly_rad (a: k[X]) : k[X] := 
+def rad (a: k[X]) : k[X] := 
   (prime_factors a).prod id
 
 
@@ -85,22 +85,18 @@ end
 
 
 
--- properties of radicals
+-- Properties of radicals
 
+/- `rad_coprime_mul`
 
--- is_coprime.mul_dvd
--- lemma poly_coprime_div_mul_div (a b c : k[X]) (hc: is_coprime a b) (hadiv: a ∣ c) (hbdiv : b ∣ c) : (a * b) ∣ c :=
--- begin
---   exact is_coprime.mul_dvd hc hadiv hbdiv,
--- end
+For any coprime polynomial a and b, rad(a*b) = rad(a) * rad(b)
 
--- is_coprime.dvd_of_dvd_mul_left
--- lemma poly_coprime_div_cancel (a b c : k[X]) (hc: is_coprime a b) (hdiv: a ∣ (b * c)) : a ∣ c :=
--- begin
---   exact is_coprime.dvd_of_dvd_mul_left hc hdiv,
--- end
+Proof)
+1. Prime factors of a*b equal to the disjoint union of those of a and b. `poly_coprime_mul_prime_factors_disj_union`
+3. By definition of radical, we're done.
+-/
 
--- coprime polynomials have disjoint prime factors (as multisets)
+-- Coprime polynomials have disjoint prime factors (as multisets)
 lemma poly_coprime_disjoint_factors {a b : k[X]} (hc: is_coprime a b) : (normalized_factors a).disjoint (normalized_factors b):=
 begin
   intros x hxa hxb,
@@ -113,7 +109,7 @@ begin
   exact xp.not_unit x_unit,
 end
 
--- coprime polynomials have disjoint prime factors (as finsets)
+-- Coprime polynomials have disjoint prime factors (as finsets)
 lemma poly_coprime_disjoint_prime_factors {a b : k[X]} (hc: is_coprime a b) : disjoint (prime_factors a) (prime_factors b):=
 begin
   simp_rw prime_factors,
@@ -124,15 +120,7 @@ begin
   apply poly_coprime_disjoint_factors hc x_in_fa x_in_fb,
 end
 
-
--- unique_factorization_monoid.normalized_factors_mul
--- lemma poly_coprime_mul_disj_union_factors (a b : k[X]) (ha: a ≠ 0) (hb: b ≠ 0) (hc: is_coprime a b) : (normalized_factors (a * b)) = (normalized_factors a) + (normalized_factors b) :=
--- begin
---   apply unique_factorization_monoid.normalized_factors_mul,
---   exact ha,
---   exact hb,
--- end
-
+-- Prime factors of (a*b) is a disjoint union of those of a and b, when they are coprime.
 lemma poly_coprime_mul_prime_factors_disj_union {a b : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : is_coprime a b) : 
   prime_factors (a * b) = (prime_factors a).disj_union (prime_factors b) (poly_coprime_disjoint_prime_factors hc) :=
 begin
@@ -144,30 +132,23 @@ begin
   rw normalized_factors_mul ha hb, simp,
 end
 
--- properties of radical
-
-/- `poly_rad_coprime_mul`
-
-For any coprime polynomial a and b, rad(a*b) = rad(a) * rad(b)
-
-Proof)
-1. Prime factors of a*b equal to the disjoint union of those of a and b. `poly_coprime_mul_prime_factors_disj_union`
-3. By definition of radical, we're done.
--/
-lemma poly_rad_coprime_mul {a b : k[X]} (ha: a ≠ 0) (hb: b ≠ 0) (hc: is_coprime a b) : 
-  poly_rad (a * b) = poly_rad a * poly_rad b :=
+-- Main statement
+lemma rad_coprime_mul {a b : k[X]} (ha: a ≠ 0) (hb: b ≠ 0) (hc: is_coprime a b) : 
+  rad (a * b) = rad a * rad b :=
 begin
-  simp_rw poly_rad,
+  simp_rw rad,
   rw poly_coprime_mul_prime_factors_disj_union ha hb hc,
   rw finset.prod_disj_union (poly_coprime_disjoint_prime_factors hc),
 end
 
-/- `poly_rad_pow`
+/- `rad_pow`
 
 For any polynomial a and n ∈ ℕ with n > 0, rad(a^n) = rad(a)
 
 Proof) Show that the prime factors of a and a^n are the same (below `prime_factors_eq_pow`), and the result follows.
 -/
+
+-- Polynomial factors are invariant under power.
 lemma prime_factors_eq_pow (a: k[X]) (n: ℕ) (hn: n > 0) : 
   prime_factors (a^n) = prime_factors a :=
 begin
@@ -180,12 +161,13 @@ begin
   exact ne_of_gt hn,
 end
 
-lemma poly_rad_pow (a: k[X]) {n: nat} (hn: n > 0) : poly_rad (a^n) = poly_rad(a) :=
+-- Main statement.
+lemma rad_pow (a: k[X]) {n: nat} (hn: n > 0) : rad (a^n) = rad(a) :=
 begin
-  simp_rw [poly_rad, prime_factors_eq_pow a n hn],
+  simp_rw [rad, prime_factors_eq_pow a n hn],
 end
 
-/- `poly_rad_deg_le_deg` deg(rad(a)) ≤ deg(a)
+/- `rad_deg_le_deg` deg(rad(a)) ≤ deg(a)
 
 Proof)
 a = Product of all (factors a)
@@ -206,7 +188,7 @@ Fact 2-4. a = b + c in ℕ -> a ≥ b
 > multiset.le
 
 Fact 3. 
-  (poly_rad a).deg = (Product of all (factors a).to_finset).deg
+  (rad a).deg = (Product of all (factors a).to_finset).deg
     = Sum (factors a).to_finset  <- Fact 1
   
   a.deg = (Product of all (factors a)).deg
@@ -217,9 +199,9 @@ Fact 3.
   
 -/
 
-lemma div_rad_dvd (a : k[X]) (ha : a ≠ 0): poly_rad a ∣ a :=
+lemma div_rad_dvd (a : k[X]) (ha : a ≠ 0): rad a ∣ a :=
 begin
-  rw poly_rad,
+  rw rad,
   have x := (prime_factors a).val,
   have y := normalized_factors_prod ha,
   rw ← associated.dvd_iff_dvd_right y,
@@ -230,9 +212,9 @@ begin
   exact multiset.dedup_le _,
 end
 
-lemma poly_rad_ne_zero {a: k[X]} (ha: a ≠ 0) : poly_rad a ≠ 0 :=
+lemma rad_ne_zero {a: k[X]} (ha: a ≠ 0) : rad a ≠ 0 :=
 begin
-  rw [poly_rad, ← finset.prod_val],
+  rw [rad, ← finset.prod_val],
   apply multiset.prod_ne_zero,
   rw prime_factors,
   simp only [multiset.to_finset_val, multiset.mem_dedup], 
@@ -240,7 +222,7 @@ begin
 end 
 
 
-/- Main lemma: a / (poly_rad a) divides a'.
+/- Main lemma: a / (rad a) divides a'.
 
 The below proof is based on induction.
 To be precise, we use `unique_factorization_monoid.induction_on_coprime` and to reduce to the cases when
@@ -250,7 +232,7 @@ To be precise, we use `unique_factorization_monoid.induction_on_coprime` and to 
 -/
 
 -- define div_rad(a) as a / rad(a)
-def div_rad (a : k[X]) : k[X] := a / (poly_rad a)
+def div_rad (a : k[X]) : k[X] := a / (rad a)
 
 def div_rad_dvd_deriv (a: k[X]) : Prop := (div_rad a) ∣ a.derivative
 
@@ -264,9 +246,9 @@ end
 
 lemma div_rad_dvd_deriv_one : div_rad_dvd_deriv (1 : k[X]) := div_rad_dvd_deriv_const 1
 
-lemma div_rad_eq {x a : k[X]} (ha : a ≠ 0) : x = div_rad a ↔ x * (poly_rad a) = a :=
+lemma div_rad_eq {x a : k[X]} (ha : a ≠ 0) : x = div_rad a ↔ x * (rad a) = a :=
 begin
-  have rad_nz := poly_rad_ne_zero ha,
+  have rad_nz := rad_ne_zero ha,
   split,
   { intro eq, subst eq, rw div_rad,
     rw mul_comm, 
@@ -278,25 +260,25 @@ begin
     exact rad_nz, },
 end
 
-lemma mul_div_rad_poly_rad {a : k[X]} (ha : a ≠ 0) : (div_rad a) * (poly_rad a) = a :=
+lemma mul_div_rad_rad {a : k[X]} (ha : a ≠ 0) : (div_rad a) * (rad a) = a :=
 begin
   rw ← div_rad_eq ha,
 end
 
-lemma poly_rad_deg_le_deg {a: k[X]} (ha : a ≠ 0) : (poly_rad a).degree ≤ a.degree :=
+lemma rad_deg_le_deg {a: k[X]} (ha : a ≠ 0) : (rad a).degree ≤ a.degree :=
 begin
   set rhs := a.degree with eq_rhs,
-  rw ←mul_div_rad_poly_rad ha at eq_rhs,
-  rw [←zero_add (poly_rad a).degree, eq_rhs, degree_mul],
+  rw ←mul_div_rad_rad ha at eq_rhs,
+  rw [←zero_add (rad a).degree, eq_rhs, degree_mul],
   rw with_bot.add_le_add_iff_right,
   { cases le_or_lt 0 (div_rad a).degree with h h,
     exact h, 
     exfalso, 
     simp only [polynomial.degree_eq_bot, nat.with_bot.lt_zero_iff] at h,
-    have eqn := mul_div_rad_poly_rad ha,
+    have eqn := mul_div_rad_rad ha,
     rw h at eqn, simp at eqn, rw eqn at ha, simp at ha, exact ha, },
   { intro h, rw polynomial.degree_eq_bot at h,
-    have eqn := mul_div_rad_poly_rad ha,
+    have eqn := mul_div_rad_rad ha,
     rw h at eqn, simp at eqn, rw eqn at ha, simp at ha, exact ha, },
 end
 
@@ -306,8 +288,8 @@ begin
     intro h; subst h; revert hu; exact not_is_unit_zero,
   rw is_unit_iff_exists_inv at ⊢ hu,
   rcases hu with ⟨inv_u, eq_u⟩,
-  use poly_rad u * inv_u,
-  rw [←mul_assoc, mul_div_rad_poly_rad u_neq_0],
+  use rad u * inv_u,
+  rw [←mul_assoc, mul_div_rad_rad u_neq_0],
   exact eq_u,
 end 
 
@@ -321,14 +303,14 @@ end
 -- lemma div_rad_coprime_mul (a b : k[X]) (ha : a ≠ 0) (hb : b ≠ 0) (hc : is_coprime a b) : div_rad(a * b) = (div_rad a) * (div_rad b) :=
 -- begin
 --   simp_rw div_rad,
---   rw poly_rad_coprime_mul ha hb hc,
+--   rw rad_coprime_mul ha hb hc,
 --   symmetry,
---   exact div_mul_div_comm a (poly_rad a) b (poly_rad b),
+--   exact div_mul_div_comm a (rad a) b (rad b),
 -- end
 
-lemma poly_rad_prime_eq (a : k[X]) (ha: prime a) : poly_rad a = normalize a :=
+lemma rad_prime_eq (a : k[X]) (ha: prime a) : rad a = normalize a :=
 begin
-  rw poly_rad,
+  rw rad,
   rw prime_factors,
   have ia := ha.irreducible,
   have na := normalized_factors_irreducible ia,
@@ -336,10 +318,10 @@ begin
   simp only [multiset.to_finset_singleton, id.def, finset.prod_singleton],
 end
 
-lemma poly_rad_prime_pow (a : k[X]) (ha: prime a) (n : ℕ) (hn : n > 0): poly_rad (a^n) = normalize a :=
+lemma rad_prime_pow (a : k[X]) (ha: prime a) (n : ℕ) (hn : n > 0): rad (a^n) = normalize a :=
 begin
-  rw (poly_rad_pow a hn),
-  exact (poly_rad_prime_eq a ha),
+  rw (rad_pow a hn),
+  exact (rad_prime_eq a ha),
 end
 
 lemma dvd_normalize_pow (a : k[X]) (n : ℕ) (ha : a ≠ 0) : (normalize a) ∣ a^(n + 1) :=
@@ -363,7 +345,7 @@ end
 lemma dvd_rad_prime_pow (a : k[X]) (n : ℕ) (pa : prime a) (ha : a ≠ 0) : associated (div_rad (a^(n+1))) (a^n) :=
 begin
   rw div_rad,
-  rw (poly_rad_prime_pow a pa (n + 1) (by dec_trivial)),
+  rw (rad_prime_pow a pa (n + 1) (by dec_trivial)),
   have na := associated_normalize a,
   rw associated.comm at na,
   have hna : normalize a ≠ 0 :=
@@ -393,9 +375,9 @@ end
 lemma div_rad_coprime_mul {a b : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc: is_coprime a b) : div_rad (a * b) = (div_rad a) * (div_rad b) :=
 begin
   symmetry, rw div_rad_eq _,
-  rw poly_rad_coprime_mul ha hb hc,
+  rw rad_coprime_mul ha hb hc,
   set c := a * b with eq_c,
-  rw [←mul_div_rad_poly_rad ha, ←mul_div_rad_poly_rad hb] at eq_c,
+  rw [←mul_div_rad_rad ha, ←mul_div_rad_rad hb] at eq_c,
   rw eq_c, ring_nf, simp, tauto,
 end
 
@@ -488,8 +470,8 @@ end
 protected lemma is_coprime.div_rad {a b : k[X]} (ha : a ≠ 0) (hb : b ≠ 0)
   (h : is_coprime a b) : is_coprime (div_rad a) (div_rad b) :=
 begin
-  rw ←mul_div_rad_poly_rad ha at h,
-  rw ←mul_div_rad_poly_rad hb at h,
+  rw ←mul_div_rad_rad ha at h,
+  rw ←mul_div_rad_rad hb at h,
   exact h.of_mul_left_left.of_mul_right_left,
 end
 
@@ -562,7 +544,7 @@ begin
 end
 
 -- Proof of the main theorem (polynomial ABC).
-theorem poly_abc (a b c : k[X]) (hsum: a + b + c = 0) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hab: is_coprime a b) (hbc: is_coprime b c) (hca: is_coprime c a) (hdeg : (poly_rad (a * b * c)).degree ≤ a.degree) : (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
+theorem poly_abc (a b c : k[X]) (hsum: a + b + c = 0) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hab: is_coprime a b) (hbc: is_coprime b c) (hca: is_coprime c a) (hdeg : (rad (a * b * c)).degree ≤ a.degree) : (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
 begin
   -- 1, 2.
   have wbc := wronskian_eq_of_sum_zero hsum,
@@ -602,8 +584,8 @@ begin
   have deg_comp_1 : a.degree + b.degree + c.degree ≤ a.degree + (div_rad (a*b*c)).degree :=
   begin
     calc a.degree + b.degree + c.degree = (a*b*c).degree : by simp only [degree_mul]
-    ... = (div_rad (a*b*c) * poly_rad (a*b*c)).degree : by rw (mul_div_rad_poly_rad habc_nz)
-    ... = (div_rad (a*b*c)).degree + (poly_rad (a*b*c)).degree : by simp only [degree_mul]
+    ... = (div_rad (a*b*c) * rad (a*b*c)).degree : by rw (mul_div_rad_rad habc_nz)
+    ... = (div_rad (a*b*c)).degree + (rad (a*b*c)).degree : by simp only [degree_mul]
     ... ≤ (div_rad (a*b*c)).degree + a.degree : add_le_add_left hdeg _
     ... = a.degree + (div_rad (a*b*c)).degree : add_comm _ _
   end,
@@ -644,15 +626,15 @@ end
 Corollary 2.1.5 of Franz's note.
 Here we need an assumption that their derivatives are not all zero - otherwise the statement itself is false as stated.
 -/
-theorem poly_abc_max_ver (a b c : k[X]) (chn : ring_char k = 0) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hsum : a + b + c = 0) (hab : is_coprime a b) (hbc : is_coprime b c) (hca : is_coprime c a) (hnderiv : ¬(a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0)): max (max a.degree b.degree) c.degree < (poly_rad (a*b*c)).degree :=
+theorem poly_abc_max_ver (a b c : k[X]) (chn : ring_char k = 0) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hsum : a + b + c = 0) (hab : is_coprime a b) (hbc : is_coprime b c) (hca : is_coprime c a) (hnderiv : ¬(a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0)): max (max a.degree b.degree) c.degree < (rad (a*b*c)).degree :=
 begin
-  have hadeg : a.degree < (poly_rad (a*b*c)).degree :=
+  have hadeg : a.degree < (rad (a*b*c)).degree :=
   begin
     have abc_a := poly_abc a b c hsum ha hb hc hab hbc hca,
-    cases lt_or_le a.degree ((poly_rad (a * b * c)).degree) with h h,
+    cases lt_or_le a.degree ((rad (a * b * c)).degree) with h h,
     exact h, exfalso, apply hnderiv, apply abc_a, exact h,
   end,
-  have hbdeg : b.degree < (poly_rad (a*b*c)).degree :=
+  have hbdeg : b.degree < (rad (a*b*c)).degree :=
   begin
     have hsum' : b + c + a = 0,
     {
@@ -662,11 +644,11 @@ begin
     have abc_b := poly_abc b c a hsum' hb hc ha hbc hca hab,
     have hnderiv' : ¬(b.derivative = 0 ∧ c.derivative = 0 ∧ a.derivative = 0) := by tauto,
     have t : b*c*a = a*b*c := by ring,
-    cases lt_or_le b.degree ((poly_rad (a*b*c)).degree) with h h,
+    cases lt_or_le b.degree ((rad (a*b*c)).degree) with h h,
     exact h,
     exfalso, apply hnderiv', apply abc_b, rw t, exact h,
   end,
-  have hcdeg : c.degree < (poly_rad (a*b*c)).degree := 
+  have hcdeg : c.degree < (rad (a*b*c)).degree := 
   begin
     have hsum' : c + a + b = 0,
     {
@@ -676,7 +658,7 @@ begin
     have abc_c := poly_abc c a b hsum' hc ha hb hca hab hbc,
     have hnderiv' : ¬(c.derivative = 0 ∧ a.derivative = 0 ∧ b.derivative = 0) := by tauto,
     have t : c*a*b = a*b*c := by ring,
-    cases lt_or_le c.degree ((poly_rad (a*b*c)).degree) with h h,
+    cases lt_or_le c.degree ((rad (a*b*c)).degree) with h h,
     exact h,
     exfalso, apply hnderiv', apply abc_c, rw t, exact h,
   end,
@@ -776,10 +758,10 @@ begin
     calc n • (max (max a.degree b.degree) c.degree) = max (n • (max a.degree b.degree)) (n • c.degree) : by rw nat.with_bot.smul_max
     ... = max (max (n • a.degree) (n • b.degree)) (n • c.degree) : by rw nat.with_bot.smul_max
     ... = max (max (a^n).degree (b^n).degree) (c^n).degree : by simp only [polynomial.degree_pow]
-    ... < (poly_rad (a^n * b^n * c^n)).degree : _
-    ... = (poly_rad ((a*b*c)^n)).degree : by rw [mul_pow, mul_pow]
-    ... = (poly_rad (a*b*c)).degree : by rw poly_rad_pow (a*b*c) np
-    ... ≤ (a*b*c).degree : poly_rad_deg_le_deg (by simp only [ne.def, mul_eq_zero]; tauto)
+    ... < (rad (a^n * b^n * c^n)).degree : _
+    ... = (rad ((a*b*c)^n)).degree : by rw [mul_pow, mul_pow]
+    ... = (rad (a*b*c)).degree : by rw rad_pow (a*b*c) np
+    ... ≤ (a*b*c).degree : rad_deg_le_deg (by simp only [ne.def, mul_eq_zero]; tauto)
     ... = a.degree + b.degree + c.degree : by simp only [degree_mul]
     ... ≤ 3 • (max (max a.degree b.degree) c.degree) : _
     ... ≤ n • (max (max a.degree b.degree) c.degree) : _,
