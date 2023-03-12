@@ -13,7 +13,7 @@ import algebra.associated
 import algebra.big_operators.multiset.basic
 import algebra.group.basic
 import algebra.group_power.basic
-
+import init.data.nat.lemmas
 
 noncomputable theory
 
@@ -515,7 +515,7 @@ begin
   exact h.of_mul_left_left.of_mul_right_left,
 end
 
-theorem poly_abc (a b c : k[X]) (hsum: a + b + c = 0) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hab: is_coprime a b) (hbc: is_coprime b c) (hca: is_coprime c a) (hdeg : a.degree >= (poly_rad (a * b * c)).degree) : (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
+theorem poly_abc (a b c : k[X]) (hsum: a + b + c = 0) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hab: is_coprime a b) (hbc: is_coprime b c) (hca: is_coprime c a) (hdeg : a.degree ≥ (poly_rad (a * b * c)).degree) : (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
 begin
   have wbc := wronskian_eq_of_sum_zero hsum,
   have ara_dvd_w := div_rad_dvd_wronskian_left a b,
@@ -525,20 +525,61 @@ begin
   rw ←wbc at crc_dvd_w,
 
   have hab_c := hca.symm.mul_left hbc,
+  have hab_nz : a * b ≠ 0 := begin
+    simp,
+    tauto,
+  end,
   
   have abc_dvd_w : div_rad (a*b*c) ∣ w := begin
     have abc_eq : div_rad (a*b*c) = 
       (div_rad a)*(div_rad b)*(div_rad c),
       {
-        calc div_rad (a*b*c) = div_rad (a*b) * div_rad c : 
-      }
+        calc div_rad (a*b*c) = div_rad (a*b) * (div_rad c) : div_rad_coprime_mul hab_nz hc hab_c
+        ... = (div_rad a) * (div_rad b) * (div_rad c) : by rw div_rad_coprime_mul ha hb hab,
+      },
     rw abc_eq,
-    apply is_coprime.mul_dvd,
-    sorry, sorry, sorry,
+    apply is_coprime.mul_dvd _ _ crc_dvd_w,
+    {
+      rw ← div_rad_coprime_mul ha hb hab,
+      exact hab_c.div_rad hab_nz hc,
+    },
+    {
+      have h_ara_brb_c := hab.div_rad ha hb,
+      exact h_ara_brb_c.mul_dvd ara_dvd_w brb_dvd_w,
+    },
   end,
+
+  -- 4.
+  have deg_comp_1 : a.degree + b.degree + c.degree ≤ (div_rad (a*b*c)).degree + a.degree :=
+  begin
+    calc a.degree + b.degree + c.degree = (a*b*c).degree : sorry
+    ... = (div_rad (a*b*c)).degree + (poly_rad (a*b*c)).degree : sorry
+    ... ≤ (div_rad (a*b*c)).degree + a.degree : sorry
+  end,
+  have deg_comp_2 : a.degree + b.degree ≤ (div_rad (a*b*c)).degree :=
+  begin
+    sorry,
+  end,
+  have deg_comp_3 : w.degree < (div_rad (a*b*c)).degree :=
+  begin
+    sorry,
+  end,
+  have w_z : w = 0 :=
+  begin
+    by_contra w_nz,
+    have t := degree_le_of_dvd abc_dvd_w w_nz,
+    have wf : w.degree < w.degree := begin
+      calc w.degree < (div_rad (a*b*c)).degree : deg_comp_3
+      ... ≤ w.degree : t
+    end,
+    simp only [lt_self_iff_false] at wf,
+    exact wf,
+  end,
+  cases (coprime_wronskian_eq_zero_const w_z hab),
   sorry,
 end
 
+example (a b : ℕ) (h1 : a < b) (h2 : b ≤ a) : false := by library_search
 
 /- FLT for polynomials
 
