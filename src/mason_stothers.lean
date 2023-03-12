@@ -77,6 +77,21 @@ begin
   rw ← wronskian_anticomm,
 end
 
+lemma polynomial.degree_ne_bot {a : k[X]} (ha : a ≠ 0) : a.degree ≠ ⊥ :=
+  by intro h; rw polynomial.degree_eq_bot at h; exact ha h
+
+lemma wronskian.deg_lt_add_deg_deg {a b : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) : 
+  (wronskian a b).degree < a.degree + b.degree :=
+begin
+  calc (wronskian a b).degree ≤ max (a * b.derivative).degree (a.derivative * b).degree : polynomial.degree_sub_le _ _
+  ... < a.degree + b.degree : _,
+  rw max_lt_iff, split; rw degree_mul,
+  { rw with_bot.add_lt_add_iff_left (polynomial.degree_ne_bot ha),
+    exact polynomial.degree_derivative_lt hb, },
+  { rw with_bot.add_lt_add_iff_right (polynomial.degree_ne_bot hb),
+    exact polynomial.degree_derivative_lt ha, },
+end 
+
 -- lemma wronskian_deg_plus_one_le_deg_sum (a b : k[X]) : (wronskian a b).degree + 1 ≤ a.degree + b.degree := sorry 
 
 
@@ -515,7 +530,7 @@ begin
   exact h.of_mul_left_left.of_mul_right_left,
 end
 
-theorem poly_abc (a b c : k[X]) (hsum: a + b + c = 0) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hab: is_coprime a b) (hbc: is_coprime b c) (hca: is_coprime c a) (hdeg : a.degree ≥ (poly_rad (a * b * c)).degree) : (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
+theorem poly_abc (a b c : k[X]) (hsum: a + b + c = 0) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hab: is_coprime a b) (hbc: is_coprime b c) (hca: is_coprime c a) (hdeg : (poly_rad (a * b * c)).degree ≤ a.degree) : (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
 begin
   have wbc := wronskian_eq_of_sum_zero hsum,
   have ara_dvd_w := div_rad_dvd_wronskian_left a b,
@@ -525,10 +540,10 @@ begin
   rw ←wbc at crc_dvd_w,
 
   have hab_c := hca.symm.mul_left hbc,
-  have hab_nz : a * b ≠ 0 := begin
-    simp,
-    tauto,
-  end,
+  have hab_nz : a * b ≠ 0 := 
+    by simp only [ne.def, mul_eq_zero]; tauto,
+  have habc_nz : a * b * c ≠ 0 := 
+    by simp only [ne.def, mul_eq_zero]; tauto,
   
   have abc_dvd_w : div_rad (a*b*c) ∣ w := begin
     have abc_eq : div_rad (a*b*c) = 
@@ -550,19 +565,25 @@ begin
   end,
 
   -- 4.
-  have deg_comp_1 : a.degree + b.degree + c.degree ≤ (div_rad (a*b*c)).degree + a.degree :=
+  have deg_comp_1 : a.degree + b.degree + c.degree ≤ a.degree + (div_rad (a*b*c)).degree :=
   begin
-    calc a.degree + b.degree + c.degree = (a*b*c).degree : sorry
-    ... = (div_rad (a*b*c)).degree + (poly_rad (a*b*c)).degree : sorry
-    ... ≤ (div_rad (a*b*c)).degree + a.degree : sorry
+    calc a.degree + b.degree + c.degree = (a*b*c).degree : by simp only [degree_mul]
+    ... = (div_rad (a*b*c) * poly_rad (a*b*c)).degree : by rw (mul_div_rad_poly_rad habc_nz)
+    ... = (div_rad (a*b*c)).degree + (poly_rad (a*b*c)).degree : by simp only [degree_mul]
+    ... ≤ (div_rad (a*b*c)).degree + a.degree : add_le_add_left hdeg _
+    ... = a.degree + (div_rad (a*b*c)).degree : add_comm _ _
   end,
-  have deg_comp_2 : a.degree + b.degree ≤ (div_rad (a*b*c)).degree :=
-  begin
-    sorry,
+  have deg_comp_2 : b.degree + c.degree ≤ (div_rad (a*b*c)).degree := begin
+    have a_deg_nbot : a.degree ≠ ⊥ :=
+      by intro h; rw polynomial.degree_eq_bot at h; exact ha h,
+    rw ←with_bot.add_le_add_iff_left a_deg_nbot,
+    rw ←add_assoc _ _ _, exact deg_comp_1,
   end,
   have deg_comp_3 : w.degree < (div_rad (a*b*c)).degree :=
   begin
-    sorry,
+    have ineq := wronskian.deg_lt_add_deg_deg hb hc,
+    rw ←wbc at ineq,
+    exact ineq.trans_le deg_comp_2, 
   end,
   have w_z : w = 0 :=
   begin
@@ -575,11 +596,11 @@ begin
     simp only [lt_self_iff_false] at wf,
     exact wf,
   end,
-  cases (coprime_wronskian_eq_zero_const w_z hab),
-  sorry,
+  cases (coprime_wronskian_eq_zero_const w_z hab) with daz dbz,
+  rw wbc at w_z,
+  cases (coprime_wronskian_eq_zero_const w_z hbc) with _ dcz,
+  refine ⟨daz, dbz, dcz⟩, 
 end
-
-example (a b : ℕ) (h1 : a < b) (h2 : b ≤ a) : false := by library_search
 
 /- FLT for polynomials
 
