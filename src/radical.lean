@@ -93,7 +93,7 @@ begin
   rw finset.prod_disj_union (hc.disjoint_prime_factors),
 end
 
-lemma prime_factors_pow (a: k[X]) {n: ℕ} (hn: n > 0) : 
+lemma prime_factors_pow (a: k[X]) {n: ℕ} (hn: 0 < n) : 
   prime_factors (a^n) = prime_factors a :=
 begin
   simp_rw prime_factors,
@@ -105,7 +105,7 @@ begin
   exact ne_of_gt hn,
 end
 
-lemma polynomial.radical_pow (a: k[X]) {n: nat} (hn: n > 0) : 
+lemma polynomial.radical_pow (a: k[X]) {n: nat} (hn: 0 < n) : 
   (a^n).radical = a.radical :=
 begin
   simp_rw [polynomial.radical, prime_factors_pow a hn],
@@ -124,7 +124,7 @@ begin
   exact multiset.dedup_le _,
 end
 
-lemma polynomial.radical_neq_zero (a: k[X]) : a.radical ≠ 0 :=
+lemma polynomial.radical_ne_zero (a: k[X]) : a.radical ≠ 0 :=
 begin
   rw [polynomial.radical, ←finset.prod_val],
   apply multiset.prod_ne_zero,
@@ -141,8 +141,8 @@ begin
   simp only [multiset.to_finset_singleton, id.def, finset.prod_singleton],
 end
 
-lemma polynomial.radical_prime_power {a : k[X]} (ha: prime a)
-  {n : ℕ} (hn : n > 0): (a^n).radical = normalize a :=
+lemma polynomial.radical_prime_pow {a : k[X]} (ha: prime a)
+  {n : ℕ} (hn : 0 < n): (a^n).radical = normalize a :=
 begin
   rw (a.radical_pow hn),
   exact (polynomial.radical_prime ha),
