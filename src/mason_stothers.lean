@@ -16,6 +16,7 @@ import algebra.group_power.basic
 import algebra.char_p.basic
 import init.data.nat.lemmas
 import order.with_bot
+import algebra.order.smul
 
 noncomputable theory
 
@@ -721,10 +722,11 @@ end
 protected lemma nat.with_bot.smul_max 
   {n : ℕ} {a b : with_bot ℕ} : n • max a b = max (n • a) (n • b) :=
 begin
-  apply le_antisymm,
-  rw [nsmul_eq_mul, le_max_iff, ←nsmul_eq_mul],
-  sorry,
-  sorry,
+  apply eq.symm,
+  rw max_eq_iff,
+  rcases max_cases a b with ⟨eqn, ba⟩ | ⟨eqn, ab⟩,
+  left, rw eqn, refine ⟨rfl, _⟩, exact nat.with_bot.smul_le_smul ba,
+  right, rw eqn, refine ⟨rfl, _⟩, exact nat.with_bot.smul_le_smul (le_of_lt ab),
 end
 
 theorem poly_flt_char_zero (a b c : k[X]) (n : ℕ) (chz : ring_char k = 0) (hn: 3 ≤ n) (hsum: a^n + b^n + c^n = 0) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hab : is_coprime a b) (hbc : is_coprime b c) (hca : is_coprime c a) : (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
@@ -739,49 +741,46 @@ begin
 
   have np : n > 0 := by linarith,
 
-  have hdeg_1 := poly_abc_max_ver (a^n) (b^n) (c^n) chz hap hbp hcp hsum habp hbcp hcap,
-  set md := (max (max a.degree b.degree) c.degree),
+  by_contra ngoal,
+
   have hdeg_2 : n • (max (max a.degree b.degree) c.degree) < n • (max (max a.degree b.degree) c.degree) :=
   begin
     calc n • (max (max a.degree b.degree) c.degree) = max (n • (max a.degree b.degree)) (n • c.degree) : by rw nat.with_bot.smul_max
     ... = max (max (n • a.degree) (n • b.degree)) (n • c.degree) : by rw nat.with_bot.smul_max
     ... = max (max (a^n).degree (b^n).degree) (c^n).degree : by simp only [polynomial.degree_pow]
-    ... < (poly_rad (a^n * b^n * c^n)).degree : hdeg_1
+    ... < (poly_rad (a^n * b^n * c^n)).degree : _
     ... = (poly_rad ((a*b*c)^n)).degree : by rw [mul_pow, mul_pow]
     ... = (poly_rad (a*b*c)).degree : by rw poly_rad_pow (a*b*c) np
     ... ≤ (a*b*c).degree : poly_rad_deg_le_deg (by simp only [ne.def, mul_eq_zero]; tauto)
     ... = a.degree + b.degree + c.degree : by simp only [degree_mul]
-    ... ≤ 3 • (max (max a.degree b.degree) c.degree) : _,
-    set m := max (max a.degree b.degree) c.degree with def_m,
-    have eq_3m : 3 • m = m + m + m := begin
+    ... ≤ 3 • (max (max a.degree b.degree) c.degree) : _
+    ... ≤ n • (max (max a.degree b.degree) c.degree) : _,
+    { have hdeg_1 := poly_abc_max_ver (a^n) (b^n) (c^n) 
+        chz hap hbp hcp hsum habp hbcp hcap,
+      apply hdeg_1, intro h, apply ngoal,
+      refine ⟨_, _, _⟩;
+      { apply char_ndvd_pow_deriv _ np; try {assumption},
+        rw chz, simp, linarith, tauto, }, },
+    { set m := max (max a.degree b.degree) c.degree with def_m,
+      have eq_3m : 3 • m = m + m + m := begin
+        rw (show 3 = 2 + 1, by refl),
+        rw [add_smul, two_smul, one_smul],
+      end,
+      rw eq_3m,
+      apply nat.with_bot.add_le_add,
+      apply nat.with_bot.add_le_add,
+      { rw def_m, apply le_max_of_le_left _,
+        exact le_max_left _ _ }, 
+      { rw def_m, apply le_max_of_le_left _,
+        exact le_max_right _ _ },
+      { exact le_max_right _ _ }, },
+    { set m := max (max a.degree b.degree) c.degree with def_m,
+      cases le_or_lt 0 m with h h,
+      exact nsmul_le_nsmul h hn,
+      rw nat.with_bot.lt_zero_iff _ at h, rw h,
       rw (show 3 = 2 + 1, by refl),
-      rw [add_smul, two_smul, one_smul],
-    end,
-    rw eq_3m,
-    apply nat.with_bot.add_le_add,
-    apply nat.with_bot.add_le_add,
-    { rw def_m, apply le_max_of_le_left _,
-      exact le_max_left _ _ }, 
-    { rw def_m, apply le_max_of_le_left _,
-      exact le_max_right _ _ },
-    { exact le_max_right _ _ },
+      rw [add_smul, two_smul, one_smul], simp, },
   end,
-  have hdeg_3 : md < md :=
-  begin
-    sorry,
-  end
-
-  -- have hdeg : (poly_rad (a^n * b^n * c^n)).degree ≤ (a^n).degree :=
-  -- begin
-  --   sorry,
-  -- end,
-
-  -- have pd := poly_abc (a^n) (b^n) (c^n) hsum hap hbp hcp habp hbcp hcap hdeg,
-  -- cases pd with apd bpd,
-  -- cases bpd with bpd cpd,
-  -- have adnz := char_ndvd_pow_deriv ha np chn apd,
-  -- have bdnz := char_ndvd_pow_deriv hb np chn bpd,
-  -- have cdnz := char_ndvd_pow_deriv hc np chn cpd,
-  -- tauto,
+  exfalso, exact (eq.not_lt (eq.refl _)) hdeg_2,
 end
 
