@@ -684,7 +684,7 @@ begin
     ... < (poly_rad (a^n * b^n * c^n)).degree : hdeg_1
     ... = (poly_rad ((a*b*c)^n)).degree : sorry
     ... = (poly_rad (a*b*c)).degree : by rw poly_rad_pow (a*b*c) np
-    ... ≤ (a*b*c).degree : poly_rad_deg_le_deg (a*b*c)
+    ... ≤ (a*b*c).degree : poly_rad_deg_le_deg (by simp only [ne.def, mul_eq_zero]; tauto)
     ... = a.degree + b.degree + c.degree : sorry
     ... ≤ 3 • (max (max a.degree b.degree) c.degree) : sorry,
   end,
