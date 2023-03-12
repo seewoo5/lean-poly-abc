@@ -65,7 +65,7 @@ begin
   rw ← wronskian_anticomm,
 end
 
-lemma polynomial.degree_ne_bot {a : k[X]} (ha : a ≠ 0) : a.degree ≠ ⊥ :=
+private lemma degree_ne_bot {a : k[X]} (ha : a ≠ 0) : a.degree ≠ ⊥ :=
   by intro h; rw polynomial.degree_eq_bot at h; exact ha h
 
 lemma wronskian.degree_lt_add {a b : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) : 
@@ -76,19 +76,8 @@ begin
       polynomial.degree_sub_le _ _
     ... < a.degree + b.degree : _,
   rw max_lt_iff, split; rw degree_mul,
-  { rw with_bot.add_lt_add_iff_left (polynomial.degree_ne_bot ha),
+  { rw with_bot.add_lt_add_iff_left (degree_ne_bot ha),
     exact polynomial.degree_derivative_lt hb, },
-  { rw with_bot.add_lt_add_iff_right (polynomial.degree_ne_bot hb),
+  { rw with_bot.add_lt_add_iff_right (degree_ne_bot hb),
     exact polynomial.degree_derivative_lt ha, },
 end
-
-lemma prime_factors_pow (a: k[X]) {n: ℕ} (hn: n > 0) : 
-  prime_factors (a^n) = prime_factors a :=
-begin
-  simp_rw prime_factors,
-  simp only [normalized_factors_pow],
-  apply finset.ext,
-  intro x,
-  simp only [multiset.mem_to_finset],
-  rw multiset.mem_nsmul _,
-  exact ne_of_gt hn,
