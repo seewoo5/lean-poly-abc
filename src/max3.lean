@@ -1,10 +1,4 @@
-import tactic.simp_rw
 import data.nat.order.basic
-import order.min_max
-import algebra.group.defs
-import algebra.order.ring.defs
-import algebra.order.monoid.defs
-import algebra.order.monoid.min_max
 
 -- Utility library for three maxes of ℕ
 
@@ -45,4 +39,4 @@ begin
   apply nat.add_le_add _ (le_max3_third _ _ _),
   apply nat.add_le_add _ (le_max3_second _ _ _),
   exact le_max3_first _ _ _,
-end 
+end
