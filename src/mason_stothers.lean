@@ -1,22 +1,4 @@
-import data.polynomial.basic
-import data.finset.basic
-import data.multiset.basic
--- import order.disjoint
-import data.polynomial.derivative
-import ring_theory.polynomial.content
-import ring_theory.unique_factorization_domain
-import ring_theory.euclidean_domain
--- import ring_theory.principal_ideal_domain
-import algebra.divisibility.units
-import algebra.divisibility.basic
-import algebra.associated
-import algebra.big_operators.multiset.basic
-import algebra.group.basic
-import algebra.group_power.basic
 import algebra.char_p.basic
-import init.data.nat.lemmas
-import order.with_bot
-import algebra.order.smul
 
 import wronskian
 import div_radical
@@ -30,7 +12,6 @@ open unique_factorization_monoid
 
 variables {k: Type*} [field k]
 
--- TODO: doesn't compile - restructuring in progress!
 
 @[simp]
 lemma dvd_derivative_iff {a : k[X]} : 
@@ -216,6 +197,10 @@ end
 private lemma rot3_add {a b c : k[X]} : a + b + c = b + c + a := by ring_nf
 private lemma rot3_mul {a b c : k[X]} : a * b * c = b * c * a := by ring_nf
 
+/- Alternative version with maximum of degrees.
+Corollary 2.1.5 of Franz's note.
+Here we need an assumption that their derivatives are not all zero - otherwise the statement itself is false as stated.
+-/
 theorem polynomial.abc_max3 (chn : ring_char k = 0) 
   {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) 
   (hab : is_coprime a b) (hbc : is_coprime b c) (hca : is_coprime c a) 
@@ -235,23 +220,25 @@ begin
 end
 
 /- FLT for polynomials
-
-For coprime polynomials a, b, c satisfying a^n + b^n + c^n = 0, n ≥ 3 then a, b, c are all constant.
+For coprime polynomials a, b, c satisfying a^n + b^n + c^n = 0, n ≥ 3 then a, b, c are all constant (i.e. all of their derivatives are zero).
 (We assume that the characteristic of the field is zero. In fact, the theorem is true when the characteristic does not divide n.)
 
-Proof) Apply ABC for polynomials with triple (a^n, b^n, c^n):
+Proof)
+1. Assume that at least one of a, b, and c has nonzero derivative.
+2. For the corresponding polynomial (let's say, a), characteristic zero assumption implies that the derivative of its power (let's say, a^n) is also nonzero.
+3. Apply ABC for polynomials `poly_abc_max_ver` with triple (a^n, b^n, c^n) to get an inequality max(deg a^n, deg b^n, deg c^n) < deg rad(a^n*b^n*c^n).
+4. Use properties of degree `degree_pow`, `rad_pow`, and the assumption `3 ≤ n` to deduce a contradiction.
 
--> max (deg a^n, deg b^n, deg c^n) = n * max (deg a, deg b, deg c) + 1
-≤ deg (rad (a^n * b^n * c^n)) 
+-> n * max (deg a, deg b, deg c) = max (deg a^n, deg b^n, deg c^n)
+< deg (rad (a^n * b^n * c^n)) 
 ≤ deg (rad (a * b * c))
 ≤ deg (abc)
 ≤ deg a + deg b + deg c
 ≤ 3 * max (deg a, deg b, deg c)
-
-and from n ≥ 3, we should have max (deg a, deg b, deg c) = ⟂, i.e. at least one of a, b, c is zero.
-
+≤ n * max (deg a, deg b, deg c)
 -/
 
+-- (a^n)' = 0 → a' = 0 when char(k) ∤ n.
 lemma char_ndvd_pow_deriv {a : k[X]} (n : ℕ) (ha : a ≠ 0) 
   (hn : n > 0) (chn : ¬(ring_char k ∣ n))
   (apd : (a^n).derivative = 0) : a.derivative = 0 :=
@@ -320,4 +307,3 @@ begin
   end,
   exfalso, exact (eq.not_lt (eq.refl _)) hdeg_2,
 end
-
