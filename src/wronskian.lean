@@ -1,28 +1,10 @@
-import data.polynomial.basic
-import data.finset.basic
-import data.multiset.basic
--- import order.disjoint
-import data.polynomial.derivative
 import ring_theory.polynomial.content
-import ring_theory.unique_factorization_domain
-import ring_theory.euclidean_domain
--- import ring_theory.principal_ideal_domain
-import algebra.divisibility.units
-import algebra.divisibility.basic
-import algebra.associated
-import algebra.big_operators.multiset.basic
-import algebra.group.basic
-import algebra.group_power.basic
-import algebra.char_p.basic
-import init.data.nat.lemmas
-import order.with_bot
-import algebra.order.smul
+
 
 noncomputable theory
 open_locale polynomial classical
 
 open polynomial
-open unique_factorization_monoid
 
 variables {k: Type*} [field k]
 

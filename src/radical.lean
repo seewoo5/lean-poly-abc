@@ -1,22 +1,5 @@
-import data.polynomial.basic
-import data.finset.basic
-import data.multiset.basic
--- import order.disjoint
-import data.polynomial.derivative
 import ring_theory.polynomial.content
-import ring_theory.unique_factorization_domain
-import ring_theory.euclidean_domain
--- import ring_theory.principal_ideal_domain
-import algebra.divisibility.units
-import algebra.divisibility.basic
-import algebra.associated
-import algebra.big_operators.multiset.basic
-import algebra.group.basic
-import algebra.group_power.basic
-import algebra.char_p.basic
-import init.data.nat.lemmas
-import order.with_bot
-import algebra.order.smul
+
 
 noncomputable theory
 open_locale polynomial classical
@@ -147,38 +130,6 @@ begin
   rw (a.radical_pow hn),
   exact (polynomial.radical_prime ha),
 end
-
-/- `poly_rad_deg_le_deg` deg(rad(a)) ≤ deg(a)
-
-Proof)
-a = Product of all (factors a)
-
-Fact 1.
-deg (Product of a_1, a_2, ..., a_n) = Sum (deg a_1), deg a_2, ....
-
-> polynomial.degree_prod
-
-Fact 2. A : multiset is a subset (le) of B : multiset
--> sum A <= sum B
-
-Fact 2-1. B = A ⊔ (B ∖ A)
-Fact 2-2. sum B = sum (A ⊔ (B \ A)) = sum A + sum (B \ A)
-Fact 2-3. sum (B \ A) : ℕ 
-Fact 2-4. a = b + c in ℕ -> a ≥ b
-
-> multiset.le
-
-Fact 3. 
-  (poly_rad a).deg = (Product of all (factors a).to_finset).deg
-    = Sum (factors a).to_finset  <- Fact 1
-  
-  a.deg = (Product of all (factors a)).deg
-    = Sum (factors a)  <- Fact 1
-
-  Goal : Sum (factors a).to_finset <= Sum (factors a)
-    (factors a).to_finset is a subset of (factors a)
-  
--/
 
 lemma polynomial.radical_degree_le {a: k[X]} (ha : a ≠ 0) : 
   a.radical.degree ≤ a.degree :=
