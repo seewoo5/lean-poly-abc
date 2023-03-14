@@ -16,17 +16,19 @@ For this one should use UFDness of $k[X]$. Factor $f$ into multiplications of pr
 
 We factor out a part of the main proof.
 
-> __Lemma [wronskian-zero].__ If $a, b, c \in k[X]$ are nonzero and $a + b + c = 0$ and they are coprime to each other, then $W = W(a, b)$ is zero if and only if $a'=b'=c'=0$. ^lem-wronskian-zero
+> __Lemma [wronskian-zero].__ If $a, b \in k[X]$ are nonzero and coprime to each other, then $W = W(a, b)$ is zero if and only if $a'=b'=0$. ^lem-wronskian-zero
 
-_Proof._ If $a'=b'=c'=0$ then it is evident that $W = 0$.
-We now assume $W = 0$ and show $a'=b'=c'=0$.
+_Proof._ If $a'=b'=0$ then it is evident that $W = 0$.
+We now assume $W = 0$ and show $a'=b'=0$.
 
 As $W(a, b) = 0$ we have $ab' = a'b$. As $b$ divides $ab'$, it also divides $b'$.
-Now if $b'$ is not zero, then the degree of $b'$ is strictly less than $b$ so we get a contradiction. So $b' = 0$. By a similar argument we also get $a' = 0$ with $W(a, b) = 0$, and use [[#^lem-wronskian-eq]] to get $c' = 0$ from $W = W(b, c) = 0$ as well. □
+Now if $b'$ is not zero, then the degree of $b'$ is strictly less than $b$ so we get a contradiction. So $b' = 0$. By a similar argument we also get $a' = 0$ with $W(a, b) = 0$. □
 
 _Proof._ (of [[#^thm-mason]]) We have $W = W(a, b) = W(b, c)$ by [[#^lem-wronskian-eq]]. And $a/\text{rad }a, b/\text{rad }b, c/\text{rad }c$ all divide $W$. Then, $a b c / \text{rad }(a b c)$ divides $W$ because $a/\text{rad }a, b/\text{rad }b, c/\text{rad }c$ are all coprime (informal note: This is the key step. $W$ is too good that it is divisible by all the factors, but has a small degree from its formula).
 
-By [[#^lem-wronskian-zero]] it is sufficient to show $\text{max}(\text{deg } a, \text{deg }b, \text{deg }c) < \text{deg} (\text{rad } a b c)$ assuming $W \neq 0$.
+We divide the case into whether $W = 0$ or not. 
+If $W = W(a, b) = W(b, c)$ is zero, then by [[#^lem-wronskian-zero]] we have $a' = b' = c' = 0$.
+So assume otherwise that $W \neq 0$.
 As $W$ is nonzero, $W = W(a, b) = a b' - a' b$ has degree $< \text{deg }a + \text{deg }b$ (note that this requires case analysis on whether $a'=0$ or $b' = 0$ or not for an exact treatment). Now $\text{deg }\left( a b c / \text{rad }(a b c) \right) < \text{deg }a + \text{deg }b$. 
 Arranging terms then gives $\text{deg }(a) + \text{deg }(b) + \text{deg }(c) < \text{deg }a+\text{deg }b + \text{deg }\left( \text{rad }(a b c) \right)$ or $\text{deg }(c) < \text{deg }\left( \text{rad }(a b c) \right)$. The argument is symmetric, so applying the argument by rotation shows the other inequalities $\text{deg }(a) < \text{deg }\left( \text{rad }(a b c) \right)$ and $\text{deg }(b) < \text{deg }\left( \text{rad }(a b c) \right)$. Taking the max gives the desired inequality $\text{max}(\text{deg } a, \text{deg }b, \text{deg }c) < \text{deg} (\text{rad } a b c)$. □
 
