@@ -1,4 +1,5 @@
 import algebra.char_p.basic
+import algebra.euclidean_domain.defs
 
 import wronskian
 import div_radical
@@ -11,7 +12,6 @@ open polynomial
 open unique_factorization_monoid
 
 variables {k: Type*} [field k]
-
 
 @[simp]
 lemma dvd_derivative_iff {a : k[X]} : 
@@ -74,10 +74,46 @@ begin
   exact h.of_mul_left_right.of_mul_right_right,
 end
 
-theorem polynomial.abc {a b c : k[X]}
+private lemma abc_subcall {a b c w : k[X]}
+  {hw : w ≠ 0} (wab : w = wronskian a b)
   (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
   (hab: is_coprime a b) (hbc: is_coprime b c) (hca: is_coprime c a)
-  (hsum: a + b + c = 0) (hdeg : (a * b * c).radical.degree ≤ a.degree) : 
+  (abc_dr_dvd_w : (a*b*c).div_radical ∣ w) : 
+    c.nat_degree < (a*b*c).radical.nat_degree :=
+begin
+  have hab := mul_ne_zero ha hb,
+  have habc := mul_ne_zero hab hc,
+
+  set abc_dr_nd := (a*b*c).div_radical.nat_degree with def_abc_dr_nd,
+  set abc_r_nd := (a*b*c).radical.nat_degree with def_abc_r_nd,
+  have t11 : abc_dr_nd < a.nat_degree + b.nat_degree := by calc
+    abc_dr_nd ≤ w.nat_degree : 
+        polynomial.nat_degree_le_of_dvd abc_dr_dvd_w hw
+    ... < a.nat_degree + b.nat_degree :
+        by rw wab at hw ⊢; exact wronskian.nat_degree_lt_add hw,
+  have t4 : abc_dr_nd + abc_r_nd < a.nat_degree + b.nat_degree + abc_r_nd :=
+    nat.add_lt_add_right t11 abc_r_nd,
+  have t3 : abc_dr_nd + abc_r_nd = a.nat_degree + b.nat_degree + c.nat_degree := by calc
+    abc_dr_nd + abc_r_nd = ((a*b*c).div_radical * (a*b*c).radical).nat_degree : 
+      by rw ←polynomial.nat_degree_mul
+        (polynomial.div_radical_ne_zero habc)
+        (a*b*c).radical_ne_zero
+    ... = (a*b*c).nat_degree :
+      by rw mul_comm _ (polynomial.radical _);
+         rw polynomial.mul_radical_div_radical habc
+    ... = a.nat_degree + b.nat_degree + c.nat_degree :
+      by rw [polynomial.nat_degree_mul hab hc, polynomial.nat_degree_mul ha hb],
+  rw t3 at t4,
+  exact nat.lt_of_add_lt_add_left t4,
+end
+
+private lemma rot3_add {a b c : k[X]} : a + b + c = b + c + a := by ring_nf
+private lemma rot3_mul {a b c : k[X]} : a * b * c = b * c * a := by ring_nf
+
+theorem polynomial.abc {a b c : k[X]}
+  (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
+  (hab: is_coprime a b) (hbc: is_coprime b c) (hca: is_coprime c a) (hsum: a + b + c = 0) : 
+    (max3 a.nat_degree b.nat_degree c.nat_degree < (a*b*c).radical.nat_degree) ∨
     (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
 begin
   -- Utility assertions
@@ -85,138 +121,43 @@ begin
   have hab_nz : a * b ≠ 0 := mul_ne_zero ha hb,
   have habc_nz : a * b * c ≠ 0 := mul_ne_zero hab_nz hc,
 
-  have ndeg_eq_a := polynomial.degree_eq_nat_degree ha,
-  have ndeg_eq_b := polynomial.degree_eq_nat_degree hb,
-  have ndeg_eq_c := polynomial.degree_eq_nat_degree hc,
-
-  have abc_dr_nz := polynomial.div_radical_ne_zero habc_nz,
-  have ndeg_eq_abc_dr := polynomial.degree_eq_nat_degree abc_dr_nz,
-
-  -- conversion to .nat_degree
-  have hndeg : (a * b * c).radical.nat_degree ≤ a.nat_degree := begin
-    have h := (a * b * c).radical_ne_zero,
-    have heq := polynomial.degree_eq_nat_degree h,
-    rw [heq, ndeg_eq_a] at hdeg,
-    simp only [with_bot.coe_le_coe] at hdeg, exact hdeg,
-  end,
-
-  -- Step 1 & 2
   have wbc := wronskian_eq_of_sum_zero hsum,
-  have ara_dvd_w := a.div_radical_dvd_wronskian_left b,
-  have brb_dvd_w := a.div_radical_dvd_wronskian_right b,
-  have crc_dvd_w := b.div_radical_dvd_wronskian_right c,
   set w := wronskian a b with wab,
-  rw ←wbc at crc_dvd_w,
-  
-  -- Step 3
-  have abc_dvd_w : (a*b*c).div_radical ∣ w := begin
-    have abc_eq : (a*b*c).div_radical = 
-      a.div_radical * b.div_radical * c.div_radical := begin
-      rw ←polynomial.div_radical_mul ha hb hab,
-      rw ←polynomial.div_radical_mul hab_nz hc _,
-      exact hca.symm.mul_left hbc,
-    end,
-    rw abc_eq,
-    have hab_dr := hab.div_radical ha hb,
-    have hbc_dr := hbc.div_radical hb hc,
-    have hca_dr := hca.div_radical hc ha,
-    have h_coprime := hca_dr.symm.mul_left hbc_dr,
-    apply h_coprime.mul_dvd _ crc_dvd_w,
-    exact hab_dr.mul_dvd ara_dvd_w brb_dvd_w,
+  have wca : w = wronskian c a := sorry,
+  have abc_dr_dvd_w : (a*b*c).div_radical ∣ w := begin
+    have adr_dvd_w := a.div_radical_dvd_wronskian_left b,
+    have bdr_dvd_w := a.div_radical_dvd_wronskian_right b,
+    have cdr_dvd_w := b.div_radical_dvd_wronskian_right c,
+    rw ←wab at adr_dvd_w bdr_dvd_w, 
+    rw ←wbc at cdr_dvd_w,
+
+    have cop_ab_dr := hab.div_radical ha hb,
+    have cop_bc_dr := hbc.div_radical hb hc,
+    have cop_ca_dr := hca.div_radical hc ha,
+    have cop_abc_dr := cop_ca_dr.symm.mul_left cop_bc_dr,
+    have abdr_dvd_w := cop_ab_dr.mul_dvd adr_dvd_w bdr_dvd_w,
+    have abcdr_dvd_w := cop_abc_dr.mul_dvd abdr_dvd_w cdr_dvd_w,
+
+    convert abcdr_dvd_w,
+
+    rw ←polynomial.div_radical_mul ha hb hab,
+    rw ←polynomial.div_radical_mul hab_nz hc _,
+    exact hca.symm.mul_left hbc,
   end,
 
-  -- Step 4
-  -- We use polynomial.nat_degree : ℕ in place of polynomial.degree : with_bot ℕ for 
-  -- ease of computation and avoiding lack of lemmas
-  have deg_comp_1 : a.nat_degree + b.nat_degree + c.nat_degree ≤ 
-    a.nat_degree + (a*b*c).div_radical.nat_degree := by
-    calc a.nat_degree + b.nat_degree + c.nat_degree = (a*b*c).nat_degree : 
-      by rw [nat_degree_mul hab_nz hc, nat_degree_mul ha hb]
-    ... = ((a*b*c).radical * (a*b*c).div_radical).nat_degree : 
-      by rw polynomial.mul_radical_div_radical habc_nz
-    ... = (a*b*c).radical.nat_degree + (a*b*c).div_radical.nat_degree : 
-      nat_degree_mul (a*b*c).radical_ne_zero abc_dr_nz
-    ... ≤ a.nat_degree + (a*b*c).div_radical.nat_degree : add_le_add_right hndeg _,
-  have deg_comp_2 : b.nat_degree + c.nat_degree ≤ (a*b*c).div_radical.nat_degree := begin
-    apply @nat.le_of_add_le_add_left a.nat_degree,
-    rw ←add_assoc, exact deg_comp_1,
-  end,
-  -- revert to .degree - this is false in .nat_degree
-  have deg_comp_3 : w.degree < (a*b*c).div_radical.degree :=
-  begin
-    have ineq := wronskian.degree_lt_add hb hc,
-    rw ←wbc at ineq,
-    apply ineq.trans_le,
-    rw [ndeg_eq_b, ndeg_eq_c, ndeg_eq_abc_dr],
-    rw [←with_bot.coe_add, with_bot.coe_le_coe],
-    exact deg_comp_2,
-  end,
-  have w_z : w = 0 := begin
-    by_contra w_nz,
-    have t := degree_le_of_dvd abc_dvd_w w_nz,
-    have wf : w.degree < w.degree := begin
-      calc w.degree < (a*b*c).div_radical.degree : deg_comp_3
-      ... ≤ w.degree : t
-    end,
-    simp only [lt_self_iff_false] at wf,
-    exact wf,
-  end,
-  cases (hab.wronskian_eq_zero_iff.mp w_z) with daz dbz,
-  refine ⟨daz, dbz, _⟩,
-  rw wbc at w_z,
-  cases (hbc.wronskian_eq_zero_iff.mp w_z) with _ dcz,
-  exact dcz,
-end
-
-theorem polynomial.abc_contra {a b c : k[X]}
-  (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
-  (hab: is_coprime a b) (hbc: is_coprime b c) (hca: is_coprime c a)
-  (hsum: a + b + c = 0)
-  (hnderiv : ¬(a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0)) : 
-  a.degree < (a * b * c).radical.degree :=
-begin
-  cases lt_or_le a.degree (a * b * c).radical.degree with h h,
-  { exact h, },
-  { exfalso, apply hnderiv, apply polynomial.abc; assumption },
-end
-
-theorem polynomial.abc_contra_nat {a b c : k[X]}
-  (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
-  (hab: is_coprime a b) (hbc: is_coprime b c) (hca: is_coprime c a)
-  (hsum: a + b + c = 0)
-  (hnderiv : ¬(a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0)) : 
-  a.nat_degree < (a * b * c).radical.nat_degree :=
-begin
-  rw ←with_bot.coe_lt_coe,
-  rw [←polynomial.degree_eq_nat_degree ha,
-      ←polynomial.degree_eq_nat_degree _],
-  apply polynomial.abc_contra; assumption,
-  exact (a * b * c).radical_ne_zero,
-end
-
-private lemma rot3_add {a b c : k[X]} : a + b + c = b + c + a := by ring_nf
-private lemma rot3_mul {a b c : k[X]} : a * b * c = b * c * a := by ring_nf
-
-/- Alternative version with maximum of degrees.
-Corollary 2.1.5 of Franz's note.
-Here we need an assumption that their derivatives are not all zero - otherwise the statement itself is false as stated.
--/
-theorem polynomial.abc_max3 (chn : ring_char k = 0) 
-  {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) 
-  (hab : is_coprime a b) (hbc : is_coprime b c) (hca : is_coprime c a) 
-  (hsum : a + b + c = 0) 
-  (hnderiv : ¬(a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0)) : 
-  max3 a.nat_degree b.nat_degree c.nat_degree < (a*b*c).radical.nat_degree :=
-begin
-  have hadeg : a.nat_degree < (a*b*c).radical.nat_degree :=
-    by apply polynomial.abc_contra_nat; assumption,
-  have hbdeg : b.nat_degree < (a*b*c).radical.nat_degree :=
-    by rw rot3_add at hsum; rw rot3_mul; 
-       apply polynomial.abc_contra_nat; try {assumption}; tauto,
-  have hcdeg : c.nat_degree < (a*b*c).radical.nat_degree :=
-    by rw [rot3_add, rot3_add] at hsum; rw [rot3_mul, rot3_mul]; 
-       apply polynomial.abc_contra_nat; try {assumption}; tauto,
-  rw max3_lt_iff, refine ⟨hadeg, hbdeg, hcdeg⟩, 
+  by_cases hw : w = 0,
+  { right,
+    rw hw at wab wbc,
+    cases hab.wronskian_eq_zero_iff.mp wab.symm with ga gb,
+    cases hbc.wronskian_eq_zero_iff.mp wbc.symm with _ gc,
+    refine ⟨ga, gb, gc⟩, },
+  { left, rw max3_lt_iff,
+    refine ⟨_, _, _⟩,
+    { rw rot3_mul at ⊢ abc_dr_dvd_w,
+      apply abc_subcall wbc; assumption, },
+    { rw [rot3_mul, rot3_mul] at ⊢ abc_dr_dvd_w,
+      apply abc_subcall wca; assumption, },
+    { apply abc_subcall wab; assumption, }, },
 end
 
 /- FLT for polynomials
@@ -239,71 +180,91 @@ Proof)
 -/
 
 -- (a^n)' = 0 → a' = 0 when char(k) ∤ n.
-lemma char_ndvd_pow_deriv {a : k[X]} (n : ℕ) (ha : a ≠ 0) 
-  (hn : n > 0) (chn : ¬(ring_char k ∣ n))
-  (apd : (a^n).derivative = 0) : a.derivative = 0 :=
+lemma pow_derivative_eq_zero 
+  {n : ℕ} (chn : ¬(ring_char k ∣ n))
+  {a : k[X]} (ha : a ≠ 0) :
+  (a^n).derivative = 0 ↔ a.derivative = 0 :=
 begin
-  rw derivative_pow at apd,
-  have pnz : a^(n-1) ≠ 0 := pow_ne_zero (n-1) ha,
-  have cn_neq_zero : (polynomial.C (↑n : k)) ≠ 0 :=
-  begin
-    simp only [polynomial.C_eq_zero, ne.def],
-    intro cn_eq_zero,
-    have cdvd := ring_char.dvd cn_eq_zero,
-    tauto,
-  end,
-  simp at apd,
-  tauto,
+  split,
+  { intro apd,
+    rw derivative_pow at apd,
+    simp only [C_eq_nat_cast, mul_eq_zero] at apd,
+    have pnz : a^(n-1) ≠ 0 := pow_ne_zero (n-1) ha,
+    have cn_neq_zero : (↑(↑n : k) : k[X]) ≠ 0 := begin
+      simp only [polynomial.C_eq_zero, ne.def,
+        algebra_map.lift_map_eq_zero_iff],
+      intro cn_eq_zero,
+      exact chn (ring_char.dvd cn_eq_zero),
+    end,
+    tauto, },
+  { intro hd, rw derivative_pow, rw hd, 
+    simp only [mul_zero], },
 end
 
-theorem polynomial.flt (chz : ring_char k = 0) 
+theorem polynomial.flt
+  {n : ℕ} (hn : 3 ≤ n) (chn : ¬(ring_char k ∣ n))
   {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
   (hab : is_coprime a b) (hbc : is_coprime b c) (hca : is_coprime c a)
-  {n : ℕ} (hn: 3 ≤ n) (hsum: a^n + b^n + c^n = 0)  : 
+  (heq: a^n + b^n = c^n) : 
   (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
 begin
   have hap : a^n ≠ 0 := pow_ne_zero _ ha,
   have hbp : b^n ≠ 0 := pow_ne_zero _ hb,
-  have hcp : c^n ≠ 0 := pow_ne_zero _ hc,
+  have hcp : -c^n ≠ 0 := neg_ne_zero.mpr (pow_ne_zero _ hc),
 
   have habp : is_coprime (a^n) (b^n) := is_coprime.pow hab,
-  have hbcp : is_coprime (b^n) (c^n) := is_coprime.pow hbc,
-  have hcap : is_coprime (c^n) (a^n) := is_coprime.pow hca,
+  have hbcp : is_coprime (b^n) (-c^n) := (is_coprime.pow hbc).neg_right,
+  have hcap : is_coprime (-c^n) (a^n) := (is_coprime.pow hca).neg_left,
 
-  have np : 1 ≤ n := le_trans (by dec_trivial) hn,
+  rw ←add_neg_eq_zero at heq,
 
-  by_contra ngoal,
+  cases (polynomial.abc hap hbp hcp habp hbcp hcap heq) with ineq dr0,
+  { exfalso,
+    simp only [polynomial.nat_degree_neg,
+      polynomial.nat_degree_pow] at ineq,
+    have simp1 : a^n * b^n * -c^n = -(a*b*c)^n :=
+      by rw [mul_pow, mul_pow, mul_neg],
+    rw [simp1, max3_mul_left _ _ _ _] at ineq, clear simp1,
+    rw polynomial.radical_neg at ineq,
+    have np : 1 ≤ n := le_trans (by dec_trivial) hn,
+    rw (a*b*c).radical_pow np at ineq, clear np,
+    sorry, },
+  { rw [polynomial.derivative_neg, neg_eq_zero] at dr0,
+    rw [pow_derivative_eq_zero chn ha,
+        pow_derivative_eq_zero chn hb,
+        pow_derivative_eq_zero chn hc] at dr0,
+    exact dr0 },
 
-  have hdeg_2 : 
-    n * max3 a.nat_degree b.nat_degree c.nat_degree < 
-    n * max3 a.nat_degree b.nat_degree c.nat_degree :=
-  begin
-    calc n * max3 a.nat_degree b.nat_degree c.nat_degree = 
-      max3 (n*a.nat_degree) (n*b.nat_degree) (n*c.nat_degree) : 
-      by rw max3_mul_left _ _ _ _
-    ... = max3 (a^n).nat_degree (b^n).nat_degree (c^n).nat_degree : 
-      by simp only [polynomial.nat_degree_pow]
-    ... < (a^n * b^n * c^n).radical.nat_degree : begin
-      apply polynomial.abc_max3; try {assumption},
-      -- derivatives of a^n, b^n and c^n are not zero: uses char k = 0
-      intro h, rcases h with ⟨ia, ib, ic⟩,
-      apply ngoal,
-      have hndvd : ¬(ring_char k ∣ n) := by rw chz; simp; linarith,
-      refine ⟨_, _, _⟩; apply char_ndvd_pow_deriv n; assumption,
-    end
-    ... = ((a*b*c)^n).radical.nat_degree : by rw [mul_pow, mul_pow]
-    ... = (a*b*c).radical.nat_degree : by rw (a*b*c).radical_pow np
-    ... ≤ (a*b*c).nat_degree : 
-      polynomial.radical_nat_degree_le (by repeat {apply mul_ne_zero}; assumption)
-    ... = a.nat_degree + b.nat_degree + c.nat_degree : begin
-      rw polynomial.nat_degree_mul _ hc,
-      rw polynomial.nat_degree_mul ha hb,
-      exact mul_ne_zero ha hb,
-    end
-    ... ≤ 3 * max3 a.nat_degree b.nat_degree c.nat_degree : 
-      add3_le_three_mul_max3 _ _ _
-    ... ≤ n * max3 a.nat_degree b.nat_degree c.nat_degree :
-      nat.mul_le_mul_right _ hn
-  end,
-  exfalso, exact (eq.not_lt (eq.refl _)) hdeg_2,
+  -- have hdeg_2 : 
+  --   n * max3 a.nat_degree b.nat_degree c.nat_degree < 
+  --   n * max3 a.nat_degree b.nat_degree c.nat_degree :=
+  -- begin
+  --   calc n * max3 a.nat_degree b.nat_degree c.nat_degree = 
+  --     max3 (n*a.nat_degree) (n*b.nat_degree) (n*c.nat_degree) : 
+  --     by rw max3_mul_left _ _ _ _
+  --   ... = max3 (a^n).nat_degree (b^n).nat_degree (c^n).nat_degree : 
+  --     by simp only [polynomial.nat_degree_pow]
+  --   ... < (a^n * b^n * c^n).radical.nat_degree : begin
+  --     apply polynomial.abc_max3; try {assumption},
+  --     -- derivatives of a^n, b^n and c^n are not zero: uses char k = 0
+  --     intro h, rcases h with ⟨ia, ib, ic⟩,
+  --     apply ngoal,
+  --     have hndvd : ¬(ring_char k ∣ n) := by rw chz; simp; linarith,
+  --     refine ⟨_, _, _⟩; apply char_ndvd_pow_deriv n; assumption,
+  --   end
+  --   ... = ((a*b*c)^n).radical.nat_degree : by rw [mul_pow, mul_pow]
+  --   ... = (a*b*c).radical.nat_degree : by rw (a*b*c).radical_pow np
+  --   ... ≤ (a*b*c).nat_degree : 
+  --     polynomial.radical_nat_degree_le (by repeat {apply mul_ne_zero}; assumption)
+  --   ... = a.nat_degree + b.nat_degree + c.nat_degree : begin
+  --     rw polynomial.nat_degree_mul _ hc,
+  --     rw polynomial.nat_degree_mul ha hb,
+  --     exact mul_ne_zero ha hb,
+  --   end
+  --   ... ≤ 3 * max3 a.nat_degree b.nat_degree c.nat_degree : 
+  --     add3_le_three_mul_max3 _ _ _
+  --   ... ≤ n * max3 a.nat_degree b.nat_degree c.nat_degree :
+  --     nat.mul_le_mul_right _ hn
+  -- end,
+  -- exfalso, exact (eq.not_lt (eq.refl _)) hdeg_2,
 end

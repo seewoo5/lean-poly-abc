@@ -73,3 +73,21 @@ lemma wronskian.nat_degree_lt_add {a b : k[X]}
   (ha : a ≠ 0) (hb : b ≠ 0) : 
   (wronskian a b).nat_degree < a.nat_degree + b.nat_degree := sorry
 -/
+<<<<<<< HEAD
+=======
+
+lemma wronskian.nat_degree_lt_add {a b : k[X]} 
+  (hw : wronskian a b ≠ 0) : 
+  (wronskian a b).nat_degree < a.nat_degree + b.nat_degree :=
+begin
+  have ha : a ≠ 0 := 
+    by intro h; subst h; rw wronskian_zero_left at hw; exact hw rfl,
+  have hb : b ≠ 0 := 
+    by intro h; subst h; rw wronskian_zero_right at hw; exact hw rfl,
+  rw [←with_bot.coe_lt_coe, with_bot.coe_add],
+  convert ←wronskian.degree_lt_add ha hb,
+  exact polynomial.degree_eq_nat_degree hw,
+  exact polynomial.degree_eq_nat_degree ha,
+  exact polynomial.degree_eq_nat_degree hb,
+end
+>>>>>>> bfc2e3a (flt almost done)
