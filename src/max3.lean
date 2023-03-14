@@ -2,6 +2,7 @@ import data.nat.order.basic
 
 -- Utility library for three maxes of ℕ
 
+/-- maximum of three natural numbers. -/
 def max3 (a b c : ℕ) : ℕ := max (max a b) c
 
 theorem max3_mul_left (a b c d : ℕ) :

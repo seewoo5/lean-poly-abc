@@ -8,6 +8,7 @@ open polynomial
 
 variables {k: Type*} [field k]
 
+/-- Wronskian: W(a, b) = ab' - a'b. -/
 def wronskian (a b : k[X]) : k[X] :=
   a * b.derivative - a.derivative * b
 

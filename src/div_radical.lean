@@ -1,6 +1,12 @@
 import radical
 import wronskian
 
+/-
+On `div_radical(a) = a / radical(a)`. The purpose of this file is to prove our "main lemma" that `div_radical(a)` divides `a'` for any nonzero polynomial `a`.
+The proof is based on induction (`unique_factorization_domain.induction_on_coprime`).
+-/
+
+
 noncomputable theory
 open_locale polynomial classical
 
@@ -9,7 +15,7 @@ open unique_factorization_monoid
 
 variables {k: Type*} [field k]
 
--- This is the key to our implementation
+/-- For a given polynomial `a`, `div_radical(a)` is `a` divided by its radical `rad(a)`. This is the key to our implementation. -/
 def polynomial.div_radical (a : k[X]) : k[X] := a / a.radical
 
 lemma polynomial.mul_radical_div_radical {a : k[X]} (ha : a ≠ 0) : 
@@ -44,7 +50,7 @@ begin
   exact eq_u,
 end
 
-lemma eq_div_radical {a x : k[X]} (ha : a ≠ 0) (h : a.radical * x = a) : 
+lemma eq_div_radical {a x : k[X]} (h : a.radical * x = a) :
   x = a.div_radical :=
 begin
   rw polynomial.div_radical,
@@ -57,7 +63,6 @@ lemma polynomial.div_radical_mul {a b : k[X]}
   (a * b).div_radical = a.div_radical * b.div_radical :=
 begin
   symmetry, apply eq_div_radical,
-  { exact mul_ne_zero ha hb },  
   rw polynomial.radical_mul ha hb hc,
   set c := a * b with eq_c,
   rw [←polynomial.mul_radical_div_radical ha, 
