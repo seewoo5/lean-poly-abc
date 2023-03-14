@@ -12,14 +12,15 @@ variables {k: Type*} [field k]
 lemma polynomial.degree_ne_bot {a : k[X]} (ha : a ≠ 0) : a.degree ≠ ⊥ :=
   by intro h; rw polynomial.degree_eq_bot at h; exact ha h
 
--- Radical of polynomial = product of monic (normalized) factors
+/-- Prime factors of a polynomial `a` are monic factors of `a` without duplication. -/
 def prime_factors (a: k[X]) : finset (k[X]) := 
   (normalized_factors a).to_finset
 
+/-- Radical of a polynomial `a` is a product of prime factors of `a`. -/
 protected def polynomial.radical (a: k[X]) : k[X] := 
   (prime_factors a).prod id
 
--- coprime polynomials have disjoint prime factors (as multisets)
+/-- coprime polynomials have disjoint prime factors (as multisets). -/
 lemma is_coprime.disjoint_normalized_factors {a b : k[X]} (hc: is_coprime a b) : 
   (normalized_factors a).disjoint (normalized_factors b):=
 begin
@@ -58,7 +59,7 @@ begin
   rw normalized_factors_mul ha hb, simp,
 end
 
-/- `poly_rad_coprime_mul`
+/-- `poly_rad_coprime_mul`
 
 For any coprime polynomial a and b, rad(a*b) = rad(a) * rad(b)
 
