@@ -52,6 +52,20 @@ begin
   rw [hda, hdb], simp only [mul_zero, zero_mul, sub_self],
 end
 
+/- ABC for polynomials (Mason-Stothers theorem)
+
+For coprime polynomials a, b, c satisfying a + b + c = 0 and deg(a) ≥ deg(rad(abc)), we have a' = b' = c' = 0.
+
+Proof is based on this online note by Franz Lemmermeyer http://www.fen.bilkent.edu.tr/~franz/ag05/ag-02.pdf, which is essentially based on Noah Snyder's proof ("An Alternative Proof of Mason's Theorem"), but slightly different.
+
+1. Show that W(a, b) = W(b, c) = W(c, a) =: W. `wronskian_eq_of_sum_zero`
+2. (a / rad(a)) | W, and same for b and c. `poly_mod_rad_div_diff`
+3. a / rad(a), b / rad(b), c / rad(c) are all coprime, so their product abc / rad(abc) also divides W. `poly_coprime_div_mul_div`
+4. Using the assumption on degrees, deduce that deg (abc / rad(abc)) > deg W.
+5. By `polynomial.degree_le_of_dvd`, W = 0.
+6. Since W(a, b) = ab' - a'b = 0 and a and b are coprime, a' = 0. Similarly we have b' = c' = 0. `coprime_wronskian_eq_zero_const`
+-/
+
 protected lemma is_coprime.div_radical {a b : k[X]} (ha : a ≠ 0) (hb : b ≠ 0)
   (h : is_coprime a b) : is_coprime a.div_radical b.div_radical :=
 begin
