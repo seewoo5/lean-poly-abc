@@ -5,7 +5,7 @@
 
 This is a formalization of the proof of ABC and FLT theorem on polynomials (Mason-Stothers Theorem).
 The proof is based on the [online note] by Franz Lemmermeyer.
-
+See `proof_sketch.md` for details.
 
 
 [online note]: http://www.fen.bilkent.edu.tr/~franz/ag05/ag-02.pdf
