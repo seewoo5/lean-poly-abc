@@ -59,15 +59,23 @@ begin
   rw normalized_factors_mul ha hb, simp,
 end
 
-/-- `poly_rad_coprime_mul`
+-- possible TODO: the proof is unnecessarily long
+@[simp]
+lemma polynomial.radical_neg_one : (-1 : k[X]).radical = 1 :=
+begin
+  have h : is_unit (-1 : k[X]) := is_unit_one.neg,
+  have hnf : normalized_factors (-1 : k[X]) = 0 := begin
+    by_contra hnnf,
+    revert h, rw imp_false,
+    rw ←unique_factorization_monoid.normalized_factors_pos,
+    cases (lt_or_eq_of_le (multiset.zero_le (normalized_factors (-1 : k[X])))) with h0 h1,
+    assumption, rw ←h1 at hnnf, exfalso, exact (hnnf rfl),
+    simp only [ne.def, neg_eq_zero, one_ne_zero, not_false_iff],
+  end,
+  simp_rw [polynomial.radical, prime_factors],
+  rw hnf, simp only [multiset.to_finset_zero, finset.prod_empty],
+end
 
-For any coprime polynomial a and b, rad(a*b) = rad(a) * rad(b)
-
-Proof)
-1. Prime factors of a and Prime factors of b are disjoint. `poly_coprime_disjoint_factors`
-2. Prime factors of a*b equal to the disjoint union of those of a and b. `poly_coprime_mul_prime_factors_disj_union`
-3. By definition of radical, we're done.
--/
 lemma polynomial.radical_mul {a b : k[X]}
   (ha: a ≠ 0) (hb: b ≠ 0) (hc: is_coprime a b) : 
   (a * b).radical = a.radical * b.radical :=
@@ -75,6 +83,18 @@ begin
   simp_rw polynomial.radical,
   rw hc.mul_prime_factors_disj_union ha hb,
   rw finset.prod_disj_union (hc.disjoint_prime_factors),
+end
+
+lemma polynomial.radical_neg {a : k[X]} : 
+  (-a).radical = a.radical :=
+begin
+  by_cases ha : a = 0,
+  { subst ha, simp only [neg_zero], },
+  rw neg_eq_neg_one_mul,
+  have h : is_coprime (-1) a := is_coprime_one_left.neg_left,
+  rw polynomial.radical_mul _ ha h,
+  { rw polynomial.radical_neg_one, simp only [one_mul], },
+  { simp only [ne.def, neg_eq_zero, one_ne_zero, not_false_iff], },
 end
 
 lemma prime_factors_pow (a: k[X]) {n: ℕ} (hn: 1 ≤ n) : 
