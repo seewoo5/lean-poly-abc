@@ -52,20 +52,6 @@ begin
   rw [hda, hdb], simp only [mul_zero, zero_mul, sub_self],
 end
 
-/- ABC for polynomials (Mason-Stothers theorem)
-
-For coprime polynomials a, b, c satisfying a + b + c = 0 and deg(a) ≥ deg(rad(abc)), we have a' = b' = c' = 0.
-
-Proof is based on this online note by Franz Lemmermeyer http://www.fen.bilkent.edu.tr/~franz/ag05/ag-02.pdf, which is essentially based on Noah Snyder's proof ("An Alternative Proof of Mason's Theorem"), but slightly different.
-
-1. Show that W(a, b) = W(b, c) = W(c, a) =: W. `wronskian_eq_of_sum_zero`
-2. (a / rad(a)) | W, and same for b and c. `poly_mod_rad_div_diff`
-3. a / rad(a), b / rad(b), c / rad(c) are all coprime, so their product abc / rad(abc) also divides W. `poly_coprime_div_mul_div`
-4. Using the assumption on degrees, deduce that deg (abc / rad(abc)) > deg W.
-5. By `polynomial.degree_le_of_dvd`, W = 0.
-6. Since W(a, b) = ab' - a'b = 0 and a and b are coprime, a' = 0. Similarly we have b' = c' = 0. `coprime_wronskian_eq_zero_const`
--/
-
 protected lemma is_coprime.div_radical {a b : k[X]} (ha : a ≠ 0) (hb : b ≠ 0)
   (h : is_coprime a b) : is_coprime a.div_radical b.div_radical :=
 begin
@@ -123,7 +109,11 @@ begin
 
   have wbc := wronskian_eq_of_sum_zero hsum,
   set w := wronskian a b with wab,
-  have wca : w = wronskian c a := sorry,
+  have wca : w = wronskian c a := begin
+    rw rot3_add at hsum,
+    have h := wronskian_eq_of_sum_zero hsum,
+    rw ←wbc at h, exact h,
+  end,
   have abc_dr_dvd_w : (a*b*c).div_radical ∣ w := begin
     have adr_dvd_w := a.div_radical_dvd_wronskian_left b,
     have bdr_dvd_w := a.div_radical_dvd_wronskian_right b,
@@ -160,26 +150,6 @@ begin
     { apply abc_subcall wab; assumption, }, },
 end
 
-/- FLT for polynomials
-For coprime polynomials a, b, c satisfying a^n + b^n + c^n = 0, n ≥ 3 then a, b, c are all constant (i.e. all of their derivatives are zero).
-(We assume that the characteristic of the field is zero. In fact, the theorem is true when the characteristic does not divide n.)
-
-Proof)
-1. Assume that at least one of a, b, and c has nonzero derivative.
-2. For the corresponding polynomial (let's say, a), characteristic zero assumption implies that the derivative of its power (let's say, a^n) is also nonzero.
-3. Apply ABC for polynomials `poly_abc_max_ver` with triple (a^n, b^n, c^n) to get an inequality max(deg a^n, deg b^n, deg c^n) < deg rad(a^n*b^n*c^n).
-4. Use properties of degree `degree_pow`, `rad_pow`, and the assumption `3 ≤ n` to deduce a contradiction.
-
--> n * max (deg a, deg b, deg c) = max (deg a^n, deg b^n, deg c^n)
-< deg (rad (a^n * b^n * c^n)) 
-≤ deg (rad (a * b * c))
-≤ deg (abc)
-≤ deg a + deg b + deg c
-≤ 3 * max (deg a, deg b, deg c)
-≤ n * max (deg a, deg b, deg c)
--/
-
--- (a^n)' = 0 → a' = 0 when char(k) ∤ n.
 lemma pow_derivative_eq_zero 
   {n : ℕ} (chn : ¬(ring_char k ∣ n))
   {a : k[X]} (ha : a ≠ 0) :
@@ -228,43 +198,22 @@ begin
     rw polynomial.radical_neg at ineq,
     have np : 1 ≤ n := le_trans (by dec_trivial) hn,
     rw (a*b*c).radical_pow np at ineq, clear np,
-    sorry, },
+    have ineq2 : (a * b * c).radical.nat_degree ≤ 
+      n * max3 a.nat_degree b.nat_degree c.nat_degree := 
+      by calc (a * b * c).radical.nat_degree ≤ (a*b*c).nat_degree : 
+        polynomial.radical_nat_degree_le (mul_ne_zero (mul_ne_zero ha hb) hc)
+      ... = a.nat_degree + b.nat_degree + c.nat_degree : 
+        by rw polynomial.nat_degree_mul (mul_ne_zero ha hb) hc;
+           rw polynomial.nat_degree_mul ha hb
+      ... ≤ 3 * max3 a.nat_degree b.nat_degree c.nat_degree :
+        add3_le_three_mul_max3 _ _ _
+      ... ≤ n * max3 a.nat_degree b.nat_degree c.nat_degree :
+        nat.mul_le_mul_right _ hn,
+    apply eq.not_lt (eq.refl (n * max3 a.nat_degree b.nat_degree c.nat_degree)),
+    exact ineq.trans_le ineq2, },
   { rw [polynomial.derivative_neg, neg_eq_zero] at dr0,
     rw [pow_derivative_eq_zero chn ha,
         pow_derivative_eq_zero chn hb,
         pow_derivative_eq_zero chn hc] at dr0,
     exact dr0 },
-
-  -- have hdeg_2 : 
-  --   n * max3 a.nat_degree b.nat_degree c.nat_degree < 
-  --   n * max3 a.nat_degree b.nat_degree c.nat_degree :=
-  -- begin
-  --   calc n * max3 a.nat_degree b.nat_degree c.nat_degree = 
-  --     max3 (n*a.nat_degree) (n*b.nat_degree) (n*c.nat_degree) : 
-  --     by rw max3_mul_left _ _ _ _
-  --   ... = max3 (a^n).nat_degree (b^n).nat_degree (c^n).nat_degree : 
-  --     by simp only [polynomial.nat_degree_pow]
-  --   ... < (a^n * b^n * c^n).radical.nat_degree : begin
-  --     apply polynomial.abc_max3; try {assumption},
-  --     -- derivatives of a^n, b^n and c^n are not zero: uses char k = 0
-  --     intro h, rcases h with ⟨ia, ib, ic⟩,
-  --     apply ngoal,
-  --     have hndvd : ¬(ring_char k ∣ n) := by rw chz; simp; linarith,
-  --     refine ⟨_, _, _⟩; apply char_ndvd_pow_deriv n; assumption,
-  --   end
-  --   ... = ((a*b*c)^n).radical.nat_degree : by rw [mul_pow, mul_pow]
-  --   ... = (a*b*c).radical.nat_degree : by rw (a*b*c).radical_pow np
-  --   ... ≤ (a*b*c).nat_degree : 
-  --     polynomial.radical_nat_degree_le (by repeat {apply mul_ne_zero}; assumption)
-  --   ... = a.nat_degree + b.nat_degree + c.nat_degree : begin
-  --     rw polynomial.nat_degree_mul _ hc,
-  --     rw polynomial.nat_degree_mul ha hb,
-  --     exact mul_ne_zero ha hb,
-  --   end
-  --   ... ≤ 3 * max3 a.nat_degree b.nat_degree c.nat_degree : 
-  --     add3_le_three_mul_max3 _ _ _
-  --   ... ≤ n * max3 a.nat_degree b.nat_degree c.nat_degree :
-  --     nat.mul_le_mul_right _ hn
-  -- end,
-  -- exfalso, exact (eq.not_lt (eq.refl _)) hdeg_2,
 end
