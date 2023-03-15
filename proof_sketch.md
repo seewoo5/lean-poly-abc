@@ -35,7 +35,7 @@ Now if $b'$ is not zero, then the degree of $b'$ is strictly less than $b$ so we
 
 At last, we have the following main theorem. (See `mason_stothers.lean`)
 
-> **Theorem (Mason-Stothers, Polynomial ABC)** If $a, b, c \in k[X]$ are nonzero and $a + b + c = 0$ and they are coprime to each other (note: a, b being coprime implies all the others), then either $\text{max}(\text{deg } a, \text{deg }b, \text{deg }c) < \text{deg} (\text{rad } a b c)$ or all $a', b', c'$ are zero.
+> **Theorem (Mason-Stothers, Polynomial ABC)** If $a, b, c \in k[X]$ are nonzero and $a + b + c = 0$ and they are coprime to each other, then either $\text{max}(\text{deg } a, \text{deg }b, \text{deg }c) < \text{deg} (\text{rad } a b c)$ or all $a', b', c'$ are zero.
 
 *Proof.* (of Mason-Stothers) We have $W = W(a, b) = W(b, c)$ by Lemma 1. And $a/\text{rad }a, b/\text{rad }b, c/\text{rad }c$ all divide $W$. Then, $a b c / \text{rad }(a b c)$ divides $W$ because $a/\text{rad }a, b/\text{rad }b, c/\text{rad }c$ are all coprime (informal note: This is the key step. $W$ is too good that it is divisible by all the factors, but has a small degree from its formula).
 
@@ -47,7 +47,7 @@ Arranging terms then gives $\text{deg }(a) + \text{deg }(b) + \text{deg }(c) < \
 
 Using this, we can prove the following version of FLT for polynomials.
 
-> **Theorem (Polynomial FLT)** If $n \geq 3$, the characteristic of $k$ does not divide $n$ (this holds when characteristics is equal to zero), $a^n+b^n+c^n = 0$ in $k[X]$, and $a, b, c$ are nonzero all coprime to each other, then $a'=b'=c'=0$.
+> **Theorem (Polynomial FLT)** If $n \geq 3$, the characteristic of $k$ does not divide $n$ (this holds when characteristic is equal to zero), $a^n+b^n+c^n = 0$ in $k[X]$, and $a, b, c$ are nonzero all coprime to each other, then $a'=b'=c'=0$.
 
 *Proof.* Mason-Stothers gives either one of the following.
 - $\text{max}(\text{deg } a^n, \text{deg }b^n, \text{deg }c^n) < \text{deg} (\text{rad } a^n b^n c^n)$, so $n \max(\deg a, \deg b, \deg c) < \deg(\text{rad }a b c)$. But in this case then the following holds.
