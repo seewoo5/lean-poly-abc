@@ -3,7 +3,7 @@
 - Jineon Baek (University of Michigan, Ann Arbor -- jineon@umich.edu)
 - Seewoo Lee (University of California, Berkeley -- seewoo5@berkeley.edu)
 
-This is a formalization of the proof of ABC and FLT theorem on polynomials (Mason-Stothers Theorem).
+This is a formalization of the proof of ABC and FLT theorem on polynomials (Mason-Stothers Theorem) in Lean 3.
 The proof is based on the [online note] by Franz Lemmermeyer.
 See `proof_sketch.md` for details.
 
