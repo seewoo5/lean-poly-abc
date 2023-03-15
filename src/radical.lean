@@ -59,9 +59,6 @@ begin
   rw normalized_factors_mul ha hb, simp,
 end
 
-<<<<<<< HEAD
-/-- `poly_rad_coprime_mul`
-=======
 -- possible TODO: the proof is unnecessarily long
 @[simp]
 lemma polynomial.radical_neg_one : (-1 : k[X]).radical = 1 :=
@@ -78,7 +75,6 @@ begin
   simp_rw [polynomial.radical, prime_factors],
   rw hnf, simp only [multiset.to_finset_zero, finset.prod_empty],
 end
->>>>>>> bfc2e3a (flt almost done)
 
 lemma polynomial.radical_mul {a b : k[X]}
   (ha: a ≠ 0) (hb: b ≠ 0) (hc: is_coprime a b) : 
