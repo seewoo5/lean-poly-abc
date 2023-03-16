@@ -47,9 +47,9 @@ Arranging terms then gives $\text{deg }(a) + \text{deg }(b) + \text{deg }(c) < \
 
 Using this, we can prove the following version of FLT for polynomials.
 
-> **Theorem (Polynomial FLT)** If $n \geq 3$, the characteristic of $k$ does not divide $n$ (this holds when characteristic is equal to zero), $a^n+b^n+c^n = 0$ in $k[X]$, and $a, b, c$ are nonzero all coprime to each other, then $a'=b'=c'=0$.
+> **Theorem (Polynomial FLT)** If $n \geq 3$, the characteristic of $k$ does not divide $n$ (this holds when characteristic is equal to zero), $a^n+b^n=c^n$ in $k[X]$, and $a, b, c$ are nonzero all coprime to each other, then $a'=b'=c'=0$.
 
-*Proof.* Mason-Stothers gives either one of the following.
+*Proof.* Applying Mason-Stothers to the triple $(a^n, b^n, -c^n)$ gives either one of the following.
 - $\text{max}(\text{deg } a^n, \text{deg }b^n, \text{deg }c^n) < \text{deg} (\text{rad } a^n b^n c^n)$, so $n \max(\deg a, \deg b, \deg c) < \deg(\text{rad }a b c)$. But in this case then the following holds.
 $\deg(\text{rad }a b c) = \deg(\text{rad }a) + \deg(\text{rad } b) + \deg(\text{rad } c)$
 $\leq \deg(a) + \deg(b) + \deg(c) \leq 3 \max (\deg a, \deg b, \deg c)$
@@ -57,5 +57,5 @@ $\leq \deg(a) + \deg(b) + \deg(c) \leq 3 \max (\deg a, \deg b, \deg c)$
 - In the other case of Mason-Stothers we get $(a^n)' = (b^n)' = (c^n)' = 0$. As $(a^n)' = n a' a^{n-1} = 0$ and $n$ is not zero in $k$, we have $a' = 0$. Similar arguments also give $b' = c' = 0$. □
 
 Finally, note that for general field the derivative $a'$ of some $a \in k[X]$ being equal to zero is not equivalent to $a = 0$. If the characteristic is $p$ then the derivative of $X^p$ is $pX^{p-1} = 0$.
-(In fact, we have a "counterexample" $X^{p} + (1 - X)^{p} + (-1)^{p} = 0$ for the polynomial FLT when $p$ is odd and the characteristic of $k$ is equal to $p$.)
+(In fact, we have a "counterexample" $(X - 1)^{p} + (1)^{p} = X^p$ for the polynomial FLT when $p$ is odd and the characteristic of $k$ is equal to $p$.)
 However, if the characteristic of $k$ is zero then $a' = 0$ is equivalent to $a$ being a constant.
