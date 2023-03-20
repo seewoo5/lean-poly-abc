@@ -4,20 +4,20 @@ import ring_theory.polynomial.content
 noncomputable theory
 open_locale polynomial classical
 
-open polynomial
+namespace polynomial
 open unique_factorization_monoid
 
 variables {k: Type*} [field k]
 
-lemma polynomial.degree_ne_bot {a : k[X]} (ha : a ≠ 0) : a.degree ≠ ⊥ :=
-  by intro h; rw polynomial.degree_eq_bot at h; exact ha h
+lemma degree_ne_bot {a : k[X]} (ha : a ≠ 0) : a.degree ≠ ⊥ :=
+  by intro h; rw degree_eq_bot at h; exact ha h
 
 /-- Prime factors of a polynomial `a` are monic factors of `a` without duplication. -/
 def prime_factors (a: k[X]) : finset (k[X]) := 
   (normalized_factors a).to_finset
 
 /-- Radical of a polynomial `a` is a product of prime factors of `a`. -/
-protected def polynomial.radical (a: k[X]) : k[X] := 
+def radical (a: k[X]) : k[X] := 
   (prime_factors a).prod id
 
 /-- coprime polynomials have disjoint prime factors (as multisets). -/
@@ -46,7 +46,7 @@ begin
   apply hc.disjoint_normalized_factors x_in_fa x_in_fb,
 end
 
-lemma is_coprime.mul_prime_factors_disj_union {a b : k[X]}
+lemma _root_.is_coprime.mul_prime_factors_disj_union {a b : k[X]}
   (ha : a ≠ 0) (hb : b ≠ 0) (hc : is_coprime a b) : 
   prime_factors (a * b) = 
     (prime_factors a).disj_union (prime_factors b) (hc.disjoint_prime_factors) :=
@@ -61,7 +61,7 @@ end
 
 -- possible TODO: the proof is unnecessarily long
 @[simp]
-lemma polynomial.radical_neg_one : (-1 : k[X]).radical = 1 :=
+lemma radical_neg_one : (-1 : k[X]).radical = 1 :=
 begin
   have h : is_unit (-1 : k[X]) := is_unit_one.neg,
   have hnf : normalized_factors (-1 : k[X]) = 0 := begin
@@ -72,28 +72,28 @@ begin
     assumption, rw ←h1 at hnnf, exfalso, exact (hnnf rfl),
     simp only [ne.def, neg_eq_zero, one_ne_zero, not_false_iff],
   end,
-  simp_rw [polynomial.radical, prime_factors],
+  simp_rw [radical, prime_factors],
   rw hnf, simp only [multiset.to_finset_zero, finset.prod_empty],
 end
 
-lemma polynomial.radical_mul {a b : k[X]}
+lemma radical_mul {a b : k[X]}
   (ha: a ≠ 0) (hb: b ≠ 0) (hc: is_coprime a b) : 
   (a * b).radical = a.radical * b.radical :=
 begin
-  simp_rw polynomial.radical,
+  simp_rw radical,
   rw hc.mul_prime_factors_disj_union ha hb,
   rw finset.prod_disj_union (hc.disjoint_prime_factors),
 end
 
-lemma polynomial.radical_neg {a : k[X]} : 
+lemma radical_neg {a : k[X]} : 
   (-a).radical = a.radical :=
 begin
   by_cases ha : a = 0,
   { subst ha, simp only [neg_zero], },
   rw neg_eq_neg_one_mul,
   have h : is_coprime (-1) a := is_coprime_one_left.neg_left,
-  rw polynomial.radical_mul _ ha h,
-  { rw polynomial.radical_neg_one, simp only [one_mul], },
+  rw radical_mul _ ha h,
+  { rw radical_neg_one, simp only [one_mul], },
   { simp only [ne.def, neg_eq_zero, one_ne_zero, not_false_iff], },
 end
 
@@ -109,61 +109,60 @@ begin
   exact ne_of_gt hn,
 end
 
-lemma polynomial.radical_pow (a: k[X]) {n: nat} (hn: 1 ≤ n) : 
+lemma radical_pow (a: k[X]) {n: nat} (hn: 1 ≤ n) : 
   (a^n).radical = a.radical :=
 begin
-  simp_rw [polynomial.radical, prime_factors_pow a hn],
+  simp_rw [radical, prime_factors_pow a hn],
 end
 
-lemma polynomial.radical_dvd_self {a : k[X]} (ha : a ≠ 0): a.radical ∣ a :=
+lemma radical_dvd_self {a : k[X]} : a.radical ∣ a :=
 begin
-  rw polynomial.radical,
-  have x := (prime_factors a).val,
-  have y := normalized_factors_prod ha,
-  rw ← associated.dvd_iff_dvd_right y,
-  rw ← finset.prod_val,
-  apply multiset.prod_dvd_prod_of_le,
-  rw prime_factors,
-  simp,
-  exact multiset.dedup_le _,
+  by_cases ha : a = 0,
+  { rw ha,
+    apply dvd_zero },
+  { rw [radical, ← finset.prod_val, ← (normalized_factors_prod ha).dvd_iff_dvd_right],
+    apply multiset.prod_dvd_prod_of_le,
+    rw [prime_factors, multiset.to_finset_val],
+    apply multiset.dedup_le },
 end
 
-lemma polynomial.radical_ne_zero (a: k[X]) : a.radical ≠ 0 :=
+lemma radical_ne_zero (a: k[X]) : a.radical ≠ 0 :=
 begin
-  rw [polynomial.radical, ←finset.prod_val],
+  rw [radical, ←finset.prod_val],
   apply multiset.prod_ne_zero,
   rw prime_factors,
   simp only [multiset.to_finset_val, multiset.mem_dedup], 
   exact zero_not_mem_normalized_factors _,
 end 
 
-lemma polynomial.radical_prime {a : k[X]} (ha: prime a) : 
+lemma radical_prime {a : k[X]} (ha: prime a) : 
   a.radical = normalize a :=
 begin
-  rw [polynomial.radical, prime_factors],
+  rw [radical, prime_factors],
   rw normalized_factors_irreducible ha.irreducible,
   simp only [multiset.to_finset_singleton, id.def, finset.prod_singleton],
 end
 
-lemma polynomial.radical_prime_pow {a : k[X]} (ha: prime a)
+lemma radical_prime_pow {a : k[X]} (ha: prime a)
   {n : ℕ} (hn : 1 ≤ n): (a^n).radical = normalize a :=
 begin
   rw (a.radical_pow hn),
-  exact (polynomial.radical_prime ha),
+  exact (radical_prime ha),
 end
 
-lemma polynomial.radical_degree_le {a: k[X]} (ha : a ≠ 0) : 
+lemma radical_degree_le {a: k[X]} (ha : a ≠ 0) : 
   a.radical.degree ≤ a.degree :=
 begin
-  have h := polynomial.radical_dvd_self ha,
-  exact polynomial.degree_le_of_dvd h ha,
+  exact degree_le_of_dvd radical_dvd_self ha,
 end
 
-lemma polynomial.radical_nat_degree_le {a: k[X]} (ha : a ≠ 0) : 
+lemma radical_nat_degree_le {a : k[X]} : 
   a.radical.nat_degree ≤ a.nat_degree :=
 begin
-  rw ←with_bot.coe_le_coe,
-  rw ←polynomial.degree_eq_nat_degree ha,
-  rw ←polynomial.degree_eq_nat_degree a.radical_ne_zero,
-  exact polynomial.radical_degree_le ha,
+  by_cases ha : a = 0,
+  { rw [ha, radical, prime_factors, normalized_factors_zero, multiset.to_finset_zero,
+        finset.prod_empty, nat_degree_zero, nat_degree_one] },
+  { exact nat_degree_le_of_dvd radical_dvd_self ha },
 end
+
+end polynomial
