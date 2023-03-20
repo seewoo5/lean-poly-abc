@@ -23,7 +23,7 @@ leanproject get seewoo5/lean-poly-abc
 
 This script will clone this repository along with mathlib codes.
 
-## GitPod
+## Gitpod
 
 Using [Gitpod](https://www.gitpod.io/), you can compile the codes on your browser. Sign up to Gitpod and use the following URL:
 

@@ -37,7 +37,7 @@ At last, we have the following main theorem. (See `mason_stothers.lean`)
 
 > **Theorem (Mason-Stothers, Polynomial ABC)** If $a, b, c \in k[X]$ are nonzero and $a + b + c = 0$ and they are coprime to each other, then either $\text{max}(\text{deg } a, \text{deg }b, \text{deg }c) < \text{deg} (\text{rad } a b c)$ or all $a', b', c'$ are zero.
 
-*Proof.* (of Mason-Stothers) We have $W = W(a, b) = W(b, c)$ by Lemma 1. And $a/\text{rad }a, b/\text{rad }b, c/\text{rad }c$ all divide $W$. Then, $a b c / \text{rad }(a b c)$ divides $W$ because $a/\text{rad }a, b/\text{rad }b, c/\text{rad }c$ are all coprime (informal note: This is the key step. $W$ is too good that it is divisible by all the factors, but has a small degree from its formula).
+*Proof.* (of Snyder) We have $W = W(a, b) = W(b, c)$ by Lemma 1. And $a/\text{rad }a, b/\text{rad }b, c/\text{rad }c$ all divide $W$. Then, $a b c / \text{rad }(a b c)$ divides $W$ because $a/\text{rad }a, b/\text{rad }b, c/\text{rad }c$ are all coprime (informal note: This is the key step. $W$ is too good that it is divisible by all the factors, but has a small degree from its formula).
 
 We divide the case into whether $W = 0$ or not. 
 If $W = W(a, b) = W(b, c)$ is zero, then by Lemma 4 we have $a' = b' = c' = 0$.
