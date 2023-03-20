@@ -117,10 +117,6 @@ theorem polynomial.abc {a b c : k[X]}
     (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
 begin
   -- Utility assertions
-  have hab_c := hca.symm.mul_left hbc,
-  have hab_nz : a * b ≠ 0 := mul_ne_zero ha hb,
-  have habc_nz : a * b * c ≠ 0 := mul_ne_zero hab_nz hc,
-
   have wbc := wronskian_eq_of_sum_zero hsum,
   set w := wronskian a b with wab,
   have wca : w = wronskian c a := begin
