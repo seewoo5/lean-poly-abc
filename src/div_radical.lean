@@ -95,8 +95,6 @@ end
 theorem div_radical_dvd_wronskian_left (a b : k[X]) : 
   a.div_radical ∣ wronskian a b :=
 begin
-  by_cases a_nz : a = 0,
-  { subst a_nz, rw wronskian_zero_left b, exact dvd_zero _, },
   rw wronskian,
   apply dvd_sub,
   { apply dvd_mul_of_dvd_left, 
