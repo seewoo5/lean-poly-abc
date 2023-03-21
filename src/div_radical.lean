@@ -10,41 +10,39 @@ The proof is based on induction (`unique_factorization_domain.induction_on_copri
 noncomputable theory
 open_locale polynomial classical
 
-open polynomial
+namespace polynomial
 open unique_factorization_monoid
 
 variables {k: Type*} [field k]
 
 /-- For a given polynomial `a`, `div_radical(a)` is `a` divided by its radical `rad(a)`. This is the key to our implementation. -/
-def polynomial.div_radical (a : k[X]) : k[X] := a / a.radical
+def div_radical (a : k[X]) : k[X] := a / a.radical
 
-lemma polynomial.mul_radical_div_radical {a : k[X]} (ha : a ≠ 0) : 
+lemma mul_radical_div_radical (a : k[X]) : 
   a.radical * a.div_radical = a :=
 begin
-  rw polynomial.div_radical, 
+  rw div_radical, 
   rw ←(euclidean_domain.mul_div_assoc),
   refine euclidean_domain.mul_div_cancel_left _ _,
   exact a.radical_ne_zero,
-  exact polynomial.radical_dvd_self ha,
+  exact radical_dvd_self,
 end
 
-lemma polynomial.div_radical_ne_zero {a : k[X]} (ha : a ≠ 0) : a.div_radical ≠ 0 :=
+lemma div_radical_ne_zero {a : k[X]} (ha : a ≠ 0) : a.div_radical ≠ 0 :=
 begin
-  have h := ha, rw ←polynomial.mul_radical_div_radical ha at h,
+  have h := ha, rw ←mul_radical_div_radical a at h,
   intro eqn, rw eqn at h, 
   simp only [mul_zero, ne.def, eq_self_iff_true, not_true] at h,
   exact h,
 end
 
-lemma polynomial.div_radical_is_unit {u : k[X]} (hu : is_unit u) : 
+lemma div_radical_is_unit {u : k[X]} (hu : is_unit u) : 
   is_unit u.div_radical :=
 begin
-  have u_neq_0 : u ≠ 0 := by
-    intro h; subst h; revert hu; exact not_is_unit_zero,
   rw is_unit_iff_exists_inv at ⊢ hu,
   rcases hu with ⟨inv_u, eq_u⟩,
   use u.radical * inv_u,
-  have eqn := polynomial.mul_radical_div_radical u_neq_0,
+  have eqn := mul_radical_div_radical u,
   rw mul_comm at eqn,
   rw [←mul_assoc, eqn],
   exact eq_u,
@@ -53,34 +51,34 @@ end
 lemma eq_div_radical {a x : k[X]} (h : a.radical * x = a) :
   x = a.div_radical :=
 begin
-  rw polynomial.div_radical,
+  rw div_radical,
   apply euclidean_domain.eq_div_of_mul_eq_left a.radical_ne_zero,
   rw mul_comm, exact h,
 end
 
-lemma polynomial.div_radical_mul {a b : k[X]} 
-  (ha : a ≠ 0) (hb : b ≠ 0) (hc: is_coprime a b) : 
+lemma div_radical_mul {a b : k[X]} (hc: is_coprime a b) : 
   (a * b).div_radical = a.div_radical * b.div_radical :=
 begin
+  by_cases ha : a = 0,
+  { rw [ha, zero_mul, div_radical, euclidean_domain.zero_div, zero_mul] },
+  by_cases hb : b = 0,
+  { rw [hb, mul_zero, div_radical, euclidean_domain.zero_div, mul_zero] },
   symmetry, apply eq_div_radical,
-  rw polynomial.radical_mul ha hb hc,
-  set c := a * b with eq_c,
-  rw [←polynomial.mul_radical_div_radical ha, 
-      ←polynomial.mul_radical_div_radical hb] at eq_c,
-  rw eq_c, ring_nf,
+  rw radical_mul ha hb hc,
+  rw [mul_mul_mul_comm, mul_radical_div_radical, mul_radical_div_radical],
 end
 
-lemma polynomial.div_radical_dvd_self {a : k[X]} (ha: a ≠ 0) : 
+lemma div_radical_dvd_self (a : k[X]) : 
   a.div_radical ∣ a :=
 begin
-  rw polynomial.div_radical,
+  rw div_radical,
   apply euclidean_domain.div_dvd_of_dvd,
-  exact polynomial.radical_dvd_self ha,
+  exact radical_dvd_self,
 end
 
 private def div_goal (a: k[X]) : Prop := a.div_radical ∣ a.derivative
 
-private lemma div_goal_const (u: k) : div_goal (polynomial.C u) := 
+private lemma div_goal_const (u: k) : div_goal (C u) := 
 begin
   rw [div_goal, derivative_C],
   exact dvd_zero _,
@@ -89,7 +87,7 @@ end
 private lemma div_goal_one : div_goal (1 : k[X]) := div_goal_const 1
 
 private lemma div_goal_unit {u : k[X]} (hu : is_unit u) : div_goal u :=
-  (polynomial.div_radical_is_unit hu).dvd
+  (div_radical_is_unit hu).dvd
 
 private lemma normalize_dvd_pow {a : k[X]} (ha : a ≠ 0) (n : ℕ) : 
   (normalize a) ∣ a^(n + 1) :=
@@ -112,8 +110,8 @@ end
 lemma div_radical_prime_pow_associated {a : k[X]} (pa : prime a) (n : ℕ) : 
   associated (a^(n+1)).div_radical (a^n) :=
 begin
-  rw polynomial.div_radical,
-  rw (polynomial.radical_prime_pow pa 
+  rw div_radical,
+  rw (radical_prime_pow pa 
     (show 0 < n+1, by dec_trivial)),
   have na := normalize_associated a,
   have ha := pa.ne_zero,
@@ -153,23 +151,25 @@ begin
   simp,
 end
 
-lemma div_goal_is_coprime {a b: k[X]} (ha: a ≠ 0) (hb : b ≠ 0) 
-  (hc: is_coprime a b) : div_goal a -> div_goal b -> div_goal (a*b) :=
+lemma div_goal_is_coprime {a b : k[X]}  (hc : is_coprime a b) (xa : div_goal a) (xb : div_goal b) :
+  div_goal (a * b) :=
 begin
-  intros xa xb,
   rw div_goal at ⊢ xa xb,
   rw derivative_mul,
-  have a_dvd := polynomial.div_radical_dvd_self ha,
-  have b_dvd := polynomial.div_radical_dvd_self hb,
+  have a_dvd := div_radical_dvd_self a,
+  have b_dvd := div_radical_dvd_self b,
   have a_b_diff_dvd := mul_dvd_mul a_dvd xb,
   have a_diff_b_dvd := mul_dvd_mul xa b_dvd,
-  rw ← (polynomial.div_radical_mul ha hb hc) at a_b_diff_dvd a_diff_b_dvd,
+  rw ← (div_radical_mul hc) at a_b_diff_dvd a_diff_b_dvd,
   exact dvd_add a_diff_b_dvd a_b_diff_dvd,
 end
 
-theorem polynomial.div_radical_dvd_derivative {a : k[X]} (ha : a ≠ 0) : 
+theorem div_radical_dvd_derivative {a : k[X]} : 
   a.div_radical ∣ a.derivative :=
 begin
+  rcases eq_or_ne a 0 with rfl | ha,
+  { rw derivative_zero,
+    apply dvd_zero },
   rw ←div_goal, 
   revert ha,
   apply induction_on_coprime a,
@@ -196,10 +196,10 @@ begin
 
   rw mul_ne_zero_iff at xy_nz,
   cases xy_nz with nzx nzy,
-  exact div_goal_is_coprime nzx nzy hc (hx nzx) (hy nzy),
+  exact div_goal_is_coprime hc (hx nzx) (hy nzy),
 end
 
-theorem polynomial.div_radical_dvd_wronskian_left (a b : k[X]) : 
+theorem div_radical_dvd_wronskian_left (a b : k[X]) : 
   a.div_radical ∣ wronskian a b :=
 begin
   by_cases a_nz : a = 0,
@@ -207,14 +207,16 @@ begin
   rw wronskian,
   apply dvd_sub,
   { apply dvd_mul_of_dvd_left, 
-    exact polynomial.div_radical_dvd_self a_nz, },
+    exact div_radical_dvd_self a },
   { apply dvd_mul_of_dvd_left,
-    exact polynomial.div_radical_dvd_derivative a_nz, },
+    exact div_radical_dvd_derivative },
 end
 
-theorem polynomial.div_radical_dvd_wronskian_right (a b : k[X]) : 
+theorem div_radical_dvd_wronskian_right (a b : k[X]) : 
   b.div_radical ∣ wronskian a b :=
 begin
   rw [wronskian_anticomm, dvd_neg],
   exact b.div_radical_dvd_wronskian_left _,
 end
+
+end polynomial

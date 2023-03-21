@@ -66,11 +66,11 @@ Proof is based on this online note by Franz Lemmermeyer http://www.fen.bilkent.e
 6. Since W(a, b) = ab' - a'b = 0 and a and b are coprime, a' = 0. Similarly we have b' = c' = 0. `coprime_wronskian_eq_zero_const`
 -/
 
-protected lemma is_coprime.div_radical {a b : k[X]} (ha : a ≠ 0) (hb : b ≠ 0)
+protected lemma is_coprime.div_radical {a b : k[X]}
   (h : is_coprime a b) : is_coprime a.div_radical b.div_radical :=
 begin
-  rw ←polynomial.mul_radical_div_radical ha at h,
-  rw ←polynomial.mul_radical_div_radical hb at h,
+  rw ←polynomial.mul_radical_div_radical a at h,
+  rw ←polynomial.mul_radical_div_radical b at h,
   exact h.of_mul_left_right.of_mul_right_right,
 end
 
@@ -100,7 +100,7 @@ begin
         (a*b*c).radical_ne_zero
     ... = (a*b*c).nat_degree :
       by rw mul_comm _ (polynomial.radical _);
-         rw polynomial.mul_radical_div_radical habc
+         rw (a * b * c).mul_radical_div_radical
     ... = a.nat_degree + b.nat_degree + c.nat_degree :
       by rw [polynomial.nat_degree_mul hab hc, polynomial.nat_degree_mul ha hb],
   rw t3 at t4,
@@ -117,10 +117,6 @@ theorem polynomial.abc {a b c : k[X]}
     (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
 begin
   -- Utility assertions
-  have hab_c := hca.symm.mul_left hbc,
-  have hab_nz : a * b ≠ 0 := mul_ne_zero ha hb,
-  have habc_nz : a * b * c ≠ 0 := mul_ne_zero hab_nz hc,
-
   have wbc := wronskian_eq_of_sum_zero hsum,
   set w := wronskian a b with wab,
   have wca : w = wronskian c a := begin
@@ -135,17 +131,17 @@ begin
     rw ←wab at adr_dvd_w bdr_dvd_w, 
     rw ←wbc at cdr_dvd_w,
 
-    have cop_ab_dr := hab.div_radical ha hb,
-    have cop_bc_dr := hbc.div_radical hb hc,
-    have cop_ca_dr := hca.div_radical hc ha,
+    have cop_ab_dr := hab.div_radical,
+    have cop_bc_dr := hbc.div_radical,
+    have cop_ca_dr := hca.div_radical,
     have cop_abc_dr := cop_ca_dr.symm.mul_left cop_bc_dr,
     have abdr_dvd_w := cop_ab_dr.mul_dvd adr_dvd_w bdr_dvd_w,
     have abcdr_dvd_w := cop_abc_dr.mul_dvd abdr_dvd_w cdr_dvd_w,
 
     convert abcdr_dvd_w,
 
-    rw ←polynomial.div_radical_mul ha hb hab,
-    rw ←polynomial.div_radical_mul hab_nz hc _,
+    rw ←polynomial.div_radical_mul hab,
+    rw ←polynomial.div_radical_mul _,
     exact hca.symm.mul_left hbc,
   end,
 
@@ -215,7 +211,7 @@ begin
     have ineq2 : (a * b * c).radical.nat_degree ≤ 
       n * max3 a.nat_degree b.nat_degree c.nat_degree := 
       by calc (a * b * c).radical.nat_degree ≤ (a*b*c).nat_degree : 
-        polynomial.radical_nat_degree_le (mul_ne_zero (mul_ne_zero ha hb) hc)
+        polynomial.radical_nat_degree_le
       ... = a.nat_degree + b.nat_degree + c.nat_degree : 
         by rw polynomial.nat_degree_mul (mul_ne_zero ha hb) hc;
            rw polynomial.nat_degree_mul ha hb
