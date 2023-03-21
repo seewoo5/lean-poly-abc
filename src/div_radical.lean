@@ -30,30 +30,21 @@ end
 
 lemma div_radical_ne_zero {a : k[X]} (ha : a ≠ 0) : a.div_radical ≠ 0 :=
 begin
-  have h := ha, rw ←mul_radical_div_radical a at h,
-  intro eqn, rw eqn at h, 
-  simp only [mul_zero, ne.def, eq_self_iff_true, not_true] at h,
-  exact h,
+  rw ← mul_radical_div_radical a at ha,
+  exact right_ne_zero_of_mul ha,
 end
 
 lemma div_radical_is_unit {u : k[X]} (hu : is_unit u) : 
   is_unit u.div_radical :=
 begin
-  rw is_unit_iff_exists_inv at ⊢ hu,
-  rcases hu with ⟨inv_u, eq_u⟩,
-  use u.radical * inv_u,
-  have eqn := mul_radical_div_radical u,
-  rw mul_comm at eqn,
-  rw [←mul_assoc, eqn],
-  exact eq_u,
+  rwa [div_radical, radical_unit hu, euclidean_domain.div_one],
 end
 
 lemma eq_div_radical {a x : k[X]} (h : a.radical * x = a) :
   x = a.div_radical :=
 begin
-  rw div_radical,
   apply euclidean_domain.eq_div_of_mul_eq_left a.radical_ne_zero,
-  rw mul_comm, exact h,
+  rwa mul_comm,
 end
 
 lemma div_radical_mul {a b : k[X]} (hc: is_coprime a b) : 
