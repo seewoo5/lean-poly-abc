@@ -25,7 +25,7 @@ begin
   rw ←(euclidean_domain.mul_div_assoc),
   refine euclidean_domain.mul_div_cancel_left _ _,
   exact a.radical_ne_zero,
-  exact radical_dvd_self,
+  exact radical_dvd_self a,
 end
 
 lemma div_radical_ne_zero {a : k[X]} (ha : a ≠ 0) : a.div_radical ≠ 0 :=
@@ -55,7 +55,7 @@ begin
   by_cases hb : b = 0,
   { rw [hb, mul_zero, div_radical, euclidean_domain.zero_div, mul_zero] },
   symmetry, apply eq_div_radical,
-  rw radical_mul ha hb hc,
+  rw radical_mul hc,
   rw [mul_mul_mul_comm, mul_radical_div_radical, mul_radical_div_radical],
 end
 
@@ -64,10 +64,10 @@ lemma div_radical_dvd_self (a : k[X]) :
 begin
   rw div_radical,
   apply euclidean_domain.div_dvd_of_dvd,
-  exact radical_dvd_self,
+  exact radical_dvd_self a,
 end
 
-theorem div_radical_dvd_derivative {a : k[X]} : 
+theorem div_radical_dvd_derivative (a : k[X]) : 
   a.div_radical ∣ a.derivative :=
 begin
   apply induction_on_coprime a,
@@ -100,7 +100,7 @@ begin
   { apply dvd_mul_of_dvd_left, 
     exact div_radical_dvd_self a },
   { apply dvd_mul_of_dvd_left,
-    exact div_radical_dvd_derivative },
+    exact div_radical_dvd_derivative a },
 end
 
 theorem div_radical_dvd_wronskian_right (a b : k[X]) : 

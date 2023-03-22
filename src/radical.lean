@@ -70,10 +70,15 @@ end
 lemma radical_neg_one : (-1 : k[X]).radical = 1 :=
 radical_unit (is_unit_one.neg)
 
-lemma radical_mul {a b : k[X]}
-  (ha: a ≠ 0) (hb: b ≠ 0) (hc: is_coprime a b) : 
+lemma radical_mul {a b : k[X]} (hc: is_coprime a b) : 
   (a * b).radical = a.radical * b.radical :=
 begin
+  by_cases ha: a = 0,
+  { subst ha, rw is_coprime_zero_left at hc,
+    simp only [zero_mul, radical_zero, one_mul, radical_unit hc], },
+  by_cases hb: b = 0,
+  { subst hb, rw is_coprime_zero_right at hc,
+    simp only [mul_zero, radical_zero, mul_one, radical_unit hc], },
   simp_rw radical,
   rw hc.mul_prime_factors_disj_union ha hb,
   rw finset.prod_disj_union (hc.disjoint_prime_factors),
@@ -98,7 +103,7 @@ begin
   simp_rw [radical, prime_factors_pow a hn],
 end
 
-lemma radical_dvd_self {a : k[X]} : a.radical ∣ a :=
+lemma radical_dvd_self (a : k[X]) : a.radical ∣ a :=
 begin
   by_cases ha : a = 0,
   { rw ha,
@@ -136,7 +141,7 @@ end
 lemma radical_degree_le {a: k[X]} (ha : a ≠ 0) : 
   a.radical.degree ≤ a.degree :=
 begin
-  exact degree_le_of_dvd radical_dvd_self ha,
+  exact degree_le_of_dvd (radical_dvd_self a) ha,
 end
 
 lemma radical_nat_degree_le {a : k[X]} : 
@@ -144,7 +149,7 @@ lemma radical_nat_degree_le {a : k[X]} :
 begin
   by_cases ha : a = 0,
   { rw [ha, radical_zero, nat_degree_one, nat_degree_zero] },
-  { exact nat_degree_le_of_dvd radical_dvd_self ha },
+  { exact nat_degree_le_of_dvd (radical_dvd_self a) ha },
 end
 
 end polynomial
