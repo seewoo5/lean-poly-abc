@@ -20,6 +20,23 @@ def prime_factors (a: k[X]) : finset (k[X]) :=
 def radical (a: k[X]) : k[X] := 
   (prime_factors a).prod id
 
+lemma radical_zero : radical (0 : k[X]) = 1 :=
+by rw [radical, prime_factors, normalized_factors_zero, multiset.to_finset_zero, finset.prod_empty]
+
+lemma radical_one : radical (1 : k[X]) = 1 :=
+by rw [radical, prime_factors, normalized_factors_one, multiset.to_finset_zero, finset.prod_empty]
+
+lemma radical_associated {a b : k[X]} (h : associated a b) : radical a = radical b :=
+begin
+  rcases iff_iff_and_or_not_and_not.mp h.eq_zero_iff with ⟨rfl, rfl⟩ | ⟨ha, hb⟩,
+  { refl },
+  { simp_rw [radical, prime_factors],
+    rw (associated_iff_normalized_factors_eq_normalized_factors ha hb).mp h },
+end
+
+lemma radical_unit {a : k[X]} (h : is_unit a) : radical a = 1 :=
+(radical_associated (associated_one_iff_is_unit.mpr h)).trans radical_one
+
 /-- coprime polynomials have disjoint prime factors (as multisets). -/
 lemma is_coprime.disjoint_normalized_factors {a b : k[X]} (hc: is_coprime a b) : 
   (normalized_factors a).disjoint (normalized_factors b):=
@@ -28,22 +45,14 @@ begin
   have x_dvd_a := dvd_of_mem_normalized_factors hxa,
   have x_dvd_b := dvd_of_mem_normalized_factors hxb,
   have xp := prime_of_normalized_factor x hxa,
-  have x_dvd_gcd := euclidean_domain.dvd_gcd x_dvd_a x_dvd_b,
-  rw ←euclidean_domain.gcd_is_unit_iff at hc,
-  have x_unit := is_unit_of_dvd_unit x_dvd_gcd hc,
-  exact xp.not_unit x_unit,
+  exact xp.not_unit (hc.is_unit_of_dvd' x_dvd_a x_dvd_b),
 end
 
 -- coprime polynomials have disjoint prime factors (as finsets)
 lemma is_coprime.disjoint_prime_factors {a b : k[X]} (hc: is_coprime a b) : 
   disjoint (prime_factors a) (prime_factors b):=
 begin
-  simp_rw prime_factors,
-  rw finset.disjoint_left,
-  intros x x_in_fa,
-  intro x_in_fb,
-  simp only [multiset.mem_to_finset] at x_in_fa x_in_fb,
-  apply hc.disjoint_normalized_factors x_in_fa x_in_fb,
+  exact multiset.disjoint_to_finset.mpr hc.disjoint_normalized_factors,
 end
 
 lemma _root_.is_coprime.mul_prime_factors_disj_union {a b : k[X]}
@@ -53,28 +62,13 @@ lemma _root_.is_coprime.mul_prime_factors_disj_union {a b : k[X]}
 begin
   rw [finset.disj_union_eq_union],
   simp_rw prime_factors, 
-  apply finset.ext,
-  intro x,
-  simp,
-  rw normalized_factors_mul ha hb, simp,
+  rw [normalized_factors_mul ha hb, multiset.to_finset_add],
 end
 
 -- possible TODO: the proof is unnecessarily long
 @[simp]
 lemma radical_neg_one : (-1 : k[X]).radical = 1 :=
-begin
-  have h : is_unit (-1 : k[X]) := is_unit_one.neg,
-  have hnf : normalized_factors (-1 : k[X]) = 0 := begin
-    by_contra hnnf,
-    revert h, rw imp_false,
-    rw ←unique_factorization_monoid.normalized_factors_pos,
-    cases (lt_or_eq_of_le (multiset.zero_le (normalized_factors (-1 : k[X])))) with h0 h1,
-    assumption, rw ←h1 at hnnf, exfalso, exact (hnnf rfl),
-    simp only [ne.def, neg_eq_zero, one_ne_zero, not_false_iff],
-  end,
-  simp_rw [radical, prime_factors],
-  rw hnf, simp only [multiset.to_finset_zero, finset.prod_empty],
-end
+radical_unit (is_unit_one.neg)
 
 lemma radical_mul {a b : k[X]}
   (ha: a ≠ 0) (hb: b ≠ 0) (hc: is_coprime a b) : 
@@ -87,25 +81,14 @@ end
 
 lemma radical_neg {a : k[X]} : 
   (-a).radical = a.radical :=
-begin
-  by_cases ha : a = 0,
-  { subst ha, simp only [neg_zero], },
-  rw neg_eq_neg_one_mul,
-  have h : is_coprime (-1) a := is_coprime_one_left.neg_left,
-  rw radical_mul _ ha h,
-  { rw radical_neg_one, simp only [one_mul], },
-  { simp only [ne.def, neg_eq_zero, one_ne_zero, not_false_iff], },
-end
+neg_one_mul a ▸ radical_associated $ associated_unit_mul_left a (-1) is_unit_one.neg
 
 lemma prime_factors_pow (a: k[X]) {n: ℕ} (hn: 1 ≤ n) : 
   prime_factors (a^n) = prime_factors a :=
 begin
   simp_rw prime_factors,
   simp only [normalized_factors_pow],
-  apply finset.ext,
-  intro x,
-  simp only [multiset.mem_to_finset],
-  rw multiset.mem_nsmul _,
+  rw multiset.to_finset_nsmul,
   exact ne_of_gt hn,
 end
 
@@ -160,8 +143,7 @@ lemma radical_nat_degree_le {a : k[X]} :
   a.radical.nat_degree ≤ a.nat_degree :=
 begin
   by_cases ha : a = 0,
-  { rw [ha, radical, prime_factors, normalized_factors_zero, multiset.to_finset_zero,
-        finset.prod_empty, nat_degree_zero, nat_degree_one] },
+  { rw [ha, radical_zero, nat_degree_one, nat_degree_zero] },
   { exact nat_degree_le_of_dvd radical_dvd_self ha },
 end
 
