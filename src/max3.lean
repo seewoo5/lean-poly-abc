@@ -41,3 +41,14 @@ begin
   apply nat.add_le_add _ (le_max3_second _ _ _),
   exact le_max3_first _ _ _,
 end
+
+theorem weighted_average_le_max3 {p q r a b c: ℕ} :
+  p*a + q*b + r*c ≤ (p+q+r)*(max3 a b c) := 
+begin
+  simp_rw add_mul,
+  apply nat.add_le_add,
+  apply nat.add_le_add,
+  exact nat.mul_le_mul (le_refl _) (le_max3_first _ _ _),
+  exact nat.mul_le_mul (le_refl _) (le_max3_second _ _ _),
+  exact nat.mul_le_mul (le_refl _) (le_max3_third _ _ _),
+end
