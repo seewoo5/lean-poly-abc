@@ -1,5 +1,5 @@
-import radical
-import wronskian
+import .radical
+import .wronskian
 
 /-
 On `div_radical(a) = a / radical(a)`. The purpose of this file is to prove our "main lemma" that `div_radical(a)` divides `a'` for any nonzero polynomial `a`.
