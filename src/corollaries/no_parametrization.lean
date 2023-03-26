@@ -57,9 +57,12 @@ def is_const (x : ratfunc k) := ∃ c : k, x = ratfunc.C c
 
 namespace unique_factorization_monoid
 
-theorem associated_pow_pow_iff {a b : k[X]} {m n : ℕ}
+theorem associated_pow_pow_coprime_iff {a b : k[X]} {m n : ℕ}
   (h : associated (a^m) (b^n)) (hcp : m.coprime n)
-  : ∃ 
+  : ∃ c : k[X], associated a (c^n) ∧ associated b (c^m) := sorry
+
+theorem associated_pow_pow_iff {a b : k[X]} {n : ℕ} (hn : 0 < n) :
+  associated (a^n) (b^n) ↔ associated a b := sorry
 
 end unique_factorization_monoid
 
