@@ -1,6 +1,7 @@
 import tactic.core
 import ring_theory.euclidean_domain
 import ring_theory.polynomial.content
+import ring_theory.unique_factorization_domain
 import field_theory.ratfunc
 
 import .flt_catalan
@@ -54,6 +55,14 @@ end
 
 def is_const (x : ratfunc k) := ∃ c : k, x = ratfunc.C c
 
+namespace unique_factorization_monoid
+
+theorem associated_pow_pow_iff {a b : k[X]} {m n : ℕ}
+  (h : associated (a^m) (b^n)) (hcp : m.coprime n)
+  : ∃ 
+
+end unique_factorization_monoid
+
 theorem no_parametrization_y2_x3_1 
   {x y : ratfunc k} (eqn : y^2 = x^3 + 1) : is_const x ∧ is_const y :=
 begin
@@ -61,37 +70,49 @@ begin
   have eq_y := y.num_div_denom.symm,
   have nz_M := x.denom_ne_zero,
   have nz_N := y.denom_ne_zero,
+  have cp_mM := is_coprime.num_denom x,
+  have cp_nN := is_coprime.num_denom y,
+
   set m := x.num with eq_m,
   set M := x.denom with eq_M,
   set n := y.num with eq_n,
   set N := y.denom with eq_N,
   clear_value m M n N,
-  revert m M n N eq_m eq_M eq_n eq_N nz_M nz_N eq_x eq_y,
-  intros m M n N eq_m eq_M eq_n eq_N nz_M nz_N eq_x eq_y,
-  have nz_rM := ratfunc.algebra_map_ne_zero nz_M,
-  have nz_rN := ratfunc.algebra_map_ne_zero nz_N,
-  set rm := algebra_map k[X] (ratfunc k) m with eq_rm,
-  set rM := algebra_map k[X] (ratfunc k) M with eq_rM,
-  set rn := algebra_map k[X] (ratfunc k) n with eq_rn,
-  set rN := algebra_map k[X] (ratfunc k) N with eq_rN,
-  clear_value rm rM rn rN,
-  rw ←eq_rM at nz_rM, rw ←eq_rN at nz_rN,
-  revert rm rM rn rN eq_rm eq_rM eq_rn eq_rN nz_rM nz_rN eq_x eq_y,
-  intros rm rM rn rN eq_rm eq_rM eq_rn eq_rN nz_rM nz_rN eq_x eq_y,
-  rw [eq_x, eq_y, div_pow, div_pow] at eqn,
-  have flat_eqn : rn^2 * rM^3 = (rm^3 + rM^3) * rN^2,
-  { calc rn^2 * rM^3 = rn^2 / rN^2 * rN^2 * rM^3 : 
-      by rw div_mul_cancel _ (pow_ne_zero 2 nz_rN)
-    ... = (rm^3 / rM^3 + 1) * rM^3 * rN^2 :
-      by rw eqn; ring_nf
-    ... = (rm^3 + rM^3) * rN^2 :
-      by rw [add_mul, div_mul_cancel _ (pow_ne_zero 3 nz_rM), one_mul] },
-    
-  rw [eq_rn, eq_rN, eq_rm, eq_rM] at flat_eqn,
-  simp_rw [←ring_hom.map_pow, ←ring_hom.map_mul, 
-    ←ring_hom.map_add, ←ring_hom.map_mul] at flat_eqn,
-  rw (ratfunc.algebra_map_injective k).eq_iff at flat_eqn,
+  rw [eq_x, eq_y] at eqn,
+  simp only [div_pow] at eqn,
 
+  revert m M n N eq_m eq_M eq_n eq_N nz_M nz_N eq_x eq_y eqn cp_mM cp_nN,
+  intros m M n N eq_m eq_M eq_n eq_N nz_M nz_N eq_x eq_y eqn cp_mM cp_nN,
+
+  have flat_eqn : n ^ 2 * M ^ 3 = (m ^ 3 + M ^ 3) * N ^ 2,
+  { have nz_rM := ratfunc.algebra_map_ne_zero nz_M,
+    have nz_rN := ratfunc.algebra_map_ne_zero nz_N,
+    rw ←(ratfunc.algebra_map_injective k).eq_iff,
+    simp_rw [ring_hom.map_mul, ring_hom.map_add, ring_hom.map_pow],
+    set rm := algebra_map k[X] (ratfunc k) m with eq_rm,
+    set rM := algebra_map k[X] (ratfunc k) M with eq_rM,
+    set rn := algebra_map k[X] (ratfunc k) n with eq_rn,
+    set rN := algebra_map k[X] (ratfunc k) N with eq_rN,
+    rw [←eq_rm, ←eq_rM, ←eq_rn, ←eq_rN],
+    calc rn^2 * rM^3 = rn^2 / rN^2 * rN^2 * rM^3 : 
+        by rw div_mul_cancel _ (pow_ne_zero 2 nz_rN)
+      ... = (rm^3 / rM^3 + 1) * rM^3 * rN^2 :
+        by rw eqn; ring_nf
+      ... = (rm^3 + rM^3) * rN^2 :
+        by rw [add_mul, div_mul_cancel _ (pow_ne_zero 3 nz_rM), one_mul], },
+  clear eqn,
+
+  have assoc_M3_N2 : associated (M^3) (N^2),
+  { apply associated_of_dvd_dvd,
+    { have cp : is_coprime (M^3) (m^3+1*M^3) := 
+        cp_mM.symm.pow.add_mul_right_right 1,
+      rw one_mul at cp,
+      apply cp.dvd_of_dvd_mul_left,
+      rw ←flat_eqn, exact dvd_mul_left _ _, },
+    { have cp : is_coprime (N^2) (n^2) := cp_nN.symm.pow,
+      apply cp.dvd_of_dvd_mul_left,
+      rw flat_eqn, exact dvd_mul_left _ _, }, },
+    
   -- TODO: x is mk m M and y is mk n N
   -- TODO: is_const x if and only if m M are associated
   -- associated_of_dvd_dvd -> N^2 and M^3 dividing each other gives associated
