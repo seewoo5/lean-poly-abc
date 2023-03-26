@@ -6,6 +6,7 @@ import algebra.euclidean_domain.basic
 import data.polynomial.ring_division
 import algebra.euclidean_domain.instances
 import data.polynomial.field_division
+import algebra.associated
 
 import ring_theory.unique_factorization_domain
 import field_theory.ratfunc
@@ -63,23 +64,58 @@ def is_const (x : ratfunc k) := ∃ c : k, x = ratfunc.C c
 
 namespace unique_factorization_monoid
 
-theorem associated_pow_pow_coprime_iff {a b : k[X]} {m n : ℕ}
-  (h : associated (a^m) (b^n)) (hcp : m.coprime n)
-  : ∃ c : k[X], associated a (c^n) ∧ associated b (c^m) := sorry
-
-theorem associated_pow_pow_iff {a b : k[X]} {n : ℕ} (hn : 0 < n) :
-  associated (a^n) (b^n) ↔ associated a b :=
+theorem associates_pow_eq_pow_iff {A B : associates k[X]} {n : ℕ} 
+  (hn : 0 < n) : A^n = B^n ↔ A = B :=
 begin
-  split, swap, exact associated.pow_pow,
+  by_cases hA : A = 0,
+  { subst hA, 
+    rw [zero_pow hn, eq_comm, pow_eq_zero_iff hn, eq_comm],
+    exact associates.no_zero_divisors, },
+  by_cases hB : B = 0,
+  { subst hB, 
+    rw [zero_pow hn, pow_eq_zero_iff hn],
+    exact associates.no_zero_divisors, },
+
+  split, swap,
+  { intro h, subst h, },
   intro h,
-  by_cases ha: a = 0,
-  { subst ha, rw zero_pow hn at h,
-    have h' := h.symm,
-    rw [associated_zero_iff_eq_zero] at h',
-    rw [pow_eq_zero_iff hn] at h',
-    -- TODO: why do we need explicit instance insertion
-    rw h', exact euclidean_domain.no_zero_divisors k[X], },
-  sorry,
+  apply associates.eq_of_eq_counts hA hB,
+  intros p hp,
+  apply nat.eq_of_mul_eq_mul_left hn,
+  rw [←associates.count_pow hA hp n,
+    ←associates.count_pow hB hp n, h],
+end
+
+theorem associated_pow_pow_coprime_iff {a b : k[X]} {m n : ℕ}
+  (ha : a ≠ 0) (hb : b ≠ 0) (hm : 0 < m) (hn : 0 < n)
+  (h : associated (a^m) (b^n)) (hcp : m.coprime n)
+  : ∃ c : k[X], associated a (c^n) ∧ associated b (c^m) :=
+begin
+  -- change to associates
+  simp_rw [←associates.mk_eq_mk_iff_associated,
+    associates.mk_pow] at ⊢ h,
+  rw ←associates.mk_ne_zero at ha hb,
+  set A := associates.mk a with eq_A,
+  set B := associates.mk b with eq_B,
+  rw ←eq_A at ha, rw ←eq_B at hb,
+  rename ha hA, rename hb hB,
+  clear_value A B, clear' eq_A eq_B a b,
+  suffices goal : ∃ C, A = C^n ∧ B = C^m,
+  rcases goal with ⟨C, hC⟩,
+  use C.out, simp only [associates.mk_out], exact hC,
+  
+  have subgoal : ∃ C, A = C^n,
+  { apply associates.is_pow_of_dvd_count hA,
+    intros p hp,
+    apply hcp.symm.dvd_of_dvd_mul_left,
+    rw [←associates.count_pow hA hp, h, associates.count_pow hB hp],
+    exact nat.dvd_mul_right _ _, },
+  
+  rcases subgoal with ⟨C, eq_ACn⟩,
+  refine ⟨C, eq_ACn, _⟩,
+  rw [eq_ACn, pow_right_comm,
+    associates_pow_eq_pow_iff hn] at h,
+  exact h.symm,
 end
 
 end unique_factorization_monoid
