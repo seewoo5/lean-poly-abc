@@ -76,3 +76,34 @@ begin
   rw eq_lhs, rw [mul_assoc, mul_assoc],
   apply nat.mul_le_mul_right (n*n), exact hn,
 end
+
+namespace euclidean_domain 
+
+universe u
+variables {R : Type u} [euclidean_domain R] {a b : R}
+
+-- TODO: get rid of this once mathlib is updated
+protected lemma mul_div_cancel' (hb : b ≠ 0) (hab : b ∣ a) : b * (a / b) = a :=
+  by rw [←mul_div_assoc _ hab, mul_div_cancel_left _ hb]
+
+lemma of_pow_dvd_pow {a b : k[X]} {n : ℕ} (hn : 0 < n) (h : a^n ∣ b^n) : a ∣ b :=
+begin
+  
+end
+
+theorem _root_.polynomial.flt
+  {n : ℕ} (hn : 3 ≤ n) (chk : ring_char k = 0)
+  {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
+  (hab : is_coprime a b) (heq: a^n + b^n = c^n) : 
+  ∃ (d: k[X]) (sa sb sc : k), a = ↑sa * d ∧ b = ↑sb * d ∧ c = ↑sc * d :=
+begin
+  have hd : gcd a b ≠ 0,
+  { intro h, rw euclidean_domain.gcd_eq_zero_iff at h, exact ha h.1, },
+  have eq_a := euclidean_domain.mul_div_cancel' hd (gcd_dvd_left a b),
+  have eq_b := euclidean_domain.mul_div_cancel' hd (gcd_dvd_right a b),
+  set d := gcd a b with def_d,
+  rw [←eq_a, ←eq_b] at heq,
+  use d,
+end
+
+end euclidean_domain
