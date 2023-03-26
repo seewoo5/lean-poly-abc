@@ -1,6 +1,12 @@
 import tactic.core
 import ring_theory.euclidean_domain
 import ring_theory.polynomial.content
+-- for no_zero_divisors instance
+import algebra.euclidean_domain.basic
+import data.polynomial.ring_division
+import algebra.euclidean_domain.instances
+import data.polynomial.field_division
+
 import ring_theory.unique_factorization_domain
 import field_theory.ratfunc
 
@@ -62,7 +68,19 @@ theorem associated_pow_pow_coprime_iff {a b : k[X]} {m n : ℕ}
   : ∃ c : k[X], associated a (c^n) ∧ associated b (c^m) := sorry
 
 theorem associated_pow_pow_iff {a b : k[X]} {n : ℕ} (hn : 0 < n) :
-  associated (a^n) (b^n) ↔ associated a b := sorry
+  associated (a^n) (b^n) ↔ associated a b :=
+begin
+  split, swap, exact associated.pow_pow,
+  intro h,
+  by_cases ha: a = 0,
+  { subst ha, rw zero_pow hn at h,
+    have h' := h.symm,
+    rw [associated_zero_iff_eq_zero] at h',
+    rw [pow_eq_zero_iff hn] at h',
+    -- TODO: why do we need explicit instance insertion
+    rw h', exact euclidean_domain.no_zero_divisors k[X], },
+  sorry,
+end
 
 end unique_factorization_monoid
 
