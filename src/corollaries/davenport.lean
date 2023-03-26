@@ -43,6 +43,14 @@ begin
   ... = max a.nat_degree b.nat_degree : by rw nat_degree_neg,
 end
 
+lemma nat_degree_sub_le_nat_degree {a b : k[X]} : (a - b).nat_degree ≤ max a.nat_degree b.nat_degree :=
+begin
+  by calc (a - b).nat_degree = (a + (-b)).nat_degree : by ring_nf
+  ... ≤ max a.nat_degree (-b).nat_degree : nat_degree_add_le a (-b)
+  ... = max a.nat_degree b.nat_degree : by rw nat_degree_neg,
+end
+
+
 /- Davenport's theorem
 For any nonconstant coprime polynomial a, b ∈ k[t], if a^3 ≠ b^2, then
 (1 / 2) * deg(a) + 1 ≤ deg(a^3 - b^2).
@@ -97,11 +105,17 @@ begin
       simp_rw nat_degree_pow at hdeg,
       exact hdeg,
     end,
-    have t2 : max3 (3 * a.nat_degree) (2 * b.nat_degree) (c.nat_degree) = 3 * a.nat_degree := sorry,
+    have t2 : max3 (a^3).nat_degree (b^2).nat_degree (c.nat_degree) = 3 * a.nat_degree :=
+    begin
+      have h1 : c.nat_degree ≤ max (a^3).nat_degree (b^2).nat_degree := nat_degree_sub_le_nat_degree,
+      by calc max3 (a^3).nat_degree (b^2).nat_degree (c.nat_degree) = max (a^3).nat_degree (b^2).nat_degree : max_eq_left h1
+      ... = max (a^3).nat_degree (a^3).nat_degree : by rw hdeg
+      ... = (a^3).nat_degree : max_self _
+      ... = 3 * a.nat_degree : by simp only [nat_degree_pow],
+    end,
     have t2' : (a * b).nat_degree ≤ a.nat_degree + b.nat_degree := nat_degree_mul_le,
     have t3 :=
-    by calc 3 * a.nat_degree + 1 = max3 (3 * a.nat_degree) (2 * b.nat_degree) (c.nat_degree) + 1: by rw t2
-    ... = max3 (a^3).nat_degree (b^2).nat_degree c.nat_degree + 1 : sorry
+    by calc 3 * a.nat_degree + 1 = max3 (a^3).nat_degree (b^2).nat_degree c.nat_degree + 1: by rw t2
     ... = max3 (-a^3).nat_degree (b^2).nat_degree c.nat_degree + 1 : by rw nat_degree_neg
     ... ≤ ((-a^3) * (b^2) * c).radical.nat_degree : sorry
     ... = ((-a^3) * (b^2)).radical.nat_degree + c.radical.nat_degree : sorry
