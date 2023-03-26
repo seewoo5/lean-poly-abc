@@ -12,14 +12,22 @@ open unique_factorization_monoid
 variables {k: Type*} [field k]
 
 theorem polynomial.flt_catalan
-  {p q r : ℕ} (hp : 1 ≤ p) (hq : 1 ≤ q) (hr : 1 ≤ r)
+  {p q r : ℕ} (hp : 0 < p) (hq : 0 < q) (hr : 0 < r)
   (hineq : q*r + r*p + p*q ≤ p*q*r)
   (chp : ¬(ring_char k ∣ p)) (chq : ¬(ring_char k ∣ q)) (chr : ¬(ring_char k ∣ r))
   {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
-  (hab : is_coprime a b) (hbc : is_coprime b c) (hca : is_coprime c a)
-  (heq: a^p + b^q = c^r) : 
+  (hab : is_coprime a b) (heq: a^p + b^q = c^r) : 
   (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
 begin
+  have hbc : is_coprime b c,
+  { rw [←is_coprime.pow_left_iff hq, ←is_coprime.pow_right_iff hr, ←heq],
+    convert is_coprime.add_mul_right_right hab.symm.pow (1: k[X]),
+    exact (one_mul _).symm, },
+  have hca : is_coprime c a,
+  { rw [←is_coprime.pow_left_iff hr, ←is_coprime.pow_right_iff hp, ←heq],
+    convert is_coprime.mul_add_right_left hab.symm.pow (1: k[X]),
+    exact (one_mul _).symm, },
+
   have hap : a^p ≠ 0 := pow_ne_zero _ ha,
   have hbp : b^q ≠ 0 := pow_ne_zero _ hb,
   have hcp : -c^r ≠ 0 := neg_ne_zero.mpr (pow_ne_zero _ hc),
@@ -55,16 +63,15 @@ begin
   ring_nf,
 end
 
-theorem polynomial.flt
+theorem polynomial.flt_coprime
   {n : ℕ} (hn : 3 ≤ n) (chn : ¬(ring_char k ∣ n))
   {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
-  (hab : is_coprime a b) (hbc : is_coprime b c) (hca : is_coprime c a)
-  (heq: a^n + b^n = c^n) : 
+  (hab : is_coprime a b) (heq: a^n + b^n = c^n) : 
   (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
 begin
   have h1n : 1 ≤ n := le_trans (by dec_trivial) hn,
   apply polynomial.flt_catalan h1n h1n h1n _
-    chn chn chn ha hb hc hab hbc hca heq,
+    chn chn chn ha hb hc hab heq,
   have eq_lhs : n*n + n*n + n*n = 3*n*n := by ring_nf,
   rw eq_lhs, rw [mul_assoc, mul_assoc],
   apply nat.mul_le_mul_right (n*n), exact hn,
