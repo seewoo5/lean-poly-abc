@@ -62,8 +62,6 @@ end
 
 def is_const (x : ratfunc k) := ∃ c : k, x = ratfunc.C c
 
-namespace unique_factorization_monoid
-
 theorem associates_pow_eq_pow_iff {A B : associates k[X]} {n : ℕ} 
   (hn : 0 < n) : A^n = B^n ↔ A = B :=
 begin
@@ -89,7 +87,7 @@ end
 theorem associated_pow_pow_coprime_iff {a b : k[X]} {m n : ℕ}
   (ha : a ≠ 0) (hb : b ≠ 0) (hm : 0 < m) (hn : 0 < n)
   (h : associated (a^m) (b^n)) (hcp : m.coprime n)
-  : ∃ c : k[X], associated a (c^n) ∧ associated b (c^m) :=
+  : ∃ c : k[X], c ≠ 0 ∧ associated a (c^n) ∧ associated b (c^m) :=
 begin
   -- change to associates
   simp_rw [←associates.mk_eq_mk_iff_associated,
@@ -102,7 +100,11 @@ begin
   clear_value A B, clear' eq_A eq_B a b,
   suffices goal : ∃ C, A = C^n ∧ B = C^m,
   rcases goal with ⟨C, hC⟩,
-  use C.out, simp only [associates.mk_out], exact hC,
+  use C.out, simp only [associates.mk_out],
+  refine ⟨_, hC⟩,
+  rw [←associates.mk_ne_zero, associates.mk_out,
+    ←pow_ne_zero_iff hn, ←hC.1],
+  exact hA, exact associates.no_zero_divisors,
   
   have subgoal : ∃ C, A = C^n,
   { apply associates.is_pow_of_dvd_count hA,
@@ -117,8 +119,6 @@ begin
     associates_pow_eq_pow_iff hn] at h,
   exact h.symm,
 end
-
-end unique_factorization_monoid
 
 theorem no_parametrization_y2_x3_1 
   {x y : ratfunc k} (eqn : y^2 = x^3 + 1) : is_const x ∧ is_const y :=
@@ -169,20 +169,20 @@ begin
     { have cp : is_coprime (N^2) (n^2) := cp_nN.symm.pow,
       apply cp.dvd_of_dvd_mul_left,
       rw flat_eqn, exact dvd_mul_left _ _, }, },
-    
-  -- TODO: x is mk m M and y is mk n N
-  -- TODO: is_const x if and only if m M are associated
-  -- associated_of_dvd_dvd -> N^2 and M^3 dividing each other gives associated
-  -- power -> all exponentials divided by 2 and 3
-
-  -- have coe_rm : rm = ↑m := eq_rm,
-  -- have coe_rM : rM = ↑M := eq_rM,
-  -- have coe_rn : rn = ↑n := eq_rn,
-  -- have coe_rN : rN = ↑N := eq_rN,
-  -- rw [coe_rm, coe_rM, coe_rn, coe_rN] at flat_eqn,
-  -- simp_rw [←algebra_map.coe_pow,
-  --   ←algebra_map.coe_add,
-  --   ←algebra_map.coe_mul] at flat_eqn,
   
+  rcases (associated_pow_pow_coprime_iff nz_M nz_N 
+    dec_trivial _ assoc_M3_N2 (by norm_num))
+    with ⟨w, nz_w, assoc_M_w2, assoc_N_w3⟩,
+  swap, dec_trivial,
+  rcases assoc_M_w2.symm with ⟨u, eq_Mw⟩, rw mul_comm at eq_Mw,
+  rcases assoc_N_w3.symm with ⟨v, eq_Nw⟩, rw mul_comm at eq_Nw,
+  simp_rw [←eq_Mw, ←eq_Nw, mul_pow, ←pow_mul, 
+    ←mul_assoc] at flat_eqn,
+  ring_nf at flat_eqn,
+  rw mul_left_inj' (pow_ne_zero 6 nz_w) at flat_eqn,
+  rw [mul_comm _ (↑v ^ 2), 
+    left_distrib (↑v ^ 2) (m^3) _,
+    ←mul_assoc] at flat_eqn,
+  simp_rw [←units.coe_pow, ←units.coe_mul] at flat_eqn,
   sorry,
 end
