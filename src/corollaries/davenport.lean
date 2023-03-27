@@ -144,7 +144,7 @@ begin
       ... = 2 * a.nat_degree + 2 * b.nat_degree + 2 * c.nat_degree : by ring_nf
       ... = 2 * a.nat_degree + 3 * a.nat_degree + 2 * c.nat_degree : by rw t1
       ... = 5 * a.nat_degree + (2 * c.nat_degree) : by ring_nf,
-      {simp, exact t3, },
+      {simp only [mul_le_mul_left, nat.succ_pos'], exact t3, },
     end,
     have t5 : a.nat_degree + 2 ≤ 2 * c.nat_degree := by linarith, -- avoid to use linarith
     tauto,
@@ -164,7 +164,7 @@ begin
       ... ≤ 2 * (3 * a.nat_degree) : le_double 
       ... ≤ 2 * (max (3 * a.nat_degree) (2 * b.nat_degree)) : by simp only [mul_le_mul_left, nat.succ_pos', le_max_iff, le_refl, true_or]
       ... = 2 * c.nat_degree : by rw hcdeg,
-      {simp, exact hadeg, },
+      {simp only [add_le_add_iff_left, le_mul_iff_one_le_right, nat.succ_pos'], exact hadeg, },
     end,
     tauto,
   },
