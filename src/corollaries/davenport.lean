@@ -18,6 +18,11 @@ begin
   dec_trivial,
 end
 
+lemma nat_lt_add_one_le {a b : ℕ} (h : a < b) : a + 1 ≤ b :=
+begin
+  sorry,
+end
+
 
 lemma ne_nat_degree_add_max_nat_degree {a b : k[X]} (hdeg : a.nat_degree ≠ b.nat_degree)
 : (a + b).nat_degree = max a.nat_degree b.nat_degree :=
@@ -67,17 +72,26 @@ begin
   set c := a^3 - b^2 with def_c,
   
   -- nonzero
+  -- too much here...
   have hap : -a^3 ≠ 0 := neg_ne_zero.mpr (pow_ne_zero _ ha),
   have hbp : b^2 ≠ 0 := pow_ne_zero _ hb,
   have habp_nz : (-a^3) * (b^2) ≠ 0 := mul_ne_zero hap hbp, 
   have hab_nz : a * b ≠ 0 := mul_ne_zero ha hb,
   have habc : a * b * c ≠ 0 := mul_ne_zero hab_nz hnz, 
+  have har : a.radical ≠ 0 := radical_ne_zero a,
+  have hbr : b.radical ≠ 0 := radical_ne_zero b,
+  have hcr : c.radical ≠ 0 := radical_ne_zero c,
+  have habr : a.radical * b.radical ≠ 0 := mul_ne_zero har hbr,
+  have habr' : (a * b).radical ≠ 0 :=
+    by calc (a * b).radical = a.radical * b.radical : radical_mul hab
+    ... ≠ 0 : habr, 
 
   -- coprime
   have habp : is_coprime (-a^3) (b^2) := (is_coprime.pow hab).neg_left,
   have hbcp : is_coprime (b^2) c := sorry,
   have hcap : is_coprime c (-a^3) := sorry,
   have hab_cp : is_coprime ((-a^3) * (b^2)) c := sorry,
+  have hab_cp' : is_coprime (a * b) c := sorry,
 
   -- degree of c = a^3 - b^2
   -- have deg_c_le : c.nat_degree ≤ max (3 * a.nat_degree) (2 * b.nat_degree) :=
@@ -117,12 +131,15 @@ begin
     have t3 :=
     by calc 3 * a.nat_degree + 1 = max3 (a^3).nat_degree (b^2).nat_degree c.nat_degree + 1: by rw t2
     ... = max3 (-a^3).nat_degree (b^2).nat_degree c.nat_degree + 1 : by rw nat_degree_neg
-    ... ≤ ((-a^3) * (b^2) * c).radical.nat_degree : sorry
+    ... ≤ ((-a^3) * (b^2) * c).radical.nat_degree : nat_lt_add_one_le deg_ineq
     ... = ((-a^3) * (b^2)).radical.nat_degree + c.radical.nat_degree : sorry
     ... = (-a^3).radical.nat_degree + (b^2).radical.nat_degree + c.radical.nat_degree : sorry
     ... = (a^3).radical.nat_degree + (b^2).radical.nat_degree + c.radical.nat_degree : by rw radical_neg
     ... = a.radical.nat_degree + b.radical.nat_degree + c.radical.nat_degree : sorry -- why 1 ≤ 2 and 1 ≤ 3?
-    ... = (a * b * c).radical.nat_degree : sorry
+    ... = (a.radical * b.radical).nat_degree + c.radical.nat_degree : by rw← (nat_degree_mul har hbr)
+    ... = (a * b).radical.nat_degree + c.radical.nat_degree : by rw← radical_mul hab
+    ... = ((a * b).radical * c.radical).nat_degree : by rw← (nat_degree_mul habr' hcr)
+    ... = (a * b * c).radical.nat_degree : by rw← (radical_mul hab_cp')
     ... ≤ (a * b * c).nat_degree : radical_nat_degree_le
     ... = (a * b).nat_degree + c.nat_degree : nat_degree_mul hab_nz hnz
     ... = a.nat_degree + b.nat_degree + c.nat_degree : by rw [nat_degree_mul ha hb],
