@@ -16,39 +16,58 @@ theorem polynomial.flt_catalan
   {p q r : ℕ} (hp : 0 < p) (hq : 0 < q) (hr : 0 < r)
   (hineq : q*r + r*p + p*q ≤ p*q*r)
   (chp : ¬(ring_char k ∣ p)) (chq : ¬(ring_char k ∣ q)) (chr : ¬(ring_char k ∣ r))
-  {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
-  (hab : is_coprime a b) (heq: a^p + b^q = c^r) : 
+  {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hab : is_coprime a b)
+  {u v w : k[X]ˣ} (heq: ↑u*a^p + ↑v*b^q = ↑w*c^r) : 
   (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
 begin
   have hbc : is_coprime b c,
-  { rw [←is_coprime.pow_left_iff hq, ←is_coprime.pow_right_iff hr, ←heq],
-    convert is_coprime.add_mul_right_right hab.symm.pow (1: k[X]),
-    exact (one_mul _).symm, },
+  { rw [←units.inv_mul_eq_iff_eq_mul, mul_add, 
+      ←mul_assoc, ←mul_assoc, ←units.coe_mul, ←units.coe_mul] at heq,
+    rw [←is_coprime.pow_left_iff hq, ←is_coprime.pow_right_iff hr, ←heq],
+    refine is_coprime.add_mul_right_right _ ↑(w⁻¹ * v),
+    rw is_coprime_mul_unit_left_right (w⁻¹ * u).is_unit,
+    exact hab.symm.pow },
   have hca : is_coprime c a,
-  { rw [←is_coprime.pow_left_iff hr, ←is_coprime.pow_right_iff hp, ←heq],
-    convert is_coprime.mul_add_right_left hab.symm.pow (1: k[X]),
-    exact (one_mul _).symm, },
+  { rw [←units.inv_mul_eq_iff_eq_mul, mul_add, 
+      ←mul_assoc, ←mul_assoc, ←units.coe_mul, ←units.coe_mul] at heq,
+    rw [←is_coprime.pow_left_iff hr, ←is_coprime.pow_right_iff hp, ←heq],
+    refine is_coprime.mul_add_right_left _ ↑(w⁻¹ * u),
+    rw is_coprime_mul_unit_left_left (w⁻¹ * v).is_unit,
+    exact hab.symm.pow, },
 
   have hap : a^p ≠ 0 := pow_ne_zero _ ha,
   have hbp : b^q ≠ 0 := pow_ne_zero _ hb,
   have hcp : -c^r ≠ 0 := neg_ne_zero.mpr (pow_ne_zero _ hc),
 
-  have habp : is_coprime (a^p) (b^q) := is_coprime.pow hab,
-  have hbcp : is_coprime (b^q) (-c^r) := (is_coprime.pow hbc).neg_right,
-  have hcap : is_coprime (-c^r) (a^p) := (is_coprime.pow hca).neg_left,
-  have habcp : is_coprime ((a^p)*(b^q)) (-c^r) := hcap.symm.mul_left hbcp,
-
   rw ←add_neg_eq_zero at heq,
 
-  cases (polynomial.abc hap hbp hcp habp hbcp hcap heq) with ineq dr0, swap,
+  have habp : is_coprime (↑u*a^p) (↑v*b^q) := by
+    rw [is_coprime_mul_unit_left_left u.is_unit, 
+      is_coprime_mul_unit_left_right v.is_unit]; 
+    exact hab.pow,
+  have hbcp : is_coprime (↑v*b^q) (-(↑w*c^r)) := by
+    rw [is_coprime.neg_right_iff,
+      is_coprime_mul_unit_left_left v.is_unit,
+      is_coprime_mul_unit_left_right w.is_unit];
+    exact hbc.pow,
+  have hcap : is_coprime (-(↑w*c^r)) (↑u*a^p) := by 
+    rw [is_coprime.neg_left_iff,
+      is_coprime_mul_unit_left_left w.is_unit,
+      is_coprime_mul_unit_left_right u.is_unit];
+    exact hca.pow,
+  have habcp := hcap.symm.mul_left hbcp,
+
+  cases (polynomial.abc _ _ _ habp hbcp hcap heq) with ineq dr0, swap,
   { rw [polynomial.derivative_neg, neg_eq_zero] at dr0,
-    rw [pow_derivative_eq_zero chp ha,
-        pow_derivative_eq_zero chq hb,
-        pow_derivative_eq_zero chr hc] at dr0,
-    exact dr0 },
+    sorry, },
+    -- rw [pow_derivative_eq_zero chp ha,
+    --     pow_derivative_eq_zero chq hb,
+    --     pow_derivative_eq_zero chr hc] at dr0,
+    -- exact dr0 },
   
   exfalso, apply not_le_of_lt ineq, clear ineq,
   rw [radical_mul habcp, radical_mul habp],
+  -- need progress here
   rw [radical_pow a hp, radical_pow b hq, 
     radical_neg, radical_pow c hr],
   rw [←radical_mul hab, ←radical_mul (hca.symm.mul_left hbc)],
