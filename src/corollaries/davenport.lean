@@ -18,12 +18,6 @@ begin
   dec_trivial,
 end
 
-lemma nat_lt_add_one_le {a b : ℕ} (h : a < b) : a + 1 ≤ b :=
-begin
-  sorry,
-end
-
-
 lemma ne_nat_degree_add_max_nat_degree {a b : k[X]} (hdeg : a.nat_degree ≠ b.nat_degree)
 : (a + b).nat_degree = max a.nat_degree b.nat_degree :=
 begin
@@ -128,21 +122,20 @@ begin
       ... = 3 * a.nat_degree : by simp only [nat_degree_pow],
     end,
     have t2' : (a * b).nat_degree ≤ a.nat_degree + b.nat_degree := nat_degree_mul_le,
-    have t3 :=
-    by calc 3 * a.nat_degree + 1 = max3 (a^3).nat_degree (b^2).nat_degree c.nat_degree + 1: by rw t2
-    ... = max3 (-a^3).nat_degree (b^2).nat_degree c.nat_degree + 1 : by rw nat_degree_neg
-    ... ≤ ((-a^3) * (b^2) * c).radical.nat_degree : nat_lt_add_one_le deg_ineq
-    ... = ((-a^3) * (b^2)).radical.nat_degree + c.radical.nat_degree : sorry
-    ... = (-a^3).radical.nat_degree + (b^2).radical.nat_degree + c.radical.nat_degree : sorry
-    ... = (a^3).radical.nat_degree + (b^2).radical.nat_degree + c.radical.nat_degree : by rw radical_neg
-    ... = a.radical.nat_degree + b.radical.nat_degree + c.radical.nat_degree : sorry -- why 1 ≤ 2 and 1 ≤ 3?
-    ... = (a.radical * b.radical).nat_degree + c.radical.nat_degree : by rw← (nat_degree_mul har hbr)
-    ... = (a * b).radical.nat_degree + c.radical.nat_degree : by rw← radical_mul hab
-    ... = ((a * b).radical * c.radical).nat_degree : by rw← (nat_degree_mul habr' hcr)
-    ... = (a * b * c).radical.nat_degree : by rw← (radical_mul hab_cp')
-    ... ≤ (a * b * c).nat_degree : radical_nat_degree_le
-    ... = (a * b).nat_degree + c.nat_degree : nat_degree_mul hab_nz hnz
-    ... = a.nat_degree + b.nat_degree + c.nat_degree : by rw [nat_degree_mul ha hb],
+    have t3 : 3 * a.nat_degree + 1 ≤ a.nat_degree + b.nat_degree + c.nat_degree :=
+    begin
+      calc 3 * a.nat_degree + 1 = max3 (-a^3).nat_degree (b^2).nat_degree c.nat_degree + 1 : by rw [←t2, nat_degree_neg]
+      ... ≤ ((-a^3) * (b^2) * c).radical.nat_degree : _ 
+      ... = ((-a^3) * (b^2)).radical.nat_degree + c.radical.nat_degree : sorry
+      ... = (-a^3).radical.nat_degree + (b^2).radical.nat_degree + c.radical.nat_degree : sorry
+      ... = (a^3).radical.nat_degree + (b^2).radical.nat_degree + c.radical.nat_degree : by rw radical_neg
+      ... = a.radical.nat_degree + b.radical.nat_degree + c.radical.nat_degree : sorry -- why 1 ≤ 2 and 1 ≤ 3?
+      ... = (a * b * c).radical.nat_degree : by rw [←nat_degree_mul har hbr, ←radical_mul hab, ←nat_degree_mul habr' hcr, ←radical_mul hab_cp']
+      ... ≤ (a * b * c).nat_degree : radical_nat_degree_le
+      ... = (a * b).nat_degree + c.nat_degree : nat_degree_mul hab_nz hnz
+      ... = a.nat_degree + b.nat_degree + c.nat_degree : by rw [nat_degree_mul ha hb],
+      { rw nat.lt_iff_add_one_le at deg_ineq, exact deg_ineq, },
+    end,
 
     have t4 : 5 * a.nat_degree + (a.nat_degree + 2) ≤ 5 * a.nat_degree + (2 * c.nat_degree) :=
     by calc 5 * a.nat_degree + a.nat_degree + 2 = 2 * (3 * a.nat_degree + 1) : by ring_nf
