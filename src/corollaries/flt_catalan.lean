@@ -1,5 +1,6 @@
 import algebra.char_p.basic
 import algebra.euclidean_domain.defs
+import ring_theory.power_series.basic
 import logic.lemmas
 
 import mason_stothers
@@ -11,6 +12,27 @@ open polynomial
 open unique_factorization_monoid
 
 variables {k: Type*} [field k]
+
+private lemma unit_ne_zero {u : k[X]ˣ} : (↑u : k[X]) ≠ 0 :=
+begin
+  rcases polynomial.is_unit_iff.mp u.is_unit with ⟨r, hr, er⟩,
+  rw [←er, ne.def, C_eq_zero, ←ne.def],
+  rw is_unit_iff_ne_zero at hr,
+  exact hr,
+end
+
+private lemma unit_nat_degree_zero {u : k[X]ˣ} : (↑u : k[X]).nat_degree = 0 :=
+begin
+  rcases polynomial.is_unit_iff.mp u.is_unit with ⟨r, hr, er⟩,
+  rw ←er, exact polynomial.nat_degree_C r,
+end
+
+private lemma derivative_unit_mul {u : k[X]ˣ} (a : k[X]) :
+  (↑u * a).derivative = ↑u * a.derivative :=
+begin
+  rcases polynomial.is_unit_iff.mp u.is_unit with ⟨r, hr, er⟩,
+  rw ←er, simp only [derivative_mul, derivative_C, zero_mul, zero_add],
+end
 
 theorem polynomial.flt_catalan
   {p q r : ℕ} (hp : 0 < p) (hq : 0 < q) (hr : 0 < r)
@@ -39,47 +61,61 @@ begin
   have hbp : b^q ≠ 0 := pow_ne_zero _ hb,
   have hcp : -c^r ≠ 0 := neg_ne_zero.mpr (pow_ne_zero _ hc),
 
-  rw ←add_neg_eq_zero at heq,
+  rw [←add_neg_eq_zero, ←mul_neg] at heq,
 
   have habp : is_coprime (↑u*a^p) (↑v*b^q) := by
     rw [is_coprime_mul_unit_left_left u.is_unit, 
       is_coprime_mul_unit_left_right v.is_unit]; 
     exact hab.pow,
-  have hbcp : is_coprime (↑v*b^q) (-(↑w*c^r)) := by
-    rw [is_coprime.neg_right_iff,
-      is_coprime_mul_unit_left_left v.is_unit,
-      is_coprime_mul_unit_left_right w.is_unit];
+  have hbcp : is_coprime (↑v*b^q) (↑w*-c^r) := by
+    rw [is_coprime_mul_unit_left_left v.is_unit,
+      is_coprime_mul_unit_left_right w.is_unit,
+      is_coprime.neg_right_iff];
     exact hbc.pow,
-  have hcap : is_coprime (-(↑w*c^r)) (↑u*a^p) := by 
-    rw [is_coprime.neg_left_iff,
-      is_coprime_mul_unit_left_left w.is_unit,
-      is_coprime_mul_unit_left_right u.is_unit];
+  have hcap : is_coprime (↑w*-c^r) (↑u*a^p) := by 
+    rw [is_coprime_mul_unit_left_left w.is_unit,
+      is_coprime_mul_unit_left_right u.is_unit,
+      is_coprime.neg_left_iff];
     exact hca.pow,
   have habcp := hcap.symm.mul_left hbcp,
 
-  cases (polynomial.abc _ _ _ habp hbcp hcap heq) with ineq dr0, swap,
-  { rw [polynomial.derivative_neg, neg_eq_zero] at dr0,
-    sorry, },
-    -- rw [pow_derivative_eq_zero chp ha,
-    --     pow_derivative_eq_zero chq hb,
-    --     pow_derivative_eq_zero chr hc] at dr0,
-    -- exact dr0 },
+  cases (polynomial.abc 
+    (mul_ne_zero unit_ne_zero hap)
+    (mul_ne_zero unit_ne_zero hbp)
+    (mul_ne_zero unit_ne_zero hcp)
+    habp hbcp hcap heq) with ineq dr0, swap,
+  { simp_rw [derivative_unit_mul, 
+      units.mul_right_eq_zero,
+      derivative_neg, neg_eq_zero] at dr0,
+    rw [pow_derivative_eq_zero chp ha,
+        pow_derivative_eq_zero chq hb,
+        pow_derivative_eq_zero chr hc] at dr0,
+    exact dr0, },
   
   exfalso, apply not_le_of_lt ineq, clear ineq,
+  -- work on lhs
   rw [radical_mul habcp, radical_mul habp],
-  -- need progress here
-  rw [radical_pow a hp, radical_pow b hq, 
-    radical_neg, radical_pow c hr],
+  simp_rw radical_unit_mul,
+  rw [radical_neg,
+    radical_pow a hp, radical_pow b hq, radical_pow c hr],
   rw [←radical_mul hab, ←radical_mul (hca.symm.mul_left hbc)],
   apply le_trans radical_nat_degree_le,
-  rw nat_degree_neg, simp_rw nat_degree_pow,
+  rw nat_degree_mul (mul_ne_zero ha hb) hc,
+  rw nat_degree_mul ha hb,
+  -- work on rhs
+  rw nat_degree_mul unit_ne_zero hap,
+  rw nat_degree_mul unit_ne_zero hbp,
+  rw nat_degree_mul unit_ne_zero hcp,
+  simp_rw [
+    polynomial.nat_degree_neg,
+    polynomial.nat_degree_pow,
+    unit_nat_degree_zero, zero_add],
+
   have hpqr : 0 < p*q*r := nat.mul_le_mul
     (nat.mul_le_mul hp hq) hr,
   apply le_of_mul_le_mul_left _ hpqr,
   apply le_trans _ (nat.mul_le_mul_right _ hineq),
   convert weighted_average_le_max3,
-  rw nat_degree_mul (mul_ne_zero ha hb) hc,
-  rw nat_degree_mul ha hb,
   ring_nf,
 end
 
@@ -89,8 +125,11 @@ theorem polynomial.flt_coprime
   (hab : is_coprime a b) (heq: a^n + b^n = c^n) : 
   (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
 begin
-  have h1n : 1 ≤ n := le_trans (by dec_trivial) hn,
-  apply polynomial.flt_catalan h1n h1n h1n _
+  have hn' : 0 < n := by linarith,
+  rw [←one_mul (a^n), ←one_mul (b^n), ←one_mul (c^n)] at heq,
+  have h : ↑(1: k[X]ˣ) = (1: k[X]) := rfl,
+  simp_rw ←h at heq,
+  apply polynomial.flt_catalan hn' hn' hn' _
     chn chn chn ha hb hc hab heq,
   have eq_lhs : n*n + n*n + n*n = 3*n*n := by ring_nf,
   rw eq_lhs, rw [mul_assoc, mul_assoc],
