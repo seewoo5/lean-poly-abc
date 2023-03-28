@@ -34,8 +34,14 @@ begin
     rw (associated_iff_normalized_factors_eq_normalized_factors ha hb).mp h },
 end
 
-lemma radical_unit {a : k[X]} (h : is_unit a) : radical a = 1 :=
+lemma radical_is_unit {a : k[X]} (h : is_unit a) : radical a = 1 :=
 (radical_associated (associated_one_iff_is_unit.mpr h)).trans radical_one
+
+lemma radical_unit {u : k[X]ˣ} : radical (↑u: k[X]) = 1 :=
+radical_is_unit u.is_unit
+
+lemma radical_unit_mul {u : k[X]ˣ} {a : k[X]} : radical (↑u * a) = radical a :=
+radical_associated (associated_unit_mul_left _ _ u.is_unit)
 
 /-- coprime polynomials have disjoint prime factors (as multisets). -/
 lemma is_coprime.disjoint_normalized_factors {a b : k[X]} (hc: is_coprime a b) : 
@@ -68,17 +74,17 @@ end
 -- possible TODO: the proof is unnecessarily long
 @[simp]
 lemma radical_neg_one : (-1 : k[X]).radical = 1 :=
-radical_unit (is_unit_one.neg)
+radical_is_unit (is_unit_one.neg)
 
 lemma radical_mul {a b : k[X]} (hc: is_coprime a b) : 
   (a * b).radical = a.radical * b.radical :=
 begin
   by_cases ha: a = 0,
   { subst ha, rw is_coprime_zero_left at hc,
-    simp only [zero_mul, radical_zero, one_mul, radical_unit hc], },
+    simp only [zero_mul, radical_zero, one_mul, radical_is_unit hc], },
   by_cases hb: b = 0,
   { subst hb, rw is_coprime_zero_right at hc,
-    simp only [mul_zero, radical_zero, mul_one, radical_unit hc], },
+    simp only [mul_zero, radical_zero, mul_one, radical_is_unit hc], },
   simp_rw radical,
   rw hc.mul_prime_factors_disj_union ha hb,
   rw finset.prod_disj_union (hc.disjoint_prime_factors),
@@ -97,7 +103,7 @@ begin
   exact ne_of_gt hn,
 end
 
-lemma radical_pow (a: k[X]) {n: nat} (hn: 1 ≤ n) : 
+lemma radical_pow (a: k[X]) {n: nat} (hn: 0 < n) : 
   (a^n).radical = a.radical :=
 begin
   simp_rw [radical, prime_factors_pow a hn],

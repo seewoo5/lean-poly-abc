@@ -37,7 +37,7 @@ end
 lemma div_radical_is_unit {u : k[X]} (hu : is_unit u) : 
   is_unit u.div_radical :=
 begin
-  rwa [div_radical, radical_unit hu, euclidean_domain.div_one],
+  rwa [div_radical, radical_is_unit hu, euclidean_domain.div_one],
 end
 
 lemma eq_div_radical {a x : k[X]} (h : a.radical * x = a) :
