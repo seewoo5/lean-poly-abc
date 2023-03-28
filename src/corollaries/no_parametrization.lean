@@ -120,7 +120,7 @@ begin
   exact h.symm,
 end
 
-theorem no_parametrization_y2_x3_1 
+theorem no_parametrization_y2_x3_1 (chk : ¬(ring_char k ∣ 6))
   {x y : ratfunc k} (eqn : y^2 = x^3 + 1) : is_const x ∧ is_const y :=
 begin
   have eq_x := x.num_div_denom.symm,
@@ -140,6 +140,9 @@ begin
 
   revert m M n N eq_m eq_M eq_n eq_N nz_M nz_N eq_x eq_y eqn cp_mM cp_nN,
   intros m M n N eq_m eq_M eq_n eq_N nz_M nz_N eq_x eq_y eqn cp_mM cp_nN,
+
+  have nz_m : m ≠ 0, sorry,
+  have nz_n : n ≠ 0, sorry,
 
   have flat_eqn : n ^ 2 * M ^ 3 = (m ^ 3 + M ^ 3) * N ^ 2,
   { have nz_rM := ratfunc.algebra_map_ne_zero nz_M,
@@ -176,13 +179,22 @@ begin
   swap, dec_trivial,
   rcases assoc_M_w2.symm with ⟨u, eq_Mw⟩, rw mul_comm at eq_Mw,
   rcases assoc_N_w3.symm with ⟨v, eq_Nw⟩, rw mul_comm at eq_Nw,
-  simp_rw [←eq_Mw, ←eq_Nw, mul_pow, ←pow_mul, 
-    ←mul_assoc] at flat_eqn,
+  simp_rw [←eq_Mw, ←eq_Nw, mul_pow, ←pow_mul, ←mul_assoc] at flat_eqn,
   ring_nf at flat_eqn,
   rw mul_left_inj' (pow_ne_zero 6 nz_w) at flat_eqn,
   rw [mul_comm _ (↑v ^ 2), 
     left_distrib (↑v ^ 2) (m^3) _,
     ←mul_assoc] at flat_eqn,
   simp_rw [←units.coe_pow, ←units.coe_mul] at flat_eqn,
-  sorry,
+  have cp_mw : is_coprime m w,
+  { rw [←eq_Mw, is_coprime_mul_unit_left_right u.is_unit,
+      is_coprime.pow_right_iff] at cp_mM, 
+    exact cp_mM, dec_trivial },
+  have chk2 : ¬ring_char k ∣ 2,
+  { intro h, apply chk, apply h.trans, use 3, norm_num, },
+  have chk3 : ¬ring_char k ∣ 3,
+  { intro h, apply chk, apply h.trans, use 2, norm_num, },
+  have deriv_eq_zero := polynomial.flt_catalan 
+    _ _ _ _ chk3 chk chk2 nz_m nz_w nz_n cp_mw flat_eqn.symm; try {norm_num},
+  rcases deriv_eq_zero with ⟨eq_dm, eq_dw, eq_dn⟩,
 end
