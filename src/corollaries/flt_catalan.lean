@@ -34,6 +34,10 @@ begin
   rw ←er, simp only [derivative_mul, derivative_C, zero_mul, zero_add],
 end
 
+private lemma is_coprime.mul_units_left {a b : k[X]} {u v : k[X]ˣ}
+  (h : is_coprime a b) : is_coprime (↑u * a) (↑v * b) :=
+by rw [is_coprime_mul_unit_left_left u.is_unit, is_coprime_mul_unit_left_right v.is_unit]; exact h 
+
 theorem polynomial.flt_catalan
   {p q r : ℕ} (hp : 0 < p) (hq : 0 < q) (hr : 0 < r)
   (hineq : q*r + r*p + p*q ≤ p*q*r)
@@ -63,20 +67,9 @@ begin
 
   rw [←add_neg_eq_zero, ←mul_neg] at heq,
 
-  have habp : is_coprime (↑u*a^p) (↑v*b^q) := by
-    rw [is_coprime_mul_unit_left_left u.is_unit, 
-      is_coprime_mul_unit_left_right v.is_unit]; 
-    exact hab.pow,
-  have hbcp : is_coprime (↑v*b^q) (↑w*-c^r) := by
-    rw [is_coprime_mul_unit_left_left v.is_unit,
-      is_coprime_mul_unit_left_right w.is_unit,
-      is_coprime.neg_right_iff];
-    exact hbc.pow,
-  have hcap : is_coprime (↑w*-c^r) (↑u*a^p) := by 
-    rw [is_coprime_mul_unit_left_left w.is_unit,
-      is_coprime_mul_unit_left_right u.is_unit,
-      is_coprime.neg_left_iff];
-    exact hca.pow,
+  have habp : is_coprime (↑u*a^p) (↑v*b^q) := hab.pow.mul_units_left,
+  have hbcp : is_coprime (↑v*b^q) (↑w*-c^r) := hbc.pow.neg_right.mul_units_left,
+  have hcap : is_coprime (↑w*-c^r) (↑u*a^p) := hca.pow.neg_left.mul_units_left,
   have habcp := hcap.symm.mul_left hbcp,
 
   cases (polynomial.abc 
