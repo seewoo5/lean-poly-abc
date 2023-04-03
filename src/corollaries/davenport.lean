@@ -68,6 +68,12 @@ theorem polynomial.davenport
     a.nat_degree + 2 ≤ 2 * (a^3 - b^2).nat_degree :=
 begin
   set c := a^3 - b^2 with def_c,
+  have hac : is_coprime a c,
+  { rwa [def_c, pow_succ, sub_eq_add_neg, is_coprime.mul_add_left_right_iff,
+      is_coprime.neg_right_iff, is_coprime.pow_right_iff two_pos] },
+  have hbc : is_coprime b c,
+  { rwa [def_c, ←is_coprime.neg_right_iff, neg_sub, pow_succ, sub_eq_add_neg, is_coprime.mul_add_left_right_iff,
+      is_coprime.neg_right_iff, is_coprime.pow_right_iff three_pos, is_coprime_comm] },
   
   -- nonzero
   -- too much here...
@@ -86,49 +92,49 @@ begin
 
   -- coprime
   have habp : is_coprime (-a^3) (b^2) := (is_coprime.pow hab).neg_left,
-  have hbcp : is_coprime (b^2) c :=
-  begin
-    have hbap : is_coprime (b^2) (a^3) := (is_coprime.pow hab).symm,
-    have t := is_coprime.mul_add_right_right hbap (-1),
-    have tt : (-1) * b^2 + a^3 = c :=
-    begin
-      rw def_c,
-      ring_nf,
-    end,
-    rw← tt,
-    exact t,
-  end,
-  have hbcp' : is_coprime b c :=
-  begin
-    have h1 : 0 < 1 := by norm_num,
-    have h2 : 0 < 2 := by norm_num,
-    rw← is_coprime.pow_iff h2 h1,
-    simp only [pow_one],
-    exact hbcp,
-  end,
-  have hcap : is_coprime c (-a^3) :=
-  begin
-    have t : is_coprime (-b^2) (-a^3) := (is_coprime.pow hab).symm.neg_right.neg_left,
-    have tt : is_coprime ((-1)*(-a^3) + (-b^2)) (-a^3) := is_coprime.mul_add_right_left t (-1),
-    have ttt : ((-1)*(-a^3) + (-b^2)) = c := by ring_nf,
-    rw← ttt,
-    exact tt,
-  end,
-  have hcap' : is_coprime c a :=
-  begin
-    have t : is_coprime c (a^3) :=
-    begin
-      rw← is_coprime.neg_right_iff,
-      exact hcap,
-    end,
-    have h1 : 0 < 1 := by norm_num,
-    have h3 : 0 < 3 := by norm_num,
-    rw← is_coprime.pow_iff h1 h3,
-    simp only [pow_one],
-    exact t, 
-  end,
-  have hab_cp : is_coprime ((-a^3) * (b^2)) c := hcap.symm.mul_left hbcp,
-  have hab_cp' : is_coprime (a * b) c := (hcap').symm.mul_left hbcp',
+  -- have hbcp : is_coprime (b^2) c :=
+  -- begin
+  --   have hbap : is_coprime (b^2) (a^3) := (is_coprime.pow hab).symm,
+  --   have t := is_coprime.mul_add_right_right hbap (-1),
+  --   have tt : (-1) * b^2 + a^3 = c :=
+  --   begin
+  --     rw def_c,
+  --     ring_nf,
+  --   end,
+  --   rw← tt,
+  --   exact t,
+  -- end,
+  -- have hbcp' : is_coprime b c :=
+  -- begin
+  --   have h1 : 0 < 1 := by norm_num,
+  --   have h2 : 0 < 2 := by norm_num,
+  --   rw← is_coprime.pow_iff h2 h1,
+  --   simp only [pow_one],
+  --   exact hbcp,
+  -- end,
+  -- have hcap : is_coprime c (-a^3) := 
+  -- begin
+  --   have t : is_coprime (-b^2) (-a^3) := (is_coprime.pow hab).symm.neg_right.neg_left,
+  --   have tt : is_coprime ((-1)*(-a^3) + (-b^2)) (-a^3) := is_coprime.mul_add_right_left t (-1),
+  --   have ttt : ((-1)*(-a^3) + (-b^2)) = c := by ring_nf,
+  --   rw← ttt,
+  --   exact tt,
+  -- end,
+  -- have hcap' : is_coprime c a :=
+  -- begin
+  --   have t : is_coprime c (a^3) :=
+  --   begin
+  --     rw← is_coprime.neg_right_iff,
+  --     exact hcap,
+  --   end,
+  --   have h1 : 0 < 1 := by norm_num,
+  --   have h3 : 0 < 3 := by norm_num,
+  --   rw← is_coprime.pow_iff h1 h3,
+  --   simp only [pow_one],
+  --   exact t, 
+  -- end,
+  have hab_cp : is_coprime ((-a^3) * (b^2)) c := sorry,
+  have hab_cp' : is_coprime (a * b) c := sorry,
 
   -- better way to do below?
   have heq : (-a^3) + b^2 + c = 0 :=
@@ -136,73 +142,76 @@ begin
     ... = 0 : by ring_nf,
   
   -- apply ABC
-  cases (polynomial.abc hap hbp hnz habp hbcp hcap heq) with deg_ineq dr0, swap,
+  cases (polynomial.abc hap hbp hnz habp sorry sorry heq) with deg_ineq dr0, swap,
   { rw [polynomial.derivative_neg, neg_eq_zero] at dr0,
     rw [pow_derivative_eq_zero ch3 ha,
         pow_derivative_eq_zero ch2 hb] at dr0,
         tauto, },
+  rw [nat_degree_neg, radical_mul, radical_mul, radical_neg, radical_pow, radical_pow,
+      nat_degree_mul, nat_degree_mul, nat_degree_pow, nat_degree_pow] at deg_ineq,
+
 
   -- divide into two cases: deg(a^3) = deg(b^2) or not
-  by_cases hdeg : (a^3).nat_degree = (b^2).nat_degree,
-  {
-    have t1 : 3 * a.nat_degree = 2 * b.nat_degree :=
-    begin
-      simp_rw nat_degree_pow at hdeg,
-      exact hdeg,
-    end,
-    have t2 : max3 (a^3).nat_degree (b^2).nat_degree (c.nat_degree) = 3 * a.nat_degree :=
-    begin
-      have h1 : c.nat_degree ≤ max (a^3).nat_degree (b^2).nat_degree := nat_degree_sub_le_nat_degree,
-      by calc max3 (a^3).nat_degree (b^2).nat_degree (c.nat_degree) = max (a^3).nat_degree (b^2).nat_degree : max_eq_left h1
-      ... = max (a^3).nat_degree (a^3).nat_degree : by rw hdeg
-      ... = (a^3).nat_degree : max_self _
-      ... = 3 * a.nat_degree : by simp only [nat_degree_pow],
-    end,
-    have t2' : (a * b).nat_degree ≤ a.nat_degree + b.nat_degree := nat_degree_mul_le,
-    have t3 : 3 * a.nat_degree + 1 ≤ a.nat_degree + b.nat_degree + c.nat_degree :=
-    begin
-      calc 3 * a.nat_degree + 1 = max3 (-a^3).nat_degree (b^2).nat_degree c.nat_degree + 1 : by rw [←t2, nat_degree_neg]
-      ... ≤ ((-a^3) * (b^2) * c).radical.nat_degree : _ -- I don't want to use underscore trick here
-      ... = ((-a^3).radical * (b^2).radical * c.radical).nat_degree : by rw [←radical_mul habp, ←radical_mul hab_cp]
-      ... = ((a^3).radical * (b^2).radical * c.radical).nat_degree : by rw radical_neg
-      ... = (a.radical * b.radical * c.radical).nat_degree: _ -- Same for here ...
-      ... = ((a * b).radical * c.radical).nat_degree : by rw radical_mul hab
-      ... = (a * b * c).radical.nat_degree : by rw radical_mul hab_cp'
-      ... ≤ (a * b * c).nat_degree : radical_nat_degree_le
-      ... = a.nat_degree + b.nat_degree + c.nat_degree : by rw [nat_degree_mul hab_nz hnz, nat_degree_mul ha hb],
-      { rw nat.lt_iff_add_one_le at deg_ineq, exact deg_ineq, },
-      { rw radical_pow a, rw radical_pow b, norm_num, norm_num, },
-    end,
+  -- by_cases hdeg : (a^3).nat_degree = (b^2).nat_degree,
+  -- {
+  --   have t1 : 3 * a.nat_degree = 2 * b.nat_degree :=
+  --   begin
+  --     simp_rw nat_degree_pow at hdeg,
+  --     exact hdeg,
+  --   end,
+  --   have t2 : max3 (a^3).nat_degree (b^2).nat_degree (c.nat_degree) = 3 * a.nat_degree :=
+  --   begin
+  --     have h1 : c.nat_degree ≤ max (a^3).nat_degree (b^2).nat_degree := nat_degree_sub_le_nat_degree,
+  --     by calc max3 (a^3).nat_degree (b^2).nat_degree (c.nat_degree) = max (a^3).nat_degree (b^2).nat_degree : max_eq_left h1
+  --     ... = max (a^3).nat_degree (a^3).nat_degree : by rw hdeg
+  --     ... = (a^3).nat_degree : max_self _
+  --     ... = 3 * a.nat_degree : by simp only [nat_degree_pow],
+  --   end,
+  --   have t2' : (a * b).nat_degree ≤ a.nat_degree + b.nat_degree := nat_degree_mul_le,
+  --   have t3 : 3 * a.nat_degree + 1 ≤ a.nat_degree + b.nat_degree + c.nat_degree :=
+  --   begin
+  --     calc 3 * a.nat_degree + 1 = max3 (-a^3).nat_degree (b^2).nat_degree c.nat_degree + 1 : by rw [←t2, nat_degree_neg]
+  --     ... ≤ ((-a^3) * (b^2) * c).radical.nat_degree : _ -- I don't want to use underscore trick here
+  --     -- ... = ((-a^3).radical * (b^2).radical * c.radical).nat_degree : 
+  --     ... = ((a^3).radical * (b^2).radical * c.radical).nat_degree : by rw [radical_mul sorry, radical_mul sorry, radical_neg]
+  --     ... = (a.radical * b.radical * c.radical).nat_degree: _ -- Same for here ...
+  --     ... = ((a * b).radical * c.radical).nat_degree : by rw radical_mul hab
+  --     ... = (a * b * c).radical.nat_degree : by rw radical_mul hab_cp'
+  --     ... ≤ (a * b * c).nat_degree : radical_nat_degree_le
+  --     ... = a.nat_degree + b.nat_degree + c.nat_degree : by rw [nat_degree_mul hab_nz hnz, nat_degree_mul ha hb],
+  --     { rw nat.lt_iff_add_one_le at deg_ineq, exact deg_ineq, },
+  --     { rw radical_pow a, rw radical_pow b, norm_num, norm_num, },
+  --   end,
 
-    have t4 : 5 * a.nat_degree + (a.nat_degree + 2) ≤ 5 * a.nat_degree + (2 * c.nat_degree) :=
-    begin
-      calc 5 * a.nat_degree + a.nat_degree + 2 = 2 * (3 * a.nat_degree + 1) : by ring_nf
-      ... ≤ 2 * (a.nat_degree + b.nat_degree + c.nat_degree) : _ 
-      ... = 2 * a.nat_degree + 2 * b.nat_degree + 2 * c.nat_degree : by ring_nf
-      ... = 2 * a.nat_degree + 3 * a.nat_degree + 2 * c.nat_degree : by rw t1
-      ... = 5 * a.nat_degree + (2 * c.nat_degree) : by ring_nf,
-      {simp only [mul_le_mul_left, nat.succ_pos'], exact t3, },
-    end,
-    have t5 : a.nat_degree + 2 ≤ 2 * c.nat_degree := by linarith, -- avoid to use linarith
-    tauto,
-  },
-  {
-    have hcdeg : c.nat_degree = max (3 * a.nat_degree) (2 * b.nat_degree) :=
-    begin
-      by calc c.nat_degree = (a^3 - b^2).nat_degree : by rw def_c
-      ... = max (a^3).nat_degree (b^2).nat_degree : ne_nat_degree_sub_max_nat_degree hdeg
-      ... = max (3 * a.nat_degree) (2 * b.nat_degree) : by simp only [nat_degree_pow],
-    end,
-    have hadeg : 1 ≤ a.nat_degree := derivative_ne_zero_nat_degree_ge_one haderiv,
-    have deg_ineq2 : a.nat_degree + 2 ≤ 2 * c.nat_degree :=
-    begin
-      calc a.nat_degree + 2 ≤ a.nat_degree + 2 * a.nat_degree : _ 
-      ... = 3 * a.nat_degree : by ring_nf
-      ... ≤ 2 * (3 * a.nat_degree) : le_double 
-      ... ≤ 2 * (max (3 * a.nat_degree) (2 * b.nat_degree)) : by simp only [mul_le_mul_left, nat.succ_pos', le_max_iff, le_refl, true_or]
-      ... = 2 * c.nat_degree : by rw hcdeg,
-      {simp only [add_le_add_iff_left, le_mul_iff_one_le_right, nat.succ_pos'], exact hadeg, },
-    end,
-    tauto,
-  },
+  --   have t4 : 5 * a.nat_degree + (a.nat_degree + 2) ≤ 5 * a.nat_degree + (2 * c.nat_degree) :=
+  --   begin
+  --     calc 5 * a.nat_degree + a.nat_degree + 2 = 2 * (3 * a.nat_degree + 1) : by ring_nf
+  --     ... ≤ 2 * (a.nat_degree + b.nat_degree + c.nat_degree) : _ 
+  --     ... = 2 * a.nat_degree + 2 * b.nat_degree + 2 * c.nat_degree : by rw [mul_add, mul_add]
+  --     ... = 2 * a.nat_degree + 3 * a.nat_degree + 2 * c.nat_degree : by rw t1
+  --     ... = 5 * a.nat_degree + (2 * c.nat_degree) : by ring_nf,
+  --     {simp only [mul_le_mul_left, nat.succ_pos'], exact t3, },
+  --   end,
+  --   rwa [add_le_add_iff_left] at t4, -- avoid to use linarith
+  --   -- tauto,
+  -- },
+  -- {
+  --   have hcdeg : c.nat_degree = max (3 * a.nat_degree) (2 * b.nat_degree) :=
+  --   begin
+  --     by calc c.nat_degree = (a^3 - b^2).nat_degree : by rw def_c
+  --     ... = max (a^3).nat_degree (b^2).nat_degree : ne_nat_degree_sub_max_nat_degree hdeg
+  --     ... = max (3 * a.nat_degree) (2 * b.nat_degree) : by simp only [nat_degree_pow],
+  --   end,
+  --   have hadeg : 1 ≤ a.nat_degree := derivative_ne_zero_nat_degree_ge_one haderiv,
+  --   have deg_ineq2 : a.nat_degree + 2 ≤ 2 * c.nat_degree :=
+  --   begin
+  --     calc a.nat_degree + 2 ≤ a.nat_degree + 2 * a.nat_degree : _ 
+  --     ... = 3 * a.nat_degree : by ring_nf
+  --     ... ≤ 2 * (3 * a.nat_degree) : le_double 
+  --     ... ≤ 2 * (max (3 * a.nat_degree) (2 * b.nat_degree)) : by simp only [mul_le_mul_left, nat.succ_pos', le_max_iff, le_refl, true_or]
+  --     ... = 2 * c.nat_degree : by rw hcdeg,
+  --     {simp only [add_le_add_iff_left, le_mul_iff_one_le_right, nat.succ_pos'], exact hadeg, },
+  --   end,
+  --   tauto,
+  -- },
 end
