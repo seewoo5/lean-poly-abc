@@ -86,10 +86,47 @@ begin
 
   -- coprime
   have habp : is_coprime (-a^3) (b^2) := (is_coprime.pow hab).neg_left,
-  have hbcp : is_coprime (b^2) c := sorry,
-  have hbcp' : is_coprime b c := sorry,
-  have hcap : is_coprime c (-a^3) := sorry,
-  have hcap' : is_coprime c a := sorry,
+  have hbcp : is_coprime (b^2) c :=
+  begin
+    have hbap : is_coprime (b^2) (a^3) := (is_coprime.pow hab).symm,
+    have t := is_coprime.mul_add_right_right hbap (-1),
+    have tt : (-1) * b^2 + a^3 = c :=
+    begin
+      rw def_c,
+      ring_nf,
+    end,
+    rw← tt,
+    exact t,
+  end,
+  have hbcp' : is_coprime b c :=
+  begin
+    have h1 : 0 < 1 := by norm_num,
+    have h2 : 0 < 2 := by norm_num,
+    rw← is_coprime.pow_iff h2 h1,
+    simp only [pow_one],
+    exact hbcp,
+  end,
+  have hcap : is_coprime c (-a^3) :=
+  begin
+    have t : is_coprime (-b^2) (-a^3) := (is_coprime.pow hab).symm.neg_right.neg_left,
+    have tt : is_coprime ((-1)*(-a^3) + (-b^2)) (-a^3) := is_coprime.mul_add_right_left t (-1),
+    have ttt : ((-1)*(-a^3) + (-b^2)) = c := by ring_nf,
+    rw← ttt,
+    exact tt,
+  end,
+  have hcap' : is_coprime c a :=
+  begin
+    have t : is_coprime c (a^3) :=
+    begin
+      rw← is_coprime.neg_right_iff,
+      exact hcap,
+    end,
+    have h1 : 0 < 1 := by norm_num,
+    have h3 : 0 < 3 := by norm_num,
+    rw← is_coprime.pow_iff h1 h3,
+    simp only [pow_one],
+    exact t, 
+  end,
   have hab_cp : is_coprime ((-a^3) * (b^2)) c := hcap.symm.mul_left hbcp,
   have hab_cp' : is_coprime (a * b) c := (hcap').symm.mul_left hbcp',
 
