@@ -15,8 +15,7 @@ variables {k: Type*} [field k]
 For any nonconstant coprime polynomial a, b ∈ k[t], if a^3 ≠ b^2, then
 (1 / 2) * deg(a) + 1 ≤ deg(a^3 - b^2).
 
-Proof) Apply ABC for (-a^3, b^2, a^3 - b^2). Need to divide cases whether
-deg(a^3) = deg(b^2) or not.
+Proof) Apply ABC for (-a^3, b^2, a^3 - b^2).
 -/
 theorem polynomial.davenport
   {a b : k[X]} (hab : is_coprime a b) (hnz : a^3 - b^2 ≠ 0) (haderiv : a.derivative ≠ 0) (hbderiv : b.derivative ≠ 0) :
