@@ -11,16 +11,28 @@ open unique_factorization_monoid
 
 variables {k: Type*} [field k]
 
+lemma is_coprime_nonzero_c {a b : k[X]} (h : is_coprime a b) (ha : a.derivative ≠ 0)
+  : a^3 - b^2 ≠ 0 :=
+begin
+  by_contra h_eq_zero,
+  rw sub_eq_zero at h_eq_zero,
+  have hp : is_coprime (a^3) (b^2) := h.pow,
+  rw [←h_eq_zero, is_coprime_self, is_unit_pow_iff] at hp,
+  sorry,
+  norm_num, -- 3 ≠ 0
+end
+
 /- Davenport's theorem
-For any nonconstant coprime polynomial a, b ∈ k[t], if a^3 ≠ b^2, then
-(1 / 2) * deg(a) + 1 ≤ deg(a^3 - b^2).
+For any coprime polynomial a, b ∈ k[t] with nonzero derivatives,
+deg(a) + 2 ≤ 2 * deg(a^3 - b^2).
 
 Proof) Apply ABC for (-a^3, b^2, a^3 - b^2).
 -/
 theorem polynomial.davenport
-  {a b : k[X]} (hab : is_coprime a b) (hnz : a^3 - b^2 ≠ 0) (haderiv : a.derivative ≠ 0) (hbderiv : b.derivative ≠ 0) :
+  {a b : k[X]} (hab : is_coprime a b) (haderiv : a.derivative ≠ 0) (hbderiv : b.derivative ≠ 0) :
     a.nat_degree + 2 ≤ 2 * (a^3 - b^2).nat_degree :=
 begin
+  have hnz : a^3 - b^2 ≠ 0 := is_coprime_nonzero_c hab haderiv,
   have ha : a ≠ 0 := λ ha, haderiv (ha.symm ▸ derivative_zero),
   have hb : b ≠ 0 := λ hb, hbderiv (hb.symm ▸ derivative_zero),
   have h1 : is_coprime (a ^ 3) (a ^ 3 - b ^ 2),
