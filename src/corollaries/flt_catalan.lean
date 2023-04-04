@@ -38,38 +38,42 @@ private lemma is_coprime.mul_units_left {a b : k[X]} {u v : k[X]ˣ}
   (h : is_coprime a b) : is_coprime (↑u * a) (↑v * b) :=
 by rw [is_coprime_mul_unit_left_left u.is_unit, is_coprime_mul_unit_left_right v.is_unit]; exact h 
 
+private lemma rot_coprime {p q r : ℕ}
+  {a b c : k[X]} {u v w : k[X]ˣ} (heq: ↑u*a^p + ↑v*b^q + ↑w*c^r = 0)
+  (hab : is_coprime a b) 
+  (hp : 0 < p) (hq : 0 < q) (hr : 0 < r) : is_coprime b c :=
+begin
+  rw [add_eq_zero_iff_neg_eq, ←units.inv_mul_eq_iff_eq_mul, mul_neg, mul_add, 
+      ←mul_assoc, ←mul_assoc, ←units.coe_mul, ←units.coe_mul] at heq,
+  rw [←is_coprime.pow_left_iff hq, ←is_coprime.pow_right_iff hr, ←heq,
+    is_coprime.neg_right_iff],
+  refine is_coprime.add_mul_right_right _ ↑(w⁻¹ * v),
+  rw is_coprime_mul_unit_left_right (w⁻¹ * u).is_unit,
+  exact hab.symm.pow,
+end
+
+private lemma rot3_add {a b c : k[X]} : a + b + c = b + c + a := by ring_nf
+
 theorem polynomial.flt_catalan'
   {p q r : ℕ} (hp : 0 < p) (hq : 0 < q) (hr : 0 < r)
   (hineq : q*r + r*p + p*q ≤ p*q*r)
   (chp : ¬(ring_char k ∣ p)) (chq : ¬(ring_char k ∣ q)) (chr : ¬(ring_char k ∣ r))
   {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hab : is_coprime a b)
-  {u v w : k[X]ˣ} (heq: ↑u*a^p + ↑v*b^q = ↑w*c^r) : 
+  {u v w : k[X]ˣ} (heq: ↑u*a^p + ↑v*b^q + ↑w*c^r = 0) : 
   (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
 begin
   have hbc : is_coprime b c,
-  { rw [←units.inv_mul_eq_iff_eq_mul, mul_add, 
-      ←mul_assoc, ←mul_assoc, ←units.coe_mul, ←units.coe_mul] at heq,
-    rw [←is_coprime.pow_left_iff hq, ←is_coprime.pow_right_iff hr, ←heq],
-    refine is_coprime.add_mul_right_right _ ↑(w⁻¹ * v),
-    rw is_coprime_mul_unit_left_right (w⁻¹ * u).is_unit,
-    exact hab.symm.pow },
+  { apply rot_coprime heq hab; assumption },
   have hca : is_coprime c a,
-  { rw [←units.inv_mul_eq_iff_eq_mul, mul_add, 
-      ←mul_assoc, ←mul_assoc, ←units.coe_mul, ←units.coe_mul] at heq,
-    rw [←is_coprime.pow_left_iff hr, ←is_coprime.pow_right_iff hp, ←heq],
-    refine is_coprime.mul_add_right_left _ ↑(w⁻¹ * u),
-    rw is_coprime_mul_unit_left_left (w⁻¹ * v).is_unit,
-    exact hab.symm.pow, },
+  { apply rot_coprime (rot3_add.symm.trans heq) hbc; assumption },
 
   have hap : a^p ≠ 0 := pow_ne_zero _ ha,
   have hbp : b^q ≠ 0 := pow_ne_zero _ hb,
-  have hcp : -c^r ≠ 0 := neg_ne_zero.mpr (pow_ne_zero _ hc),
-
-  rw [←add_neg_eq_zero, ←mul_neg] at heq,
+  have hcp : c^r ≠ 0 := pow_ne_zero _ hc,
 
   have habp : is_coprime (↑u*a^p) (↑v*b^q) := hab.pow.mul_units_left,
-  have hbcp : is_coprime (↑v*b^q) (↑w*-c^r) := hbc.pow.neg_right.mul_units_left,
-  have hcap : is_coprime (↑w*-c^r) (↑u*a^p) := hca.pow.neg_left.mul_units_left,
+  have hbcp : is_coprime (↑v*b^q) (↑w*c^r) := hbc.pow.mul_units_left,
+  have hcap : is_coprime (↑w*c^r) (↑u*a^p) := hca.pow.mul_units_left,
   have habcp := hcap.symm.mul_left hbcp,
 
   cases (polynomial.abc 
@@ -78,8 +82,7 @@ begin
     (mul_ne_zero unit_ne_zero hcp)
     habp hbcp hcap heq) with ineq dr0, swap,
   { simp_rw [derivative_unit_mul, 
-      units.mul_right_eq_zero,
-      derivative_neg, neg_eq_zero] at dr0,
+      units.mul_right_eq_zero] at dr0,
     rw [pow_derivative_eq_zero chp ha,
         pow_derivative_eq_zero chq hb,
         pow_derivative_eq_zero chr hc] at dr0,
@@ -89,8 +92,7 @@ begin
   -- work on lhs
   rw [radical_mul habcp, radical_mul habp],
   simp_rw radical_unit_mul,
-  rw [radical_neg,
-    radical_pow a hp, radical_pow b hq, radical_pow c hr],
+  rw [radical_pow a hp, radical_pow b hq, radical_pow c hr],
   rw [←radical_mul hab, ←radical_mul (hca.symm.mul_left hbc)],
   apply le_trans radical_nat_degree_le,
   rw nat_degree_mul (mul_ne_zero ha hb) hc,
@@ -99,10 +101,7 @@ begin
   rw nat_degree_mul unit_ne_zero hap,
   rw nat_degree_mul unit_ne_zero hbp,
   rw nat_degree_mul unit_ne_zero hcp,
-  simp_rw [
-    polynomial.nat_degree_neg,
-    polynomial.nat_degree_pow,
-    unit_nat_degree_zero, zero_add],
+  simp_rw [polynomial.nat_degree_pow, unit_nat_degree_zero, zero_add],
 
   have hpqr : 0 < p*q*r := nat.mul_le_mul
     (nat.mul_le_mul hp hq) hr,
@@ -112,13 +111,37 @@ begin
   ring_nf,
 end
 
+
+
+theorem polynomial.flt_catalan
+  {p q r : ℕ} (hp : 0 < p) (hq : 0 < q) (hr : 0 < r)
+  (hineq : q*r + r*p + p*q ≤ p*q*r)
+  (chp : ¬(ring_char k ∣ p)) (chq : ¬(ring_char k ∣ q)) (chr : ¬(ring_char k ∣ r))
+  {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hab : is_coprime a b)
+  {u v w : k[X]ˣ} (heq: ↑u*a^p + ↑v*b^q + ↑w*c^r = 0) : 
+  a.nat_degree = 0 :=
+begin
+  have hbc : is_coprime b c,
+  { apply rot_coprime heq hab; assumption },
+  have hca : is_coprime c a,
+  { apply rot_coprime (rot3_add.symm.trans heq) hbc; assumption },
+  set d := a.nat_degree with eq_d, clear_value d, by_contra hd,
+  revert a b c eq_d hd,
+  induction d using nat.case_strong_induction_on with d ih_d,
+  { intros, apply hd, refl },
+  intros a b c eq_d hd ha hb hc hab heq hbc hca,
+  have hderiv : (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0),
+  { apply polynomial.flt_catalan' hp hq hr; assumption, },
+  rcases hderiv with ⟨ad, bd, cd⟩, sorry,
+end
+
 theorem polynomial.flt_coprime
   {n : ℕ} (hn : 3 ≤ n) (chn : ¬(ring_char k ∣ n))
   {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
   (hab : is_coprime a b) (heq: a^n + b^n = c^n) : 
   (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
 begin
-  have hn' : 0 < n := by linarith,
+  sorry {have hn' : 0 < n := by linarith,
   rw [←one_mul (a^n), ←one_mul (b^n), ←one_mul (c^n)] at heq,
   have h : ↑(1: k[X]ˣ) = (1: k[X]) := rfl,
   simp_rw ←h at heq,
@@ -126,7 +149,7 @@ begin
     chn chn chn ha hb hc hab heq,
   have eq_lhs : n*n + n*n + n*n = 3*n*n := by ring_nf,
   rw eq_lhs, rw [mul_assoc, mul_assoc],
-  apply nat.mul_le_mul_right (n*n), exact hn,
+  apply nat.mul_le_mul_right (n*n), exact hn,},
 end
 
 namespace euclidean_domain 
