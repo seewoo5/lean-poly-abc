@@ -38,7 +38,7 @@ private lemma is_coprime.mul_units_left {a b : k[X]} {u v : k[X]ˣ}
   (h : is_coprime a b) : is_coprime (↑u * a) (↑v * b) :=
 by rw [is_coprime_mul_unit_left_left u.is_unit, is_coprime_mul_unit_left_right v.is_unit]; exact h 
 
-theorem polynomial.flt_catalan
+theorem polynomial.flt_catalan'
   {p q r : ℕ} (hp : 0 < p) (hq : 0 < q) (hr : 0 < r)
   (hineq : q*r + r*p + p*q ≤ p*q*r)
   (chp : ¬(ring_char k ∣ p)) (chq : ¬(ring_char k ∣ q)) (chr : ¬(ring_char k ∣ r))
@@ -122,7 +122,7 @@ begin
   rw [←one_mul (a^n), ←one_mul (b^n), ←one_mul (c^n)] at heq,
   have h : ↑(1: k[X]ˣ) = (1: k[X]) := rfl,
   simp_rw ←h at heq,
-  apply polynomial.flt_catalan hn' hn' hn' _
+  apply polynomial.flt_catalan' hn' hn' hn' _
     chn chn chn ha hb hc hab heq,
   have eq_lhs : n*n + n*n + n*n = 3*n*n := by ring_nf,
   rw eq_lhs, rw [mul_assoc, mul_assoc],
