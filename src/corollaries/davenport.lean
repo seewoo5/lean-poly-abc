@@ -19,9 +19,11 @@ Proof) Apply ABC for (-a^3, b^2, a^3 - b^2). Need to divide cases whether
 deg(a^3) = deg(b^2) or not.
 -/
 theorem polynomial.davenport
-  {a b : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hab : is_coprime a b) (hnz : a^3 - b^2 ≠ 0) (haderiv : a.derivative ≠ 0) (hbderiv : b.derivative ≠ 0) :
+  {a b : k[X]} (hab : is_coprime a b) (hnz : a^3 - b^2 ≠ 0) (haderiv : a.derivative ≠ 0) (hbderiv : b.derivative ≠ 0) :
     a.nat_degree + 2 ≤ 2 * (a^3 - b^2).nat_degree :=
 begin
+  have ha : a ≠ 0 := λ ha, haderiv (ha.symm ▸ derivative_zero),
+  have hb : b ≠ 0 := λ hb, hbderiv (hb.symm ▸ derivative_zero),
   have h1 : is_coprime (a ^ 3) (a ^ 3 - b ^ 2),
   { rwa [←is_coprime.neg_right_iff, neg_sub, sub_eq_add_neg, neg_eq_neg_one_mul,
       is_coprime.add_mul_right_right_iff, is_coprime.pow_iff three_pos two_pos] },
