@@ -18,9 +18,8 @@ begin
   rw sub_eq_zero at h_eq_zero,
   have hp : is_coprime (a^3) (b^2) := h.pow,
   rw [←h_eq_zero, is_coprime_self, is_unit_pow_iff, is_unit_iff] at hp,
-  rcases hp with ⟨ r, hr ⟩,
-  have hd : a.derivative = 0 := sorry, -- polynomial.derivative_C
-  exact ha hd,
+  rcases hp with ⟨ r, r_unit, eq_a ⟩,
+  rw ←eq_a at ha, exact ha derivative_C,
   norm_num, -- 3 ≠ 0
 end
 
