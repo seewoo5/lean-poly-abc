@@ -65,7 +65,7 @@ begin
   rw mul_comm (b*c) a, exact mul_assoc _ _ _,
 end
 
-theorem polynomial.flt_catalan'
+theorem polynomial.flt_catalan_deriv
   {p q r : ℕ} (hp : 0 < p) (hq : 0 < q) (hr : 0 < r)
   (hineq : q*r + r*p + p*q ≤ p*q*r)
   (chp : ¬(ring_char k ∣ p)) (chq : ¬(ring_char k ∣ q)) (chr : ¬(ring_char k ∣ r))
@@ -176,7 +176,7 @@ begin
   cases (eq_or_ne (ring_char k) 0) with ch0 chn0,
   -- characteristic zero
   { have hderiv : (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0),
-    { apply polynomial.flt_catalan' hp hq hr; assumption, },
+    { apply polynomial.flt_catalan_deriv hp hq hr; assumption, },
     rcases hderiv with ⟨da, -, -⟩,
     haveI ii : char_zero k,
     apply char_zero_of_inj_zero, intro n, rw ring_char.spec,
@@ -184,14 +184,14 @@ begin
     have tt := eq_C_of_derivative_eq_zero da,
     rw tt, exact nat_degree_C _, },
 
-  -- characteristic ch
+  -- characteristic ch, where we use infinite descent
   set d := a.nat_degree with eq_d, clear_value d, by_contra hd,
   revert a b c eq_d hd,
   induction d using nat.case_strong_induction_on with d ih_d,
   { intros, apply hd, refl },
   intros a b c eq_d hd ha hb hc hab heq hbc hca,
   have hderiv : (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0),
-  { apply polynomial.flt_catalan' hp hq hr; assumption, },
+  { apply polynomial.flt_catalan_deriv hp hq hr; assumption, },
   rcases hderiv with ⟨ad, bd, cd⟩,
   rcases expcont ha ad chn0 with ⟨ca, ca_nz, eq_a, eq_deg_a⟩,
   rcases expcont hb bd chn0 with ⟨cb, cb_nz, eq_b, eq_deg_b⟩,
@@ -224,6 +224,7 @@ theorem polynomial.flt_catalan
   {u v w : k[X]ˣ} (heq: ↑u*a^p + ↑v*b^q + ↑w*c^r = 0) : 
   a.nat_degree = 0 ∧ b.nat_degree = 0 ∧ c.nat_degree = 0 :=
 begin
+  -- WLOG argument: essentially three times flt_catalan_aux
   have hbc : is_coprime b c,
   { apply rot_coprime heq hab; assumption },
   have hca : is_coprime c a,
