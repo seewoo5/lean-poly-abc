@@ -94,7 +94,7 @@ lemma radical_neg {a : k[X]} :
   (-a).radical = a.radical :=
 neg_one_mul a ▸ radical_associated $ associated_unit_mul_left a (-1) is_unit_one.neg
 
-lemma prime_factors_pow (a: k[X]) {n: ℕ} (hn: 1 ≤ n) : 
+lemma prime_factors_pow (a: k[X]) {n: ℕ} (hn: 0 < n) : 
   prime_factors (a^n) = prime_factors a :=
 begin
   simp_rw prime_factors,
