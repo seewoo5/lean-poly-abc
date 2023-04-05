@@ -1,6 +1,7 @@
 import algebra.char_p.basic
 import algebra.euclidean_domain.defs
 import ring_theory.power_series.basic
+import data.polynomial.expand
 import logic.lemmas
 
 import mason_stothers
@@ -52,7 +53,17 @@ begin
   exact hab.symm.pow,
 end
 
-private lemma rot3_add {a b c : k[X]} : a + b + c = b + c + a := by ring_nf
+private lemma rot3_add 
+  {α : Type*} [add_comm_monoid α] {a b c : α} : a + b + c = b + c + a :=
+begin
+  rw add_comm (b+c) a, exact add_assoc _ _ _,
+end
+
+private lemma mul3_add 
+  {α : Type*} [comm_monoid α] {a b c : α} : a * b * c = b * c * a :=
+begin
+  rw mul_comm (b*c) a, exact mul_assoc _ _ _,
+end
 
 theorem polynomial.flt_catalan'
   {p q r : ℕ} (hp : 0 < p) (hq : 0 < q) (hr : 0 < r)
@@ -111,9 +122,45 @@ begin
   ring_nf,
 end
 
+private lemma expcont {a : k[X]} 
+  (ha : a ≠ 0) (hda : a.derivative = 0) (chn0 : ring_char k ≠ 0) :
+  ∃ ca, ca ≠ 0 ∧ a = expand k (ring_char k) ca ∧ 
+    a.nat_degree = ca.nat_degree * (ring_char k) :=
+begin
+  have heq := (expand_contract (ring_char k) hda chn0).symm,
+  refine ⟨_, _, heq, _⟩,
+  { intro h, rw h at heq, simp only [map_zero] at heq, solve_by_elim, },
+  { convert nat_degree_expand _ _, },
+end
 
+private lemma expand_dvd {a b : k[X]} {n : ℕ} (hn : n ≠ 0) (h : a ∣ b) :
+  expand k n a ∣ expand k n b :=
+begin
+  rcases h with ⟨t, eqn⟩,
+  use expand k n t, rw [eqn, map_mul],
+end
 
-theorem polynomial.flt_catalan
+private lemma expand_unit (u : k[X]ˣ) {n : ℕ} (hn : n ≠ 0) :
+  expand k n ↑u = ↑u :=
+begin
+  rcases polynomial.is_unit_iff.mp u.is_unit with ⟨c, hc, eqc⟩,
+  simp_rw [←eqc, polynomial.expand_C],
+end
+
+private lemma is_coprime_of_expand {a b : k[X]} {n : ℕ} (hn : n ≠ 0) :
+  is_coprime (expand k n a) (expand k n b) → is_coprime a b :=
+begin
+  simp_rw [←euclidean_domain.gcd_is_unit_iff],
+  rw ←not_imp_not, intro h,
+  cases (euclidean_domain.gcd_dvd a b) with ha hb,
+  have hh := euclidean_domain.dvd_gcd (expand_dvd hn ha) (expand_dvd hn hb),
+  intro h', apply h, have tt := is_unit_of_dvd_unit hh h',
+  rw [polynomial.is_unit_iff] at tt ⊢,
+  rcases tt with ⟨zz, yy⟩, rw [eq_comm, expand_eq_C (zero_lt_iff.mpr hn), eq_comm] at yy,
+  refine ⟨zz, yy⟩, 
+end
+
+theorem polynomial.flt_catalan_aux
   {p q r : ℕ} (hp : 0 < p) (hq : 0 < q) (hr : 0 < r)
   (hineq : q*r + r*p + p*q ≤ p*q*r)
   (chp : ¬(ring_char k ∣ p)) (chq : ¬(ring_char k ∣ q)) (chr : ¬(ring_char k ∣ r))
@@ -125,6 +172,19 @@ begin
   { apply rot_coprime heq hab; assumption },
   have hca : is_coprime c a,
   { apply rot_coprime (rot3_add.symm.trans heq) hbc; assumption },
+
+  cases (eq_or_ne (ring_char k) 0) with ch0 chn0,
+  -- characteristic zero
+  { have hderiv : (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0),
+    { apply polynomial.flt_catalan' hp hq hr; assumption, },
+    rcases hderiv with ⟨da, -, -⟩,
+    haveI ii : char_zero k,
+    apply char_zero_of_inj_zero, intro n, rw ring_char.spec,
+    rw ch0, exact zero_dvd_iff.mp,
+    have tt := eq_C_of_derivative_eq_zero da,
+    rw tt, exact nat_degree_C _, },
+
+  -- characteristic ch
   set d := a.nat_degree with eq_d, clear_value d, by_contra hd,
   revert a b c eq_d hd,
   induction d using nat.case_strong_induction_on with d ih_d,
@@ -132,81 +192,68 @@ begin
   intros a b c eq_d hd ha hb hc hab heq hbc hca,
   have hderiv : (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0),
   { apply polynomial.flt_catalan' hp hq hr; assumption, },
-  rcases hderiv with ⟨ad, bd, cd⟩, sorry,
+  rcases hderiv with ⟨ad, bd, cd⟩,
+  rcases expcont ha ad chn0 with ⟨ca, ca_nz, eq_a, eq_deg_a⟩,
+  rcases expcont hb bd chn0 with ⟨cb, cb_nz, eq_b, eq_deg_b⟩,
+  rcases expcont hc cd chn0 with ⟨cc, cc_nz, eq_c, eq_deg_c⟩,
+  set ch := ring_char k with eq_ch,
+  apply @ih_d ca.nat_degree _ ca cb cc rfl; clear ih_d; try {assumption},
+  { intro h, rw [h, zero_mul] at eq_deg_a, apply hd, rw eq_d, exact eq_deg_a, },
+  { apply is_coprime_of_expand chn0, rw [←eq_a, ←eq_b], exact hab },
+  { rw [eq_a, eq_b, eq_c, 
+      ←expand_unit u chn0, ←expand_unit v chn0, ←expand_unit w chn0] at heq,
+    simp_rw [←map_pow, ←map_mul, ←map_add] at heq,
+    rw (polynomial.expand_eq_zero (zero_lt_iff.mpr chn0)) at heq,
+    exact heq, },
+  { apply is_coprime_of_expand chn0, rw [←eq_b, ←eq_c], exact hbc },
+  { apply is_coprime_of_expand chn0, rw [←eq_c, ←eq_a], exact hca },
+  rw [←nat.lt_succ_iff, eq_d, eq_deg_a],
+  rw [eq_d, eq_deg_a] at hd, have tt := (mul_ne_zero_iff.mp hd).1,
+  conv_lhs {rw ←mul_one ca.nat_degree},
+  apply nat.mul_lt_mul_of_pos_left,
+  { have hch : ch ≠ 1, rw eq_ch, exact char_p.ring_char_ne_one,
+    clear_value ch, cases ch, tauto, cases ch, tauto, dec_trivial, },
+  exact zero_lt_iff.mpr tt,
 end
 
-theorem polynomial.flt_coprime
+theorem polynomial.flt_catalan
+  {p q r : ℕ} (hp : 0 < p) (hq : 0 < q) (hr : 0 < r)
+  (hineq : q*r + r*p + p*q ≤ p*q*r)
+  (chp : ¬(ring_char k ∣ p)) (chq : ¬(ring_char k ∣ q)) (chr : ¬(ring_char k ∣ r))
+  {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hab : is_coprime a b)
+  {u v w : k[X]ˣ} (heq: ↑u*a^p + ↑v*b^q + ↑w*c^r = 0) : 
+  a.nat_degree = 0 ∧ b.nat_degree = 0 ∧ c.nat_degree = 0 :=
+begin
+  have hbc : is_coprime b c,
+  { apply rot_coprime heq hab; assumption },
+  have hca : is_coprime c a,
+  { apply rot_coprime (rot3_add.symm.trans heq) hbc; assumption },
+  refine ⟨_, _, _⟩,
+  { apply polynomial.flt_catalan_aux hp hq hr
+      _ _ _ _ _ _ _ _ heq; try {assumption}, },
+  { rw rot3_add at heq hineq, rw mul3_add at hineq,
+    apply polynomial.flt_catalan_aux _ _ _
+      _ _ _ _ _ _ _ _ heq; try {assumption}, },
+  { rw ←rot3_add at heq hineq, rw ←mul3_add at hineq,
+    apply polynomial.flt_catalan_aux _ _ _
+      _ _ _ _ _ _ _ _ heq; try {assumption}, },
+end 
+
+theorem polynomial.flt
   {n : ℕ} (hn : 3 ≤ n) (chn : ¬(ring_char k ∣ n))
   {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
   (hab : is_coprime a b) (heq: a^n + b^n = c^n) : 
-  (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
+  a.nat_degree = 0 ∧ b.nat_degree = 0 ∧ c.nat_degree = 0 :=
 begin
-  sorry {have hn' : 0 < n := by linarith,
-  rw [←one_mul (a^n), ←one_mul (b^n), ←one_mul (c^n)] at heq,
+  have hn' : 0 < n := by linarith,
+  rw [←sub_eq_zero, ←one_mul (a^n), ←one_mul (b^n), ←one_mul (c^n),
+    sub_eq_add_neg, ←neg_mul] at heq,
   have h : ↑(1: k[X]ˣ) = (1: k[X]) := rfl,
-  simp_rw ←h at heq,
-  apply polynomial.flt_catalan' hn' hn' hn' _
+  have hh : ↑(-1: k[X]ˣ) = (-1: k[X]) := rfl,
+  simp_rw [←hh, ←h] at heq,
+  apply polynomial.flt_catalan hn' hn' hn' _
     chn chn chn ha hb hc hab heq,
   have eq_lhs : n*n + n*n + n*n = 3*n*n := by ring_nf,
   rw eq_lhs, rw [mul_assoc, mul_assoc],
-  apply nat.mul_le_mul_right (n*n), exact hn,},
-end
-
-namespace euclidean_domain 
-
-universe u
-variables {R : Type u} [euclidean_domain R] {a b : R}
-
--- TODO: get rid of this once mathlib is updated
-protected lemma mul_div_cancel' (hb : b ≠ 0) (hab : b ∣ a) : b * (a / b) = a :=
-  by rw [←mul_div_assoc _ hab, mul_div_cancel_left _ hb]
-
-lemma pow_n_dvd_pow_n_iff {a b : k[X]} {n : ℕ} (ha : a ≠ 0) (hb : b ≠ 0) (hn : 0 < n) :
-  a^n ∣ b^n ↔ a ∣ b :=
-begin
-  rw dvd_iff_normalized_factors_le_normalized_factors ha hb,
-  rw dvd_iff_normalized_factors_le_normalized_factors
-    (pow_ne_zero _ ha) (pow_ne_zero _ hb),
-  simp_rw [normalized_factors_pow, multiset.le_iff_count, multiset.count_nsmul],
-  simp_rw mul_le_mul_left hn,
-end
-
-end euclidean_domain
-
-theorem polynomial.flt
-  [char_zero k] {n : ℕ} (hn : 3 ≤ n)
-  {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (heq: a^n + b^n = c^n) : 
-  ∃ (d: k[X]) (sa sb sc : k), a = ↑sa * d ∧ b = ↑sb * d ∧ c = ↑sc * d :=
-begin
-  have hd : euclidean_domain.gcd a b ≠ 0,
-  { intro h, rw euclidean_domain.gcd_eq_zero_iff at h, exact ha h.1, },
-  have eq_a := euclidean_domain.mul_div_cancel' hd
-    (euclidean_domain.gcd_dvd_left a b),
-  have eq_b := euclidean_domain.mul_div_cancel' hd
-    (euclidean_domain.gcd_dvd_right a b),
-  set d := euclidean_domain.gcd a b with def_d,
-  rw [←eq_a, ←eq_b] at heq,
-  simp_rw [mul_pow, ←mul_add] at heq,
-  have dvd_dc := dvd_of_mul_right_eq _ heq,
-  have hn' : 0 < n := by linarith,
-  rw euclidean_domain.pow_n_dvd_pow_n_iff hd hc hn' at dvd_dc,
-  have eq_c := euclidean_domain.mul_div_cancel' hd dvd_dc,
-  rw [←eq_c, mul_pow, mul_right_inj' (pow_ne_zero _ hd)] at heq,
-  have hab : is_coprime (a / d) (b / d),
-  { have gcd_eq := euclidean_domain.gcd_eq_gcd_ab a b,
-    rw [←def_d, ←eq_a, ←eq_b, mul_assoc, mul_assoc, ←mul_add] at gcd_eq,
-    conv_lhs at gcd_eq {rw ←mul_one d},
-    rw [mul_right_inj' hd, mul_comm (a / d), mul_comm (b / d)] at gcd_eq,
-    existsi _, existsi _, exact gcd_eq.symm, },
-  have flt := polynomial.flt_coprime hn
-    (by rw [ring_char.eq_zero, zero_dvd_iff]; linarith) 
-    (right_ne_zero_of_mul (eq_a.trans_ne ha))
-    (right_ne_zero_of_mul (eq_b.trans_ne hb))
-    (right_ne_zero_of_mul (eq_c.trans_ne hc))
-    hab heq,
-  rcases flt with ⟨hda, hdb, hdc⟩,
-  rw [polynomial.eq_C_of_derivative_eq_zero hda, mul_comm, eq_comm] at eq_a,
-  rw [polynomial.eq_C_of_derivative_eq_zero hdb, mul_comm, eq_comm] at eq_b,
-  rw [polynomial.eq_C_of_derivative_eq_zero hdc, mul_comm, eq_comm] at eq_c,
-  refine ⟨_, _, _, _, eq_a, eq_b, eq_c⟩,
+  apply nat.mul_le_mul_right (n*n), exact hn,
 end
