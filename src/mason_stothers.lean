@@ -79,7 +79,7 @@ private lemma abc_subcall {a b c w : k[X]}
   (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
   (hab: is_coprime a b) (hbc: is_coprime b c) (hca: is_coprime c a)
   (abc_dr_dvd_w : (a*b*c).div_radical ∣ w) : 
-    c.nat_degree < (a*b*c).radical.nat_degree :=
+    c.nat_degree + 1 ≤ (a*b*c).radical.nat_degree :=
 begin
   have hab := mul_ne_zero ha hb,
   have habc := mul_ne_zero hab hc,
@@ -113,7 +113,7 @@ private lemma rot3_mul {a b c : k[X]} : a * b * c = b * c * a := by ring_nf
 theorem polynomial.abc {a b c : k[X]}
   (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
   (hab: is_coprime a b) (hbc: is_coprime b c) (hca: is_coprime c a) (hsum: a + b + c = 0) : 
-    (max3 a.nat_degree b.nat_degree c.nat_degree < (a*b*c).radical.nat_degree) ∨
+    (max3 a.nat_degree b.nat_degree c.nat_degree + 1 ≤ (a*b*c).radical.nat_degree) ∨
     (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0) :=
 begin
   -- Utility assertions
@@ -151,7 +151,8 @@ begin
     cases hab.wronskian_eq_zero_iff.mp wab.symm with ga gb,
     cases hbc.wronskian_eq_zero_iff.mp wbc.symm with _ gc,
     refine ⟨ga, gb, gc⟩, },
-  { left, rw max3_lt_iff,
+  { left,
+    rw [←max3_add_add_right, max3_le_iff],
     refine ⟨_, _, _⟩,
     { rw rot3_mul at ⊢ abc_dr_dvd_w,
       apply abc_subcall wbc; assumption, },
