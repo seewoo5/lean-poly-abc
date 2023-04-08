@@ -99,6 +99,7 @@ begin
         pow_derivative_eq_zero chr hc] at dr0,
     exact dr0, },
   
+  rw nat.add_one_le_iff at ineq,
   exfalso, apply not_le_of_lt ineq, clear ineq,
   -- work on lhs
   rw [radical_mul habcp, radical_mul habp],

@@ -1,4 +1,5 @@
 import data.nat.order.basic
+import algebra.order.monoid.min_max
 
 -- Utility library for three maxes of ℕ
 
@@ -17,6 +18,14 @@ begin
   repeat {rw nat.mul_comm a _},
 end
 
+theorem max3_add_add_right (a b c d : ℕ) :
+  max3 (a + d) (b + d) (c + d) = max3 a b c + d :=
+begin
+  simp_rw max3,
+  rw← max_add_add_right (max a b) c d,
+  rw← max_add_add_right a b d,
+end
+
 theorem le_max3_first (a b c : ℕ) : a ≤ max3 a b c :=
   le_max_of_le_left (le_max_left _ _)
 
@@ -30,6 +39,12 @@ theorem max3_lt_iff {a b c d : ℕ} :
   max3 a b c < d ↔ a < d ∧ b < d ∧ c < d :=
 begin
   rw max3, simp only [max_lt_iff], tauto,
+end
+
+theorem max3_le_iff {a b c d : ℕ} :
+  max3 a b c ≤ d ↔ a ≤ d ∧ b ≤ d ∧ c ≤ d :=
+begin
+  rw max3, simp only [max_le_iff], tauto,
 end
 
 theorem add3_le_three_mul_max3 (a b c : ℕ) : 
