@@ -74,14 +74,12 @@ theorem div_radical_dvd_derivative (a : k[X]) :
   a.div_radical ∣ a.derivative :=
 begin
   apply induction_on_coprime a,
-  { /- when a is zero -/
+  { /- When a is zero. -/
     rw derivative_zero,
-    apply dvd_zero,
-  },
-  { /- when a is unit -/
-    exact λ a ha, (div_radical_is_unit ha).dvd,
-  },
-  { /- when a = p^i for some prime p -/
+    apply dvd_zero, },
+  { /- When a is unit. -/
+    exact λ a ha, (div_radical_is_unit ha).dvd, },
+  { /- When a = p^i for some prime p. -/
     rintros p (_ | i) hp,
     { rw [pow_zero, derivative_one],
       apply dvd_zero },
@@ -90,17 +88,15 @@ begin
     apply dvd_mul_of_dvd_left,
     rw [mul_comm, mul_assoc],
     apply dvd_mul_of_dvd_right,
-    rw [pow_succ', mul_dvd_mul_iff_left (pow_ne_zero i hp.ne_zero), dvd_normalize_iff],
-  },
-  { /- if it holds for coprime pair a and b, then it also holds for a * b. -/
+    rw [pow_succ', mul_dvd_mul_iff_left (pow_ne_zero i hp.ne_zero), dvd_normalize_iff], },
+  { /- If it holds for coprime pair a and b, then it also holds for a * b. -/
     intros x y hpxy hx hy,
     have hc : is_coprime x y := euclidean_domain.is_coprime_of_dvd
       (λ ⟨hx, hy⟩, not_is_unit_zero (hpxy 0 (zero_dvd_iff.mpr hx) (zero_dvd_iff.mpr hy)))
       (λ p hp _ hpx hpy, hp (hpxy p hpx hpy)),
     rw [div_radical_mul hc, derivative_mul],
     exact dvd_add (mul_dvd_mul hx y.div_radical_dvd_self)
-      (mul_dvd_mul x.div_radical_dvd_self hy),
-  },
+      (mul_dvd_mul x.div_radical_dvd_self hy), },
 end
 
 theorem div_radical_dvd_wronskian_left (a b : k[X]) : 
