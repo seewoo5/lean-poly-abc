@@ -59,7 +59,7 @@ If $ua^p + vb^q + wc^r = 0$ for some nonzero polynomials $a, b, c \in k[X]$, the
 
 *Proof.* Applying Mason-Stothers to the triple $(ua^p, vb^q, wc^r)$ gives either one of the following.
 
-*When $\max(\mathrm{deg} (ua^p), \mathrm{deg}(vb^q), \mathrm{deg}(wc^r)) < \mathrm{deg} (\mathrm{rad} (uvw a^p b^q c^r))$.* If we put $m = \max(\mathrm{deg} (a^p), \mathrm{deg}(b^q), \mathrm{deg}(c^r))$, then
+*When inequality holds.* $\max(\mathrm{deg} (ua^p), \mathrm{deg}(vb^q), \mathrm{deg}(wc^r)) < \mathrm{deg} (\mathrm{rad} (uvw a^p b^q c^r))$. If we put $m = \max(\mathrm{deg} (a^p), \mathrm{deg}(b^q), \mathrm{deg}(c^r))$, then
 
 $$
 \begin{align*}
@@ -71,9 +71,10 @@ m &= \max(p \deg(a), q\deg(b), r\deg(c)) \\
 & \le \left(\frac{1}{p} + \frac{1}{q} + \frac{1}{r}\right) m
 \end{align*}
 $$
+
 and this gives a contradiction.
 
-*When derivatives vanish.* In the other case of Mason-Stothers we get $(ua^p)' = (vb^q)' = (wc^r)' = 0$. As $(ua^p)' = u a' a^{p-1} = 0$ and $p$ is not zero in $k$, we have $a' = 0$. Similar arguments also give $b' = c' = 0$. If the characteristic of $k$ is zero, then $a' = 0$ is equivalent to $a$ being a constant, and same for $b$ and $c$. When $k$ has a positive characteristic $\ell > 0$, then we can use infinite descent argument to show that $a, b, c$ are constant polynomials. In fact, one can show that $a' = 0$ implies $a(X) = a_1(X^\ell)$ for some $a_1 \in k[X]$. Hence any nontrivial solution of Fermat's equation $ua^p + vb^q + wc^r = $ yields another solution $ua_1^p + vb_1^q + wc_1^r = 0$ with smaller degree $\deg(a_1) = \deg(a) / \ell < \deg(a)$. □
+*When derivatives vanish.* In the other case of Mason-Stothers we get $(ua^p)' = (vb^q)' = (wc^r)' = 0$. As $(ua^p)' = u a' a^{p-1} = 0$ and $p$ is not zero in $k$, we have $a' = 0$. Similar arguments also give $b' = c' = 0$. If the characteristic of $k$ is zero, then $a' = 0$ is equivalent to $a$ being a constant, and same for $b$ and $c$. When $k$ has a positive characteristic $\ell > 0$, then we can use infinite descent argument to show that $a, b, c$ are constant polynomials. In fact, one can show that $a' = 0$ implies $a(X) = a_1(X^\ell)$ for some $a_1 \in k[X]$. Hence any nontrivial solution of Fermat's equation $u a^p + v b^q + w c^r = 0$ yields an another solution $u a_1^p + v b_1^q + w c_1^r = 0$ with smaller degree $\deg(a_1) = \deg(a) / \ell < \deg(a)$. □
 
 FLT is just a special case of the above corollary when $p = q = r = n \geq 3$ and $u = v = 1, w = -1$.
 
