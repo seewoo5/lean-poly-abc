@@ -11,6 +11,7 @@ open unique_factorization_monoid
 
 variables {k: Type*} [field k]
 
+/- Auxiliary lemma to remove nonzero hypothesis using coprimality and a' ≠ 0. -/
 lemma is_coprime_nonzero_c {a b : k[X]} (h : is_coprime a b) (ha : a.derivative ≠ 0)
   : a^3 - b^2 ≠ 0 :=
 begin
@@ -44,14 +45,17 @@ begin
       is_coprime.add_mul_right_right_iff, is_coprime.pow_iff two_pos three_pos, is_coprime_comm] },
   cases abc (neg_ne_zero.mpr (pow_ne_zero 3 ha)) (pow_ne_zero 2 hb) hnz hab.pow.neg_left h2 h1.neg_left.symm
       (by rw [sub_eq_add_neg, add_add_add_comm, neg_add_self, add_neg_self, add_zero]) with h h,
-  { rw [nat_degree_neg, max3, max_eq_left (nat_degree_sub_le _ _), neg_mul, neg_mul, radical_neg,
+  { /- When we have inequality from ABC. -/
+    rw [nat_degree_neg, max3, max_eq_left (nat_degree_sub_le _ _), neg_mul, neg_mul, radical_neg,
         radical_mul (h1.mul_left h2), radical_mul hab.pow, radical_pow a three_pos, radical_pow b two_pos,
         nat_degree_mul (mul_ne_zero a.radical_ne_zero b.radical_ne_zero) (radical_ne_zero _),
-        nat_degree_mul a.radical_ne_zero b.radical_ne_zero, nat_degree_pow, nat_degree_pow] at h,
-    replace h := h.trans_le (add_le_add (add_le_add radical_nat_degree_le radical_nat_degree_le) radical_nat_degree_le),
-    rw [max_lt_iff, ←nat.one_add_le_iff, ←nat.one_add_le_iff] at h,
+        nat_degree_mul a.radical_ne_zero b.radical_ne_zero, nat_degree_pow, nat_degree_pow, ←max_add_add_right] at h,
+    replace h := le_trans h (add_le_add (add_le_add radical_nat_degree_le radical_nat_degree_le) radical_nat_degree_le),
+    rw max_le_iff at h,
+    /- Add two inequalities and simplifying it gives the desired inequality. -/
     nlinarith only [add_le_add h.1 h.2] },
-  { rw [derivative_neg, neg_eq_zero, derivative_pow, derivative_pow, nat.succ_sub_one, nat.succ_sub_one,
+  { /- When we have vanishing derivatives. This condition implies 3 = 0 = 2, which is impossible for any field k. -/
+    rw [derivative_neg, neg_eq_zero, derivative_pow, derivative_pow, nat.succ_sub_one, nat.succ_sub_one,
       mul_eq_zero, mul_eq_zero, mul_eq_zero, mul_eq_zero, or_iff_left haderiv, or_iff_left hbderiv,
       or_iff_left (pow_ne_zero 2 ha), or_iff_left (pow_ne_zero 1 hb)] at h,
     replace h := h.1.trans h.2.1.symm,
