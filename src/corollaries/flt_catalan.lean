@@ -248,6 +248,9 @@ begin
       _ _ _ _ _ _ _ _ heq; try {assumption}, },
 end 
 
+/- FLT is special case of nonsolvability of Fermat-Catalan equation.
+Take p = q = r = n and u = v = 1, w = -1.
+-/
 theorem polynomial.flt
   {n : ℕ} (hn : 3 ≤ n) (chn : ¬(ring_char k ∣ n))
   {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
