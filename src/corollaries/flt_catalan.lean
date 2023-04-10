@@ -14,6 +14,7 @@ open unique_factorization_monoid
 
 variables {k: Type*} [field k]
 
+/- Units of k[X] are nonzero. -/
 private lemma unit_ne_zero {u : k[X]ˣ} : (↑u : k[X]) ≠ 0 :=
 begin
   rcases polynomial.is_unit_iff.mp u.is_unit with ⟨r, hr, er⟩,
@@ -22,12 +23,14 @@ begin
   exact hr,
 end
 
+/- Units of k[X] have degree 0. -/
 private lemma unit_nat_degree_zero {u : k[X]ˣ} : (↑u : k[X]).nat_degree = 0 :=
 begin
   rcases polynomial.is_unit_iff.mp u.is_unit with ⟨r, hr, er⟩,
   rw ←er, exact polynomial.nat_degree_C r,
 end
 
+/- For a unit u and a polynomial a, (ua)' = u * a' -/
 private lemma derivative_unit_mul {u : k[X]ˣ} (a : k[X]) :
   (↑u * a).derivative = ↑u * a.derivative :=
 begin
@@ -35,6 +38,7 @@ begin
   rw ←er, simp only [derivative_mul, derivative_C, zero_mul, zero_add],
 end
 
+/- Multiplying units preserve coprimality -/
 private lemma is_coprime.mul_units_left {a b : k[X]} {u v : k[X]ˣ}
   (h : is_coprime a b) : is_coprime (↑u * a) (↑v * b) :=
 by rw [is_coprime_mul_unit_left_left u.is_unit, is_coprime_mul_unit_left_right v.is_unit]; exact h 
@@ -175,7 +179,7 @@ begin
   { apply rot_coprime (rot3_add.symm.trans heq) hbc; assumption },
 
   cases (eq_or_ne (ring_char k) 0) with ch0 chn0,
-  -- characteristic zero
+  /- Characteristic zero -/
   { have hderiv : (a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0),
     { apply polynomial.flt_catalan_deriv hp hq hr; assumption, },
     rcases hderiv with ⟨da, -, -⟩,
@@ -185,7 +189,10 @@ begin
     have tt := eq_C_of_derivative_eq_zero da,
     rw tt, exact nat_degree_C _, },
 
-  -- characteristic ch, where we use infinite descent
+  /- Characteristic ch ≠ 0, where we use infinite descent.
+  We use proof by contradiction (`by_contra`) combined with strong induction
+  (`nat.case_strong_induction_on`) to formalize the proof.
+  -/
   set d := a.nat_degree with eq_d, clear_value d, by_contra hd,
   revert a b c eq_d hd,
   induction d using nat.case_strong_induction_on with d ih_d,
@@ -225,7 +232,7 @@ theorem polynomial.flt_catalan
   {u v w : k[X]ˣ} (heq: ↑u*a^p + ↑v*b^q + ↑w*c^r = 0) : 
   a.nat_degree = 0 ∧ b.nat_degree = 0 ∧ c.nat_degree = 0 :=
 begin
-  -- WLOG argument: essentially three times flt_catalan_aux
+  /- WLOG argument: essentially three times flt_catalan_aux -/
   have hbc : is_coprime b c,
   { apply rot_coprime heq hab; assumption },
   have hca : is_coprime c a,
