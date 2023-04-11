@@ -84,6 +84,22 @@ FLT is just a special case of the above corollary when $p = q = r = n \geq 3$ an
 
 Note that we have a "counterexample" when $n$ is divisible by the characteristic of $k$: $(X - 1)^{p} + (1)^{p} = X^p$ for odd $p$ and the characteristic of $k$ is equal to $p$.
 
+## Nonparametrizability of an elliptic curve $y^2 = x^3 + 1$
+
+As an example of using non-solvability of Fermat-Catalan equation, we adopt the same strategy as in Franz's note to show that $y^2 = x^3 + 1$ is non-parametrizable.
+
+> **Corollary** Let $k$ be a field of characteristic $\neq 2, 3$.
+Then the elliptic curve defined by the Weierstrass equation $y^2 = x^3 + 1$ is not parametrizable by rational functions in $k(t)$. In other words, there does not exist $f(t), g(t) \in k(t)$ such that $g(t)^2 = f(t)^3 + 1$.
+
+*Proof.*
+Assume that a parametrization exists, so that $x = m / M$ and $y = n / N$ for some $m, n, M, N \in k[t]$ with $(m, M) = 1$ and $(n, N) = 1$.
+Then by clearing denominators, we obtain $n ^ 2 M ^ 3 = (m ^ 3 + M ^ 3) N ^ 2$. 
+From this one can show that $N^2$ and $M^3$ divide each other.
+Using the unique factorization of $N^2 = M^3$, we can find $\alpha, \beta \in k^\times$ and $e \in k[t]$ such that $M = \alpha e^2$ and $N = \beta e^3$.
+Now the equation reduces to $\beta^2 m^3 + \alpha^3 \beta^2 e^6 = \alpha^3 n^2$, which is a nontrivial solution for the Fermat-Catalan equation with $(p, q, r) = (3, 6, 2)$.
+This is a contradiction as the characteristic of $k$ is not $2$ or $3$. □
+
+
 ## Davenport's theorem
 
 > **Corollary (Davenport's theorem)** Let $k$ be a field (not necessarily has characteristic zero) and $f, g \in k[X]$ be coprime polynomials with nonzero deriviatives. Then we have $\deg (f) + 2 \le 2 \deg (f^3 - g^2)$.

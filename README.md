@@ -13,6 +13,9 @@ If $ua^p + vb^q + wc^r = 0$ for some nonzero polynomials $a, b, c \in k[X]$, the
 
 > **Corollary (Polynomial FLT)** If $n \geq 3$, the characteristic of $k$ does not divide $n$ (this holds when characteristic is equal to zero), $a^n+b^n=c^n$ in $k[X]$, and $a, b, c$ are nonzero all coprime to each other, then $a, b, c$ are constant polynomials.
 
+> **Corollary** Let $k$ be a field of characteristic $\neq 2, 3$.
+Then the elliptic curve defined by the Weierstrass equation $y^2 = x^3 + 1$ is not parametrizable by rational functions in $k(t)$. In other words, there does not exist $f(t), g(t) \in k(t)$ such that $g(t)^2 = f(t)^3 + 1$.
+
 > **Corollary (Davenport's theorem)** Let $k$ be a field (not necessarily has characteristic zero) and $f, g \in k[X]$ be coprime polynomials with nonzero deriviatives. Then we have $\deg (f) + 2 \le 2 \deg (f^3 - g^2)$.
 
 The proof is based on the [online note] by Franz Lemmermeyer, which is a slight variation of Noah Snyder's proof (*An Alternate Proof of Mason's Theorem*, Elem. Math. 55 (2000) 93--94).
