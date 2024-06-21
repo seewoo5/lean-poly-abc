@@ -52,7 +52,7 @@ begin
     (aux_is_unit hnz) (p / gcd p q) _,
   clear hnz,
   rw ←gcd_is_unit_iff,
-  have hnz : gcd p q ≠ 0 := gcd_ne_zero_of_right _ _ q_nz,
+  have hnz : gcd p q ≠ 0 := gcd_ne_zero_of_right q_nz,
   refine is_unit_of_associated_mul _ hnz,
   apply associated.trans (gcd_mul_left' _ _ _).symm,
   rw [mul_comm (gcd p q), mul_comm (gcd p q)],
