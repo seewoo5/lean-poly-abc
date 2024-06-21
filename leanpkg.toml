@@ -1,8 +1,8 @@
 [package]
 name = "abc-poly"
 version = "0.1"
-lean_version = "leanprover-community/lean:3.50.3"
+lean_version = "leanprover-community/lean:3.51.1"
 path = "src"
 
 [dependencies]
-mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "ed90a7d327c3a5caf65a6faf7e8a0d63c4605df7"}
+mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "4e976107aa81b41822bd5bb2b15c90b1c8a2aa15"}
