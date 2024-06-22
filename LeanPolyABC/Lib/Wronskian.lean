@@ -48,7 +48,7 @@ theorem wronskian_eq_of_sum_zero {a b c : k[X]} (h : a + b + c = 0) :
   rw [← wronskian_anticomm]
 
 private theorem degree_ne_bot {a : k[X]} (ha : a ≠ 0) : a.degree ≠ ⊥ := by
-  intro h <;> rw [Polynomial.degree_eq_bot] at h <;> exact ha h
+  intro h; rw [Polynomial.degree_eq_bot] at h; exact ha h
 
 theorem wronskian.degree_lt_add {a b : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) :
     (wronskian a b).degree < a.degree + b.degree :=
@@ -74,8 +74,8 @@ lemma wronskian.nat_degree_lt_add {a b : k[X]}
 theorem wronskian.natDegree_lt_add {a b : k[X]} (hw : wronskian a b ≠ 0) :
     (wronskian a b).natDegree < a.natDegree + b.natDegree :=
   by
-  have ha : a ≠ 0 := by intro h <;> subst h <;> rw [wronskian_zero_left] at hw <;> exact hw rfl
-  have hb : b ≠ 0 := by intro h <;> subst h <;> rw [wronskian_zero_right] at hw <;> exact hw rfl
+  have ha : a ≠ 0 := by intro h; subst h; rw [wronskian_zero_left] at hw; exact hw rfl
+  have hb : b ≠ 0 := by intro h; subst h; rw [wronskian_zero_right] at hw; exact hw rfl
   rw [← WithBot.coe_lt_coe, WithBot.coe_add]
   convert ← wronskian.degree_lt_add ha hb
   exact Polynomial.degree_eq_natDegree hw

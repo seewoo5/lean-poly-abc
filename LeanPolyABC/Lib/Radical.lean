@@ -13,7 +13,7 @@ variable {k : Type _} [Field k]
 namespace Polynomial
 
 theorem degree_ne_bot {a : k[X]} (ha : a ≠ 0) : a.degree ≠ ⊥ := by
-  intro h <;> rw [degree_eq_bot] at h <;> exact ha h
+  intro h; rw [degree_eq_bot] at h; exact ha h
 
 /-- Prime factors of a polynomial `a` are monic factors of `a` without duplication. -/
 def primeFactors (a : k[X]) : Finset k[X] :=
