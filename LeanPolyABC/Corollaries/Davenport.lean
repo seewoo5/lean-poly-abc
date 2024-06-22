@@ -15,12 +15,12 @@ open UniqueFactorizationMonoid
 variable {k : Type _} [Field k]
 
 -- Auxiliary lemma to remove nonzero hypothesis using coprimality and a' ≠ 0.
-theorem isCoprime_nonzero_c {a b : k[X]} (h : IsCoprime a b) (ha : a.derivative ≠ 0) :
+theorem isCoprime_nonzero_c {a b : k[X]} (h : IsCoprime a b) (ha : derivative a ≠ 0) :
     a ^ 3 - b ^ 2 ≠ 0 := by
   by_contra h_eq_zero
   rw [sub_eq_zero] at h_eq_zero
   have hp : IsCoprime (a ^ 3) (b ^ 2) := h.pow
-  rw [← h_eq_zero, isCoprime_self, isUnit_pow_iff, is_unit_iff] at hp
+  rw [← h_eq_zero, isCoprime_self, isUnit_pow_iff, isUnit_iff] at hp
   rcases hp with ⟨r, r_unit, eq_a⟩
   rw [← eq_a] at ha; exact ha derivative_C
   norm_num
@@ -32,8 +32,8 @@ deg(a) + 2 ≤ 2 * deg(a^3 - b^2).
 
 Proof) Apply ABC for (-a^3, b^2, a^3 - b^2).
 -/
-theorem Polynomial.davenport {a b : k[X]} (hab : IsCoprime a b) (haderiv : a.derivative ≠ 0)
-    (hbderiv : b.derivative ≠ 0) : a.natDegree + 2 ≤ 2 * (a ^ 3 - b ^ 2).natDegree :=
+theorem Polynomial.davenport {a b : k[X]} (hab : IsCoprime a b) (haderiv : derivative a ≠ 0)
+    (hbderiv : derivative b ≠ 0) : a.natDegree + 2 ≤ 2 * (a ^ 3 - b ^ 2).natDegree :=
   by
   have hnz : a ^ 3 - b ^ 2 ≠ 0 := isCoprime_nonzero_c hab haderiv
   have ha : a ≠ 0 := fun ha => haderiv (ha.symm ▸ derivative_zero)
@@ -50,15 +50,15 @@ theorem Polynomial.davenport {a b : k[X]} (hab : IsCoprime a b) (haderiv : a.der
       (by rw [sub_eq_add_neg, add_add_add_comm, neg_add_self, add_neg_self, add_zero]) with
     h h
   · -- When we have inequality from ABC.
-    rw [nat_degree_neg, max3, max_eq_left (nat_degree_sub_le _ _), neg_mul, neg_mul, radical_neg,
-      radical_mul (h1.mul_left h2), radical_mul hab.pow, radical_pow a three_pos,
+    rw [natDegree_neg, max3, max_eq_left (natDegree_sub_le _ _), neg_mul, neg_mul, radical_neg,
+      radical_hMul (h1.mul_left h2), radical_hMul hab.pow, radical_pow a three_pos,
       radical_pow b two_pos,
-      nat_degree_mul (mul_ne_zero a.radical_ne_zero b.radical_ne_zero) (radical_ne_zero _),
-      nat_degree_mul a.radical_ne_zero b.radical_ne_zero, nat_degree_pow, nat_degree_pow, ←
+      natDegree_mul (mul_ne_zero a.radical_ne_zero b.radical_ne_zero) (radical_ne_zero _),
+      natDegree_mul a.radical_ne_zero b.radical_ne_zero, natDegree_pow, natDegree_pow, ←
       max_add_add_right] at h
     replace h :=
       le_trans h
-        (add_le_add (add_le_add radical_nat_degree_le radical_nat_degree_le) radical_nat_degree_le)
+        (add_le_add (add_le_add radical_natDegree_le radical_natDegree_le) radical_natDegree_le)
     rw [max_le_iff] at h
     -- Add two inequalities and simplifying it gives the desired inequality.
     nlinarith only [add_le_add h.1 h.2]
