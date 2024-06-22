@@ -79,7 +79,7 @@ private theorem abc_subcall {a b c w : k[X]} {hw : w ≠ 0} (wab : w = wronskian
   have t11 : abc_dr_nd < a.natDegree + b.natDegree := by
     calc
       abc_dr_nd ≤ w.natDegree := Polynomial.natDegree_le_of_dvd abc_dr_dvd_w hw
-      _ < a.natDegree + b.natDegree := by rw [wab] at hw ⊢ <;> exact wronskian.natDegree_lt_add hw
+      _ < a.natDegree + b.natDegree := by rw [wab] at hw ⊢; exact wronskian.natDegree_lt_add hw
   have t4 : abc_dr_nd + abc_r_nd < a.natDegree + b.natDegree + abc_r_nd :=
     Nat.add_lt_add_right t11 abc_r_nd
   have t3 : abc_dr_nd + abc_r_nd = a.natDegree + b.natDegree + c.natDegree := by
@@ -88,7 +88,7 @@ private theorem abc_subcall {a b c w : k[X]} {hw : w ≠ 0} (wab : w = wronskian
         rw [←
           Polynomial.natDegree_mul (Polynomial.divRadical_ne_zero habc) (a * b * c).radical_ne_zero]
       _ = (a * b * c).natDegree := by
-        rw [mul_comm _ (Polynomial.radical _)] <;> rw [(a * b * c).hMul_radical_divRadical]
+        rw [mul_comm _ (Polynomial.radical _)]; rw [(a * b * c).hMul_radical_divRadical]
       _ = a.natDegree + b.natDegree + c.natDegree := by
         rw [Polynomial.natDegree_mul hab hc, Polynomial.natDegree_mul ha hb]
   rw [t3] at t4
