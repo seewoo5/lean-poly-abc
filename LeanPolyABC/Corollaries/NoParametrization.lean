@@ -25,7 +25,7 @@ theorem calcstep {n N m M : k[X]} (nz_M : M ≠ 0) (nz_N : N ≠ 0)
   set rM := algebraMap k[X] (RatFunc k) M with eq_rM
   set rn := algebraMap k[X] (RatFunc k) n with eq_rn
   set rN := algebraMap k[X] (RatFunc k) N with eq_rN
-  rw [← eq_rm, ← eq_rM, ← eq_rn, ← eq_rN]
+  rw [eq_rm, eq_rM, eq_rn, eq_rN]
   calc
     rn ^ 2 * rM ^ 3 = rn ^ 2 / rN ^ 2 * rN ^ 2 * rM ^ 3 := by
       rw [div_mul_cancel₀ _ (pow_ne_zero 2 nz_rN)]
@@ -53,22 +53,21 @@ theorem calcstep2 {m M n N : k[X]} (nz_M : M ≠ 0) (nz_N : N ≠ 0) (cp_mM : Is
     · have cp : IsCoprime (N ^ 2) (n ^ 2) := cp_nN.symm.pow
       apply cp.dvd_of_dvd_mul_left
       rw [flat_eqn]; exact dvd_mul_left _ _
-  rcases associated_pow_pow_coprime_iff nz_M nz_N (by decide) _ assoc_M3_N2 (by norm_num) with
+  rcases associated_pow_pow_coprime_iff nz_M nz_N (by decide) _ assoc_M3_N2 (by decide) with
     ⟨w, nz_w, assoc_M_w2, assoc_N_w3⟩
-  swap; decide
   rcases assoc_M_w2.symm with ⟨u, eq_Mw⟩; rw [mul_comm] at eq_Mw
   rcases assoc_N_w3.symm with ⟨v, eq_Nw⟩; rw [mul_comm] at eq_Nw
   refine' ⟨w, u, v, nz_w, eq_Mw, eq_Nw, _⟩
   simp_rw [← eq_Mw, ← eq_Nw, mul_pow, ← pow_mul, ← mul_assoc] at flat_eqn
-  ring_nf at flat_eqn
-  rw [mul_left_inj' (pow_ne_zero 6 nz_w)] at flat_eqn
-  rw [mul_comm _ (↑v ^ 2), left_distrib (↑v ^ 2) (m ^ 3) _, ← mul_assoc] at flat_eqn
-  simp_rw [← Units.val_pow_eq_pow_val, ← Units.val_mul] at flat_eqn
-  have cp_mw : IsCoprime m w :=
-    by
-    rw [← eq_Mw, isCoprime_mul_unit_left_right u.is_unit, IsCoprime.pow_right_iff] at cp_mM
+  simp only [Nat.reduceMul, mul_eq_mul_right_iff, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
+    pow_eq_zero_iff] at flat_eqn
+  simp only [Units.val_pow_eq_pow_val, Units.val_mul]
+  constructor
+  . rw [← eq_Mw, isCoprime_mul_unit_left_right u.is_unit, IsCoprime.pow_right_iff] at cp_mM
     exact cp_mM; decide
-  refine' ⟨cp_mw, flat_eqn⟩
+  . rcases flat_eqn with eqn | w0
+    . convert eqn using 1 <;> ring_nf
+    . contradiction
 
 theorem no_parametrization_y2_x3_1 (chk : ¬ringChar k ∣ 6) {x y : RatFunc k}
     (eqn : y ^ 2 = x ^ 3 + 1) : IsConst x ∧ IsConst y :=
@@ -81,7 +80,7 @@ theorem no_parametrization_y2_x3_1 (chk : ¬ringChar k ∣ 6) {x y : RatFunc k}
   cases' eq_or_ne y 0 with eq_y nz_y
   · subst y; rw [eq_comm, zero_pow, ← eq_neg_iff_add_eq_zero] at eqn
     swap; decide
-    have tt : (x ^ 3) ^ 2 = 1; rw [sq_eq_one_iff]; right; exact eqn
+    have tt : (x ^ 3) ^ 2 = 1 := by rw [sq_eq_one_iff]; right; exact eqn
     ring_nf at tt
     refine' ⟨isConst_of_root_unity _ tt, ⟨0, (map_zero _).symm⟩⟩
     decide
@@ -115,19 +114,19 @@ theorem no_parametrization_y2_x3_1 (chk : ¬ringChar k ∣ 6) {x y : RatFunc k}
   have chk2 : ¬ringChar k ∣ 2 := by intro h; apply chk; apply h.trans; use 3; norm_num
   have chk3 : ¬ringChar k ∣ 3 := by intro h; apply chk; apply h.trans; use 2; norm_num
   rw [eq_comm, ← sub_eq_zero, sub_eq_add_neg, ← neg_mul, ← Units.val_neg] at eqn2
-  have deriv_eq_zero := Polynomial.flt_catalan _ _ _ _ chk3 chk chk2 nz_m nz_w nz_n cp_mw eqn2
+  have deriv_eq_zero := Polynomial.flt_catalan
+    (by decide) (by decide) (by decide) (by decide) chk3 chk chk2 nz_m nz_w nz_n cp_mw eqn2
   rcases deriv_eq_zero with ⟨eq_dm, eq_dw, eq_dn⟩
   constructor
   · rw [Polynomial.eq_C_of_natDegree_eq_zero eq_dm]
     rw [← eq_M]; rw [Polynomial.eq_C_of_natDegree_eq_zero eq_dw]
-    rcases polynomial.is_unit_iff.mp u.is_unit with ⟨cu, -, eq_cu⟩
+    rcases Polynomial.isUnit_iff.mp u.isUnit with ⟨cu, -, eq_cu⟩
     rw [← eq_cu];
     rw [← map_pow, ← map_mul, RatFunc.algebraMap_C, RatFunc.algebraMap_C, ← map_div₀, IsConst]
-    exists _; rfl
+    refine ⟨_, rfl⟩
   · rw [Polynomial.eq_C_of_natDegree_eq_zero eq_dn]
     rw [← eq_N]; rw [Polynomial.eq_C_of_natDegree_eq_zero eq_dw]
-    rcases polynomial.is_unit_iff.mp v.is_unit with ⟨cv, -, eq_cv⟩
+    rcases Polynomial.isUnit_iff.mp v.isUnit with ⟨cv, -, eq_cv⟩
     rw [← eq_cv];
     rw [← map_pow, ← map_mul, RatFunc.algebraMap_C, RatFunc.algebraMap_C, ← map_div₀, IsConst]
-    exists _; rfl
-  iterate 4 norm_num
+    refine ⟨_, rfl⟩
