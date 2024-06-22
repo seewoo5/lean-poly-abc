@@ -1,5 +1,7 @@
 import Mathlib.Algebra.Order.Group.Nat
 import Mathlib.Algebra.Order.Monoid.Unbundled.MinMax
+import Mathlib.Algebra.Order.Ring.Defs
+import Mathlib.Algebra.Order.Ring.Nat
 
 #align_import lib.max3
 
@@ -9,10 +11,7 @@ import Mathlib.Algebra.Order.Monoid.Unbundled.MinMax
 def max3 (a b c : ℕ) : ℕ :=
   max (max a b) c
 
-theorem max3_hMul_left (a b c d : ℕ) : max3 (a * b) (a * c) (a * d) = a * max3 b c d :=
-  by
-  -- This is hard: should I use `max_mul_of_nonneg`
-  -- or `max_mul_mul_left`?
+theorem max3_hMul_left (a b c d : ℕ) : max3 (a * b) (a * c) (a * d) = a * max3 b c d := by
   rw [Nat.mul_comm a (max3 b c d)]
   simp_rw [max3]
   rw [max_mul_of_nonneg _ _ (zero_le a)]
@@ -34,11 +33,15 @@ theorem le_max3_second (a b c : ℕ) : b ≤ max3 a b c :=
 theorem le_max3_third (a b c : ℕ) : c ≤ max3 a b c :=
   le_max_right _ _
 
-theorem max3_lt_iff {a b c d : ℕ} : max3 a b c < d ↔ a < d ∧ b < d ∧ c < d := by rw [max3];
-  simp only [max_lt_iff]; tauto
+theorem max3_lt_iff {a b c d : ℕ} : max3 a b c < d ↔ a < d ∧ b < d ∧ c < d := by
+  rw [max3]
+  simp only [max_lt_iff]
+  tauto
 
-theorem max3_le_iff {a b c d : ℕ} : max3 a b c ≤ d ↔ a ≤ d ∧ b ≤ d ∧ c ≤ d := by rw [max3];
-  simp only [max_le_iff]; tauto
+theorem max3_le_iff {a b c d : ℕ} : max3 a b c ≤ d ↔ a ≤ d ∧ b ≤ d ∧ c ≤ d := by
+  rw [max3]
+  simp only [max_le_iff]
+  tauto
 
 theorem add3_le_three_hMul_max3 (a b c : ℕ) : a + b + c ≤ 3 * max3 a b c :=
   by
