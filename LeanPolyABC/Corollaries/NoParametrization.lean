@@ -45,7 +45,7 @@ theorem calcstep2 {m M n N : k[X]} (nz_M : M ≠ 0) (nz_N : N ≠ 0) (cp_mM : Is
   by
   have assoc_M3_N2 : Associated (M ^ 3) (N ^ 2) :=
     by
-    apply associated_of_dvd_dvd
+    refine associated_of_dvd_dvd ?_ ?_
     · have cp : IsCoprime (M ^ 3) (m ^ 3 + 1 * M ^ 3) := cp_mM.symm.pow.add_mul_right_right 1
       rw [one_mul] at cp
       apply cp.dvd_of_dvd_mul_left
@@ -53,7 +53,7 @@ theorem calcstep2 {m M n N : k[X]} (nz_M : M ≠ 0) (nz_N : N ≠ 0) (cp_mM : Is
     · have cp : IsCoprime (N ^ 2) (n ^ 2) := cp_nN.symm.pow
       apply cp.dvd_of_dvd_mul_left
       rw [flat_eqn]; exact dvd_mul_left _ _
-  rcases associated_pow_pow_coprime_iff nz_M nz_N (by decide) _ assoc_M3_N2 (by decide) with
+  rcases associated_pow_pow_coprime_iff nz_M nz_N (by decide) (by decide) assoc_M3_N2 (by decide) with
     ⟨w, nz_w, assoc_M_w2, assoc_N_w3⟩
   rcases assoc_M_w2.symm with ⟨u, eq_Mw⟩; rw [mul_comm] at eq_Mw
   rcases assoc_N_w3.symm with ⟨v, eq_Nw⟩; rw [mul_comm] at eq_Nw
@@ -63,7 +63,7 @@ theorem calcstep2 {m M n N : k[X]} (nz_M : M ≠ 0) (nz_N : N ≠ 0) (cp_mM : Is
     pow_eq_zero_iff] at flat_eqn
   simp only [Units.val_pow_eq_pow_val, Units.val_mul]
   constructor
-  . rw [← eq_Mw, isCoprime_mul_unit_left_right u.is_unit, IsCoprime.pow_right_iff] at cp_mM
+  . rw [← eq_Mw, isCoprime_mul_unit_left_right u.isUnit, IsCoprime.pow_right_iff] at cp_mM
     exact cp_mM; decide
   . rcases flat_eqn with eqn | w0
     . convert eqn using 1 <;> ring_nf
