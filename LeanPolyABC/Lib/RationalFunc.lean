@@ -1,13 +1,13 @@
-import Tactic.Core
-import RingTheory.EuclideanDomain
-import RingTheory.Polynomial.Content
-import Algebra.EuclideanDomain.Basic
-import Algebra.Polynomial.RingDivision
-import Algebra.EuclideanDomain.Instances
-import Algebra.Polynomial.FieldDivision
-import Algebra.Associated
-import RingTheory.UniqueFactorizationDomain
-import FieldTheory.RatFunc.Defs
+import Mathlib.Tactic.Core
+import Mathlib.RingTheory.EuclideanDomain
+import Mathlib.RingTheory.Polynomial.Content
+import Mathlib.Algebra.EuclideanDomain.Basic
+import Mathlib.Algebra.Polynomial.RingDivision
+import Mathlib.Algebra.EuclideanDomain.Instances
+import Mathlib.Algebra.Polynomial.FieldDivision
+import Mathlib.Algebra.Associated
+import Mathlib.RingTheory.UniqueFactorizationDomain
+import Mathlib.FieldTheory.RatFunc.Defs
 
 #align_import lib.rational_func
 
@@ -129,4 +129,3 @@ theorem associated_pow_pow_coprime_iff {a b : k[X]} {m n : ℕ} (ha : a ≠ 0) (
   refine' ⟨C, eq_ACn, _⟩
   rw [eq_ACn, pow_right_comm, associates_pow_eq_pow_iff hn] at h
   exact h.symm
-

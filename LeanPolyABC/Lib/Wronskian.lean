@@ -1,4 +1,4 @@
-import RingTheory.Polynomial.Content
+import Mathlib.RingTheory.Polynomial.Content
 
 #align_import lib.wronskian
 
@@ -64,11 +64,11 @@ theorem wronskian.degree_lt_add {a b : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) :
     exact Polynomial.degree_derivative_lt ha
 
 -- Note: the following is false!
--- Counterexample: b = a = 1 → 
+-- Counterexample: b = a = 1 →
 -- (wronskian a b).nat_degree = a.nat_degree = b.nat_degree = 0
 /-
-lemma wronskian.nat_degree_lt_add {a b : k[X]} 
-  (ha : a ≠ 0) (hb : b ≠ 0) : 
+lemma wronskian.nat_degree_lt_add {a b : k[X]}
+  (ha : a ≠ 0) (hb : b ≠ 0) :
   (wronskian a b).nat_degree < a.nat_degree + b.nat_degree := sorry
 -/
 theorem wronskian.natDegree_lt_add {a b : k[X]} (hw : wronskian a b ≠ 0) :
@@ -81,4 +81,3 @@ theorem wronskian.natDegree_lt_add {a b : k[X]} (hw : wronskian a b ≠ 0) :
   exact Polynomial.degree_eq_natDegree hw
   exact Polynomial.degree_eq_natDegree ha
   exact Polynomial.degree_eq_natDegree hb
-

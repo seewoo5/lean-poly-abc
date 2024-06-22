@@ -1,5 +1,5 @@
-import Corollaries.FltCatalan
-import Lib.RationalFunc
+import LeanPolyABC.Corollaries.FltCatalan
+import LeanPolyABC.Lib.RationalFunc
 
 #align_import corollaries.no_parametrization
 
@@ -131,4 +131,3 @@ theorem no_parametrization_y2_x3_1 (chk : ¬ringChar k ∣ 6) {x y : RatFunc k}
     rw [← map_pow, ← map_mul, RatFunc.algebraMap_C, RatFunc.algebraMap_C, ← map_div₀, IsConst]
     exists _; rfl
   iterate 4 norm_num
-

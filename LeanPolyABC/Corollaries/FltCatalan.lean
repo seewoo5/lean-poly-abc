@@ -1,9 +1,9 @@
-import Algebra.CharP.Defs
-import Algebra.EuclideanDomain.Defs
-import RingTheory.MvPowerSeries.Basic
-import Algebra.Polynomial.Expand
-import Logic.Lemmas
-import MasonStothers
+import Mathlib.Algebra.CharP.Defs
+import Mathlib.Algebra.EuclideanDomain.Defs
+import Mathlib.RingTheory.MvPowerSeries.Basic
+import Mathlib.Algebra.Polynomial.Expand
+import Mathlib.Logic.Lemmas
+import LeanPolyABC.MasonStothers
 
 #align_import corollaries.flt_catalan
 
@@ -220,4 +220,3 @@ theorem Polynomial.flt {n : ℕ} (hn : 3 ≤ n) (chn : ¬ringChar k ∣ n) {a b 
   have eq_lhs : n * n + n * n + n * n = 3 * n * n := by ring_nf
   rw [eq_lhs]; rw [mul_assoc, mul_assoc]
   apply Nat.mul_le_mul_right (n * n); exact hn
-

@@ -1,8 +1,8 @@
-import Algebra.CharP.Defs
-import Algebra.EuclideanDomain.Defs
-import Lib.Wronskian
-import Lib.DivRadical
-import Lib.Max3
+import Mathlib.Algebra.CharP.Defs
+import Mathlib.Algebra.EuclideanDomain.Defs
+import LeanPolyABC.Lib.Wronskian
+import LeanPolyABC.Lib.DivRadical
+import LeanPolyABC.Lib.Max3
 
 #align_import mason_stothers
 
@@ -158,4 +158,3 @@ theorem pow_derivative_eq_zero {n : ℕ} (chn : ¬ringChar k ∣ n) {a : k[X]} (
     tauto
   · intro hd; rw [derivative_pow]; rw [hd]
     simp only [MulZeroClass.mul_zero]
-

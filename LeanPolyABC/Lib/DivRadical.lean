@@ -1,5 +1,5 @@
-import Lib.Radical
-import Lib.Wronskian
+import LeanPolyABC.Lib.Radical
+import LeanPolyABC.Lib.Wronskian
 
 #align_import lib.div_radical
 
@@ -109,4 +109,3 @@ theorem divRadical_dvd_wronskian_right (a b : k[X]) : b.divRadical ∣ wronskian
   exact b.div_radical_dvd_wronskian_left _
 
 end Polynomial
-

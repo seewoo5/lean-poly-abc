@@ -1,6 +1,6 @@
-import Algebra.CharP.Defs
-import Algebra.EuclideanDomain.Defs
-import MasonStothers
+import Mathlib.Algebra.CharP.Defs
+import Mathlib.Algebra.EuclideanDomain.Defs
+import LeanPolyABC.MasonStothers
 
 #align_import corollaries.davenport
 
@@ -69,4 +69,3 @@ theorem Polynomial.davenport {a b : k[X]} (hab : IsCoprime a b) (haderiv : a.der
     replace h := h.1.trans h.2.1.symm
     rw [← sub_eq_zero, ← C_sub, ← Nat.cast_sub (Nat.le_succ 2), Nat.cast_one, C_1] at h
     exact (one_ne_zero h).elim
-

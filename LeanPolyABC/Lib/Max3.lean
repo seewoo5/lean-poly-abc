@@ -1,5 +1,5 @@
-import Algebra.Order.Group.Nat
-import Algebra.Order.Monoid.Unbundled.MinMax
+import Mathlib.Algebra.Order.Group.Nat
+import Mathlib.Algebra.Order.Monoid.Unbundled.MinMax
 
 #align_import lib.max3
 
@@ -57,4 +57,3 @@ theorem weighted_average_le_max3 {p q r a b c : ℕ} :
   exact Nat.mul_le_mul (le_refl _) (le_max3_first _ _ _)
   exact Nat.mul_le_mul (le_refl _) (le_max3_second _ _ _)
   exact Nat.mul_le_mul (le_refl _) (le_max3_third _ _ _)
-

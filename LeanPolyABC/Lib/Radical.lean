@@ -1,4 +1,4 @@
-import RingTheory.Polynomial.Content
+import Mathlib.RingTheory.Polynomial.Content
 
 #align_import lib.radical
 
@@ -137,4 +137,3 @@ theorem radical_natDegree_le {a : k[X]} : a.radical.natDegree ≤ a.natDegree :=
   · exact nat_degree_le_of_dvd (radical_dvd_self a) ha
 
 end Polynomial
-
