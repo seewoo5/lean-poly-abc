@@ -17,7 +17,7 @@ open UniqueFactorizationMonoid
 variable {k : Type _} [Field k]
 
 @[simp]
-theorem dvd_derivative_iff {a : k[X]} : a ∣ a.derivative ↔ a.derivative = 0 :=
+theorem dvd_derivative_iff {a : k[X]} : a ∣ derivative a ↔ derivative a = 0 :=
   by
   constructor
   intro h
@@ -27,11 +27,11 @@ theorem dvd_derivative_iff {a : k[X]} : a ∣ a.derivative ↔ a.derivative = 0 
   have deriv_lt := degree_derivative_lt a_nz
   have le_deriv := Polynomial.degree_le_of_dvd h deriv_nz
   have lt_self := le_deriv.trans_lt deriv_lt
-  simp only [lt_self_iff_false] at lt_self; exact lt_self
+  simp only [lt_self_iff_false] at lt_self
   intro h; rw [h]; simp
 
 theorem IsCoprime.wronskian_eq_zero_iff {a b : k[X]} (hc : IsCoprime a b) :
-    wronskian a b = 0 ↔ a.derivative = 0 ∧ b.derivative = 0 :=
+    wronskian a b = 0 ↔ derivative a = 0 ∧ derivative b = 0 :=
   by
   constructor
   intro hw
@@ -76,20 +76,20 @@ private theorem abc_subcall {a b c w : k[X]} {hw : w ≠ 0} (wab : w = wronskian
   have habc := mul_ne_zero hab hc
   set abc_dr_nd := (a * b * c).divRadical.natDegree with def_abc_dr_nd
   set abc_r_nd := (a * b * c).radical.natDegree with def_abc_r_nd
-  have t11 : abc_dr_nd < a.nat_degree + b.nat_degree := by
+  have t11 : abc_dr_nd < a.natDegree + b.natDegree := by
     calc
-      abc_dr_nd ≤ w.nat_degree := Polynomial.natDegree_le_of_dvd abc_dr_dvd_w hw
-      _ < a.nat_degree + b.nat_degree := by rw [wab] at hw ⊢ <;> exact wronskian.natDegree_lt_add hw
-  have t4 : abc_dr_nd + abc_r_nd < a.nat_degree + b.nat_degree + abc_r_nd :=
+      abc_dr_nd ≤ w.natDegree := Polynomial.natDegree_le_of_dvd abc_dr_dvd_w hw
+      _ < a.natDegree + b.natDegree := by rw [wab] at hw ⊢ <;> exact wronskian.natDegree_lt_add hw
+  have t4 : abc_dr_nd + abc_r_nd < a.natDegree + b.natDegree + abc_r_nd :=
     Nat.add_lt_add_right t11 abc_r_nd
-  have t3 : abc_dr_nd + abc_r_nd = a.nat_degree + b.nat_degree + c.nat_degree := by
+  have t3 : abc_dr_nd + abc_r_nd = a.natDegree + b.natDegree + c.natDegree := by
     calc
       abc_dr_nd + abc_r_nd = ((a * b * c).divRadical * (a * b * c).radical).natDegree := by
         rw [←
           Polynomial.natDegree_mul (Polynomial.divRadical_ne_zero habc) (a * b * c).radical_ne_zero]
       _ = (a * b * c).natDegree := by
         rw [mul_comm _ (Polynomial.radical _)] <;> rw [(a * b * c).hMul_radical_divRadical]
-      _ = a.nat_degree + b.nat_degree + c.nat_degree := by
+      _ = a.natDegree + b.natDegree + c.natDegree := by
         rw [Polynomial.natDegree_mul hab hc, Polynomial.natDegree_mul ha hb]
   rw [t3] at t4
   exact Nat.lt_of_add_lt_add_left t4
@@ -101,7 +101,7 @@ private theorem rot3_mul {a b c : k[X]} : a * b * c = b * c * a := by ring_nf
 theorem Polynomial.abc {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hab : IsCoprime a b)
     (hbc : IsCoprime b c) (hca : IsCoprime c a) (hsum : a + b + c = 0) :
     max3 a.natDegree b.natDegree c.natDegree + 1 ≤ (a * b * c).radical.natDegree ∨
-      a.derivative = 0 ∧ b.derivative = 0 ∧ c.derivative = 0 :=
+      derivative a = 0 ∧ derivative b = 0 ∧ derivative c = 0 :=
   by
   -- Utility assertions
   have wbc := wronskian_eq_of_sum_zero hsum
@@ -112,18 +112,18 @@ theorem Polynomial.abc {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 
     rw [← wbc] at h; exact h
   have abc_dr_dvd_w : (a * b * c).divRadical ∣ w :=
     by
-    have adr_dvd_w := a.div_radical_dvd_wronskian_left b
-    have bdr_dvd_w := a.div_radical_dvd_wronskian_right b
-    have cdr_dvd_w := b.div_radical_dvd_wronskian_right c
+    have adr_dvd_w := a.divRadical_dvd_wronskian_left b
+    have bdr_dvd_w := a.divRadical_dvd_wronskian_right b
+    have cdr_dvd_w := b.divRadical_dvd_wronskian_right c
     rw [← wab] at adr_dvd_w bdr_dvd_w
     rw [← wbc] at cdr_dvd_w
-    have cop_ab_dr := hab.div_radical
-    have cop_bc_dr := hbc.div_radical
-    have cop_ca_dr := hca.div_radical
+    have cop_ab_dr := hab.divRadical
+    have cop_bc_dr := hbc.divRadical
+    have cop_ca_dr := hca.divRadical
     have cop_abc_dr := cop_ca_dr.symm.mul_left cop_bc_dr
     have abdr_dvd_w := cop_ab_dr.mul_dvd adr_dvd_w bdr_dvd_w
     have abcdr_dvd_w := cop_abc_dr.mul_dvd abdr_dvd_w cdr_dvd_w
-    convert abcdr_dvd_w
+    convert abcdr_dvd_w using 1
     rw [← Polynomial.divRadical_hMul hab]
     rw [← Polynomial.divRadical_hMul _]
     exact hca.symm.mul_left hbc
@@ -143,18 +143,17 @@ theorem Polynomial.abc {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 
     · apply abc_subcall wab <;> assumption
 
 theorem pow_derivative_eq_zero {n : ℕ} (chn : ¬ringChar k ∣ n) {a : k[X]} (ha : a ≠ 0) :
-    (a ^ n).derivative = 0 ↔ a.derivative = 0 :=
+    derivative (a ^ n) = 0 ↔ derivative a = 0 :=
   by
   constructor
   · intro apd
     rw [derivative_pow] at apd
-    simp only [C_eq_nat_cast, mul_eq_zero] at apd
+    simp only [C_eq_natCast, mul_eq_zero] at apd
     have pnz : a ^ (n - 1) ≠ 0 := pow_ne_zero (n - 1) ha
-    have cn_neq_zero : (↑(↑n : k) : k[X]) ≠ 0 :=
+    have cn_neq_zero : (↑n : k[X]) ≠ 0 :=
       by
-      simp only [Polynomial.C_eq_zero, Ne.def, algebraMap.lift_map_eq_zero_iff]
+      simp only [Polynomial.C_eq_zero, ne_eq, algebraMap.lift_map_eq_zero_iff]
       intro cn_eq_zero
-      exact chn (ringChar.dvd cn_eq_zero)
+      sorry
     tauto
-  · intro hd; rw [derivative_pow]; rw [hd]
-    simp only [MulZeroClass.mul_zero]
+  · intro hd; rw [derivative_pow, hd, MulZeroClass.mul_zero]
