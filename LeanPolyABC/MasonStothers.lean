@@ -152,8 +152,9 @@ theorem pow_derivative_eq_zero {n : ℕ} (chn : ¬ringChar k ∣ n) {a : k[X]} (
     have pnz : a ^ (n - 1) ≠ 0 := pow_ne_zero (n - 1) ha
     have cn_neq_zero : (↑n : k[X]) ≠ 0 :=
       by
-      simp only [Polynomial.C_eq_zero, ne_eq, algebraMap.lift_map_eq_zero_iff]
+      -- simp only [Polynomial.C_eq_zero, ne_eq, algebraMap.lift_map_eq_zero_iff]
+      rw [←C_eq_natCast, ne_eq, Polynomial.C_eq_zero]
       intro cn_eq_zero
-      sorry
+      exact chn (ringChar.dvd cn_eq_zero)
     tauto
   · intro hd; rw [derivative_pow, hd, MulZeroClass.mul_zero]
