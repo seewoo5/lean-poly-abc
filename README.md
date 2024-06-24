@@ -1,5 +1,7 @@
 # Formalization of Polynomial ABC and FLT
 
+[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/seewoo5/lean-poly-abc/)
+
 - Jineon Baek (University of Michigan, Ann Arbor -- jineon@umich.edu)
 - Seewoo Lee (University of California, Berkeley -- seewoo5@berkeley.edu)
 
