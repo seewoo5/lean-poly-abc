@@ -50,13 +50,7 @@ Arranging terms then gives $\text{deg }(a) + \text{deg }(b) + \text{deg }(c) < \
 
 ## Nonsolvability of Fermat-Catalan equation and FLT
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 Using this, we can prove that Fermat-Catalan equation is not solvable in $k[X]$ (i.e. does not admit nonconstant solutions) under certain assumptions on exponents and the characteristic of $k$.
-=======
-> **Theorem (Polynomial FLT)** If $n \geq 3$, the characteristic of $k$ does not divide $n$ (this holds when characteristic is equal to zero), $a^n+b^n+c^n = 0$ in $k[X]$, and $a, b, c$ are nonzero all coprime to each other, then $a'=b'=c'=0$.
->>>>>>> 38cf49b (update readme & fix minor)
 
 
 > **Corollary (Nonsolvability of Fermat-Catalan equation)** Let $k$ be a field and $p, q, r \geq 1$ be integers satisfying $1/p + 1/q + 1/r \leq 1$ and not divisible by the characteristic of $k$. Let $u, v, w$ be units in $k[X]$.
@@ -137,78 +131,3 @@ $$
 and adding these two inequalities and rearranging gives the desired inequality.
 It is worth nothing that we don't need the assumption $f^3 - g^2 \neq 0$ too, because this can be proven with coprimality assumption and $f' \neq 0$.
 In fact, if $f^3 = g^2$, then both $f$ and $g$ should be unit, and this contradicts to $f' \neq 0$ since units in $k[t]$ are constants ($k[t]^\times = k^\times$). □
-=======
-> **Theorem (Polynomial FLT)** If $n \geq 3$, the characteristic of $k$ does not divide $n$ (this holds when characteristic is equal to zero), $a^n+b^n=c^n$ in $k[X]$, and $a, b, c$ are nonzero all coprime to each other, then $a'=b'=c'=0$.
-=======
-Using this, we can prove that Fermat-Catalan equation is not solvable in $k[X]$ (i.e. does not admit nonconstant solutions) under certain assumptions on exponents and the characteristic of $k$.
->>>>>>> fef38b0 (Update sketch for fermat-catalan & Davenport (#35))
-
-
-<<<<<<< HEAD
-Finally, note that for general field the derivative $a'$ of some $a \in k[X]$ being equal to zero is not equivalent to $a = 0$. If the characteristic is $p$ then the derivative of $X^p$ is $pX^{p-1} = 0$.
-(In fact, we have a "counterexample" $(X - 1)^{p} + (1)^{p} = X^p$ for the polynomial FLT when $p$ is odd and the characteristic of $k$ is equal to $p$.)
-However, if the characteristic of $k$ is zero then $a' = 0$ is equivalent to $a$ being a constant.
->>>>>>> 2ebd38b (Gitpod & update readme (#16))
-=======
-> **Corollary (Nonsolvability of Fermat-Catalan equation)** Let $k$ be a field and $p, q, r \geq 1$ be integers satisfying $1/p + 1/q + 1/r \leq 1$ and not divisible by the characteristic of $k$. Let $u, v, w$ be units in $k[X]$.
-If $ua^p + vb^q + wc^r = 0$ for some nonzero polynomials $a, b, c \in k[X]$, then $a, b, c$ are all constant polynomials.
-
-
-*Proof.* Applying Mason-Stothers to the triple $(ua^p, vb^q, wc^r)$ gives either one of the following.
-
-*When $\max(\mathrm{deg} (ua^p), \mathrm{deg}(vb^q), \mathrm{deg}(wc^r)) < \mathrm{deg} (\mathrm{rad} (uvw a^p b^q c^r))$.* If we put $m = \max(\mathrm{deg} (a^p), \mathrm{deg}(b^q), \mathrm{deg}(c^r))$, then
-
-$$
-\begin{align*}
-m &= \max(p \deg(a), q\deg(b), r\deg(c)) \\
-&< \deg(\mathrm{rad}(a^p b^q c^r)) \\
-& = \deg(\mathrm{rad}(abc)) \\
-& \le \deg(abc) \\
-& = \frac{1}{p} \deg(a^p) + \frac{1}{q} \deg(b^q) + \frac{1}{r} \deg(c^r) \\
-& \le \left(\frac{1}{p} + \frac{1}{q} + \frac{1}{r}\right) m
-\end{align*}
-$$
-and this gives a contradiction.
-
-*When derivatives vanish.* In the other case of Mason-Stothers we get $(ua^p)' = (vb^q)' = (wc^r)' = 0$. As $(ua^p)' = u a' a^{p-1} = 0$ and $p$ is not zero in $k$, we have $a' = 0$. Similar arguments also give $b' = c' = 0$. If the characteristic of $k$ is zero, then $a' = 0$ is equivalent to $a$ being a constant, and same for $b$ and $c$. When $k$ has a positive characteristic $\ell > 0$, then we can use infinite descent argument to show that $a, b, c$ are constant polynomials. In fact, one can show that $a' = 0$ implies $a(X) = a_1(X^\ell)$ for some $a_1 \in k[X]$. Hence any nontrivial solution of Fermat's equation $ua^p + vb^q + wc^r = $ yields another solution $ua_1^p + vb_1^q + wc_1^r = 0$ with smaller degree $\deg(a_1) = \deg(a) / \ell < \deg(a)$. □
-
-FLT is just a special case of the above corollary when $p = q = r = n \geq 3$ and $u = v = 1, w = -1$.
-
-> **Corollary (Polynomial FLT)** If $n \geq 3$, the characteristic of $k$ does not divide $n$ (this holds when characteristic is equal to zero), $a^n+b^n=c^n$ in $k[X]$, and $a, b, c$ are nonzero all coprime to each other, then $a, b, c$ are constant polynomials.
-
-
-
-Note that we have a "counterexample" when $n$ is divisible by the characteristic of $k$: $(X - 1)^{p} + (1)^{p} = X^p$ for odd $p$ and the characteristic of $k$ is equal to $p$.
-
-## Davenport's theorem
-
-> **Corollary (Davenport's theorem)** Let $k$ be a field (not necessarily has characteristic zero) and $f, g \in k[X]$ be coprime polynomials with nonzero deriviatives. Then we have $\deg (f) + 2 \le 2 \deg (f^3 - g^2)$.
-
-*Proof.*
-For given coprime non-constant polynomials $f, g \in k[X]$ with $f^3 - g^2 \ne 0$, apply apply Mason-Stothers to the zero-sum coprime triple $(-f^3, g^2, f^3 - g^2)$.
-Then either we get the following inequality
-
-$$
-\begin{align*}
-    \max \{3 \deg (f), 2 \deg (g) \} + 1 &=\max \{ \deg(-f^3), \deg(g^2), \deg(f^3 - g^2) \} + 1 \\
-    &\leq \deg(\mathrm{rad}(-f^3 g^2 (f^3 - g^2))) \\
-    &= \deg (\mathrm{rad} (fg(f^3 - g^2))) \\
-    &\le \deg (f) + \deg(g) + \deg(f^3 - g^2).
-\end{align*}
-$$
-
-where the first equality follows from $\deg(f^3 - g^2) \leq \max \{ \deg(f^3), \deg(g^2)\}$, or we get $(f^3)' = (g^2)' = (f^3 - g^2)' = 0$.
-However, the latter case cannot happen since it would imply $3f^2f' = 0 = 2gg' \Rightarrow 3 = 0 = 2$, which is impossible in any field $k$.
-This gives two inequalities
-
-$$
-\begin{align*}
-    3 \deg(f) \leq \deg(f) + \deg(g) + \deg(f^3 - g^2) \\
-    2 \deg(g) \leq \deg(f) + \deg(g) + \deg(f^3 - g^2) \\
-\end{align*}
-$$
-
-and adding these two inequalities and rearranging gives the desired inequality.
-It is worth nothing that we don't need the assumption $f^3 - g^2 \neq 0$ too, because this can be proven with coprimality assumption and $f' \neq 0$.
-In fact, if $f^3 = g^2$, then both $f$ and $g$ should be unit, and this contradicts to $f' \neq 0$ since units in $k[t]$ are constants ($k[t]^\times = k^\times$). □
->>>>>>> fef38b0 (Update sketch for fermat-catalan & Davenport (#35))
