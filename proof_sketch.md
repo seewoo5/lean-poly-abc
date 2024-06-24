@@ -36,11 +36,7 @@ Now if $b'$ is not zero, then the degree of $b'$ is strictly less than $b$ so we
 
 ## Mason-Stothers theorem
 
-<<<<<<< HEAD
 At last, we have the following main theorem. (See `MasonStothers.lean`)
-=======
-> **Theorem (Mason-Stothers, Polynomial ABC)** If $a, b, c \in k[X]$ are nonzero and $a + b + c = 0$ and they are coprime to each other, then either $\text{max}(\text{deg } a, \text{deg }b, \text{deg }c) < \text{deg} (\text{rad } a b c)$ or all $a', b', c'$ are zero.
->>>>>>> 38cf49b (update readme & fix minor)
 
 > **Theorem (Mason-Stothers, Polynomial ABC)** If $a, b, c \in k[X]$ are nonzero and $a + b + c = 0$ and they are coprime to each other, then either $\text{max}(\text{deg } a, \text{deg }b, \text{deg }c) + 1 \le \text{deg} (\text{rad } a b c)$ or all $a', b', c'$ are zero.
 
@@ -54,6 +50,7 @@ Arranging terms then gives $\text{deg }(a) + \text{deg }(b) + \text{deg }(c) < \
 
 ## Nonsolvability of Fermat-Catalan equation and FLT
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 Using this, we can prove that Fermat-Catalan equation is not solvable in $k[X]$ (i.e. does not admit nonconstant solutions) under certain assumptions on exponents and the characteristic of $k$.
 =======
@@ -139,3 +136,17 @@ $$
 and adding these two inequalities and rearranging gives the desired inequality.
 It is worth nothing that we don't need the assumption $f^3 - g^2 \neq 0$ too, because this can be proven with coprimality assumption and $f' \neq 0$.
 In fact, if $f^3 = g^2$, then both $f$ and $g$ should be unit, and this contradicts to $f' \neq 0$ since units in $k[t]$ are constants ($k[t]^\times = k^\times$). □
+=======
+> **Theorem (Polynomial FLT)** If $n \geq 3$, the characteristic of $k$ does not divide $n$ (this holds when characteristic is equal to zero), $a^n+b^n=c^n$ in $k[X]$, and $a, b, c$ are nonzero all coprime to each other, then $a'=b'=c'=0$.
+
+*Proof.* Applying Mason-Stothers to the triple $(a^n, b^n, -c^n)$ gives either one of the following.
+- $\text{max}(\text{deg } a^n, \text{deg }b^n, \text{deg }c^n) < \text{deg} (\text{rad } a^n b^n c^n)$, so $n \max(\deg a, \deg b, \deg c) < \deg(\text{rad }a b c)$. But in this case then the following holds.
+$\deg(\text{rad }a b c) = \deg(\text{rad }a) + \deg(\text{rad } b) + \deg(\text{rad } c)$
+$\leq \deg(a) + \deg(b) + \deg(c) \leq 3 \max (\deg a, \deg b, \deg c)$
+- This is only possible when all degrees of $a, b, c$ are equal to zero. That is, $a, b, c$ are constants.
+- In the other case of Mason-Stothers we get $(a^n)' = (b^n)' = (c^n)' = 0$. As $(a^n)' = n a' a^{n-1} = 0$ and $n$ is not zero in $k$, we have $a' = 0$. Similar arguments also give $b' = c' = 0$. □
+
+Finally, note that for general field the derivative $a'$ of some $a \in k[X]$ being equal to zero is not equivalent to $a = 0$. If the characteristic is $p$ then the derivative of $X^p$ is $pX^{p-1} = 0$.
+(In fact, we have a "counterexample" $(X - 1)^{p} + (1)^{p} = X^p$ for the polynomial FLT when $p$ is odd and the characteristic of $k$ is equal to $p$.)
+However, if the characteristic of $k$ is zero then $a' = 0$ is equivalent to $a$ being a constant.
+>>>>>>> 2ebd38b (Gitpod & update readme (#16))
