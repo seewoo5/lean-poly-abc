@@ -1,7 +1,5 @@
 import Mathlib.RingTheory.Polynomial.Content
 
-#align_import lib.wronskian
-
 noncomputable section
 
 open scoped Polynomial Classical
@@ -65,11 +63,11 @@ theorem wronskian.degree_lt_add {a b : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) :
 
 -- Note: the following is false!
 -- Counterexample: b = a = 1 →
--- (wronskian a b).nat_degree = a.nat_degree = b.nat_degree = 0
+-- (wronskian a b).natDegree = a.natDegree = b.natDegree = 0
 /-
-lemma wronskian.nat_degree_lt_add {a b : k[X]}
+lemma wronskian.natDegree_lt_add {a b : k[X]}
   (ha : a ≠ 0) (hb : b ≠ 0) :
-  (wronskian a b).nat_degree < a.nat_degree + b.nat_degree := sorry
+  (wronskian a b).natDegree < a.natDegree + b.natDegree := sorry
 -/
 theorem wronskian.natDegree_lt_add {a b : k[X]} (hw : wronskian a b ≠ 0) :
     (wronskian a b).natDegree < a.natDegree + b.natDegree :=

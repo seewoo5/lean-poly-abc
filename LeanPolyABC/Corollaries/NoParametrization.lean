@@ -1,8 +1,6 @@
 import LeanPolyABC.Corollaries.FltCatalan
 import LeanPolyABC.Lib.RationalFunc
 
-#align_import corollaries.no_parametrization
-
 noncomputable section
 
 open scoped Classical Polynomial

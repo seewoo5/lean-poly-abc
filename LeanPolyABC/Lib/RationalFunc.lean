@@ -11,8 +11,6 @@ import Mathlib.FieldTheory.RatFunc.Basic
 import Mathlib.FieldTheory.RatFunc.Defs
 import Mathlib.FieldTheory.RatFunc.AsPolynomial
 
-#align_import lib.rational_func
-
 -- for no_zero_divisors instance
 -- for no_zero_divisors instance
 noncomputable section

@@ -7,5 +7,3 @@ import LeanPolyABC.Lib.Radical
 import LeanPolyABC.Corollaries.FltCatalan
 import LeanPolyABC.Corollaries.Davenport
 import LeanPolyABC.Corollaries.NoParametrization
-
-#align_import all

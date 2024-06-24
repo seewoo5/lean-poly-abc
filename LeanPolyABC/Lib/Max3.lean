@@ -3,8 +3,6 @@ import Mathlib.Algebra.Order.Monoid.Unbundled.MinMax
 import Mathlib.Algebra.Order.Ring.Defs
 import Mathlib.Algebra.Order.Ring.Nat
 
-#align_import lib.max3
-
 -- Utility library for three maxes of ℕ
 -- Utility library for three maxes of ℕ
 /-- maximum of three natural numbers. -/

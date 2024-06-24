@@ -1,7 +1,5 @@
 import Mathlib.RingTheory.Polynomial.Content
 
-#align_import lib.radical
-
 noncomputable section
 
 open scoped Classical

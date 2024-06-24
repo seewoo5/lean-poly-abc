@@ -2,8 +2,6 @@ import Mathlib.Algebra.CharP.Defs
 import Mathlib.Algebra.EuclideanDomain.Defs
 import LeanPolyABC.MasonStothers
 
-#align_import corollaries.davenport
-
 noncomputable section
 
 open scoped Polynomial Classical

@@ -4,8 +4,6 @@ import LeanPolyABC.Lib.Wronskian
 import LeanPolyABC.Lib.DivRadical
 import LeanPolyABC.Lib.Max3
 
-#align_import mason_stothers
-
 noncomputable section
 
 open scoped Polynomial Classical

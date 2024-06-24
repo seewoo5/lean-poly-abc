@@ -5,8 +5,6 @@ import Mathlib.Algebra.Polynomial.Expand
 import Mathlib.Logic.Lemmas
 import LeanPolyABC.MasonStothers
 
-#align_import corollaries.flt_catalan
-
 noncomputable section
 
 open scoped Polynomial Classical
@@ -157,7 +155,7 @@ theorem Polynomial.flt_catalan_aux {p q r : ℕ} (hp : 0 < p) (hq : 0 < q) (hr :
     rw [tt]; exact natDegree_C _
   /- Characteristic ch ≠ 0, where we use infinite descent.
     We use proof by contradiction (`by_contra`) combined with strong induction
-    (`nat.case_strong_induction_on`) to formalize the proof.
+    (`Nat.case_strong_induction_on`) to formalize the proof.
     -/
   . set d := a.natDegree with eq_d;
     clear_value d; by_contra hd

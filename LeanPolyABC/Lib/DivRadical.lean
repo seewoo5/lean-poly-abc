@@ -3,15 +3,13 @@ import Mathlib.Algebra.Ring.Regular
 import LeanPolyABC.Lib.Radical
 import LeanPolyABC.Lib.Wronskian
 
-#align_import lib.div_radical
-
 /-
-On `div_radical(a) = a / radical(a)`. The purpose of this file is to prove our "main lemma" that `div_radical(a)` divides `a'` for any nonzero polynomial `a`.
-The proof is based on induction (`unique_factorization_domain.induction_on_coprime`).
+On `a.divRadical = a / a.radical`. The purpose of this file is to prove our "main lemma" that `a.divRadical` divides `a'` for any nonzero polynomial `a`.
+The proof is based on induction (`UniqueFactorizationMonoid.induction_on_coprime`).
 -/
 /-
-On `div_radical(a) = a / radical(a)`. The purpose of this file is to prove our "main lemma" that `div_radical(a)` divides `a'` for any nonzero polynomial `a`.
-The proof is based on induction (`unique_factorization_domain.induction_on_coprime`).
+On `a.divRadical = a / a.radical`. The purpose of this file is to prove our "main lemma" that `a.divRadical` divides `a'` for any nonzero polynomial `a`.
+The proof is based on induction (`UniqueFactorizationMonoid.induction_on_coprime`).
 -/
 noncomputable section
 
@@ -24,7 +22,7 @@ open UniqueFactorizationMonoid
 variable {k : Type _} [Field k]
 
 /--
-For a given polynomial `a`, `div_radical(a)` is `a` divided by its radical `rad(a)`. This is the key to our implementation. -/
+For a given polynomial `a`, `a.divRadical` is `a` divided by its radical `a.radical`. This is the key to our implementation. -/
 def divRadical (a : k[X]) : k[X] :=
   a / a.radical
 
@@ -67,7 +65,7 @@ theorem divRadical_dvd_self (a : k[X]) : a.divRadical ∣ a :=
   exact radical_dvd_self a
 
 /- Main lemma: a / rad(a) ∣ a'.
-Proof uses `induction_on_coprime` of `unique_factorization_domain`.
+Proof uses `induction_on_coprime` of `UniqueFactorizationMonoid`.
 -/
 
 theorem divRadical_dvd_derivative (a : k[X]) : a.divRadical ∣ (derivative a) :=
