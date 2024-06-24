@@ -36,7 +36,11 @@ Now if $b'$ is not zero, then the degree of $b'$ is strictly less than $b$ so we
 
 ## Mason-Stothers theorem
 
+<<<<<<< HEAD
 At last, we have the following main theorem. (See `MasonStothers.lean`)
+=======
+> **Theorem (Mason-Stothers, Polynomial ABC)** If $a, b, c \in k[X]$ are nonzero and $a + b + c = 0$ and they are coprime to each other, then either $\text{max}(\text{deg } a, \text{deg }b, \text{deg }c) < \text{deg} (\text{rad } a b c)$ or all $a', b', c'$ are zero.
+>>>>>>> 38cf49b (update readme & fix minor)
 
 > **Theorem (Mason-Stothers, Polynomial ABC)** If $a, b, c \in k[X]$ are nonzero and $a + b + c = 0$ and they are coprime to each other, then either $\text{max}(\text{deg } a, \text{deg }b, \text{deg }c) + 1 \le \text{deg} (\text{rad } a b c)$ or all $a', b', c'$ are zero.
 
@@ -50,7 +54,11 @@ Arranging terms then gives $\text{deg }(a) + \text{deg }(b) + \text{deg }(c) < \
 
 ## Nonsolvability of Fermat-Catalan equation and FLT
 
+<<<<<<< HEAD
 Using this, we can prove that Fermat-Catalan equation is not solvable in $k[X]$ (i.e. does not admit nonconstant solutions) under certain assumptions on exponents and the characteristic of $k$.
+=======
+> **Theorem (Polynomial FLT)** If $n \geq 3$, the characteristic of $k$ does not divide $n$ (this holds when characteristic is equal to zero), $a^n+b^n+c^n = 0$ in $k[X]$, and $a, b, c$ are nonzero all coprime to each other, then $a'=b'=c'=0$.
+>>>>>>> 38cf49b (update readme & fix minor)
 
 
 > **Corollary (Nonsolvability of Fermat-Catalan equation)** Let $k$ be a field and $p, q, r \geq 1$ be integers satisfying $1/p + 1/q + 1/r \leq 1$ and not divisible by the characteristic of $k$. Let $u, v, w$ be units in $k[X]$.
