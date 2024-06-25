@@ -5,7 +5,7 @@
 - Jineon Baek (University of Michigan, Ann Arbor -- jineon@umich.edu)
 - Seewoo Lee (University of California, Berkeley -- seewoo5@berkeley.edu)
 
-This is a formalization of the proof of ABC theorem on polynomials (Mason-Stothers Theorem) and their corollaries (nonsolvability of Fermat-Catalan equation and FLT for polynomials, Davenport's theorem) in Lean 3.
+This is a formalization of the proof of ABC theorem on polynomials (Mason-Stothers Theorem) and their corollaries (nonsolvability of Fermat-Catalan equation and FLT for polynomials, Davenport's theorem) in Lean 4.
 More precisely, we formalized the proofs of the following theorems:
 
 > **Theorem (Mason-Stothers, Polynomial ABC)** Let $k$ be a field. If $a, b, c \in k[X]$ are nonzero and $a + b + c = 0$ and they are coprime to each other, then either $\text{max}(\text{deg } a, \text{deg }b, \text{deg }c) < \text{deg} (\text{rad } a b c)$ or all $a', b', c'$ are zero.
