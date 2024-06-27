@@ -34,25 +34,6 @@ private theorem div_mul_eq {a b : k[X]} (h : a ∣ b) : b / a * a = b :=
   have t := EuclideanDomain.div_add_mod b a
   rw [h, add_zero, mul_comm] at t; exact t
 
-theorem IsCoprime.num_denom (x : RatFunc k) : IsCoprime x.num x.denom :=
-  by
-  apply RatFunc.induction_on x
-  intro p q q_nz
-  rw [RatFunc.num_div, RatFunc.denom_div _ q_nz]
-  have hnz : q / gcd p q ≠ 0 := by
-    intro h; apply q_nz
-    rw [← div_mul_eq (gcd_dvd_right p q)]
-    rw [h, MulZeroClass.zero_mul]
-  rw [isCoprime_mul_unit_left_left (aux_is_unit hnz) (p / gcd p q) _]
-  rw [isCoprime_mul_unit_left_right (aux_is_unit hnz) (p / gcd p q) _]
-  clear hnz
-  rw [← gcd_isUnit_iff]
-  have hnz : gcd p q ≠ 0 := gcd_ne_zero_of_right q_nz
-  refine' isUnit_of_associated_mul _ hnz
-  apply Associated.trans (gcd_mul_left' _ _ _).symm
-  rw [mul_comm (gcd p q), mul_comm (gcd p q)]
-  rw [div_mul_eq (gcd_dvd_left p q), div_mul_eq (gcd_dvd_right p q)]
-
 def IsConst (x : RatFunc k) :=
   ∃ c : k, x = RatFunc.C c
 
