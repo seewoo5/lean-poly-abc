@@ -12,7 +12,6 @@ import Mathlib.FieldTheory.RatFunc.Defs
 import Mathlib.FieldTheory.RatFunc.AsPolynomial
 
 -- for no_zero_divisors instance
--- for no_zero_divisors instance
 noncomputable section
 
 open scoped Classical Polynomial
