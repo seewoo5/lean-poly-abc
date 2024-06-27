@@ -1,3 +1,5 @@
+import Mathlib.FieldTheory.RatFunc.Basic
+
 import LeanPolyABC.Corollaries.FltCatalan
 import LeanPolyABC.Lib.RationalFunc
 
@@ -88,8 +90,8 @@ theorem no_parametrization_y2_x3_1 (chk : ¬ringChar k ∣ 6) {x y : RatFunc k}
   have nz_n := num_ne_zero nz_y
   have nz_M := x.denom_ne_zero
   have nz_N := y.denom_ne_zero
-  have cp_mM := IsCoprime.num_denom x
-  have cp_nN := IsCoprime.num_denom y
+  have cp_mM := isCoprime_num_denom x
+  have cp_nN := isCoprime_num_denom y
   set m := x.num
   set M := x.denom
   set n := y.num
