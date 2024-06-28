@@ -100,7 +100,7 @@ theorem Polynomial.flt_catalan_deriv {p q r : ℕ} (hp : 0 < p) (hq : 0 < q) (hr
   have hpqr : 0 < p * q * r := Nat.mul_le_mul (Nat.mul_le_mul hp hq) hr
   apply le_of_mul_le_mul_left _ hpqr
   apply le_trans _ (Nat.mul_le_mul_right _ hineq)
-  convert weighted_average_le_max3 using 1
+  convert weighted_average_le_max₃ using 1
   ring_nf
 
 private theorem expcont {a : k[X]} (ha : a ≠ 0) (hda : derivative a = 0) (chn0 : ringChar k ≠ 0) :

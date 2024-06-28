@@ -48,7 +48,7 @@ theorem Polynomial.davenport {a b : k[X]} (hab : IsCoprime a b) (haderiv : deriv
       (by rw [sub_eq_add_neg, add_add_add_comm, neg_add_self, add_neg_self, add_zero]) with
     h h
   · -- When we have inequality from ABC.
-    rw [natDegree_neg, max3, max_eq_left (natDegree_sub_le _ _), neg_mul, neg_mul, radical_neg,
+    rw [natDegree_neg, max₃, max_eq_left (natDegree_sub_le _ _), neg_mul, neg_mul, radical_neg,
       radical_hMul (h1.mul_left h2), radical_hMul hab.pow, radical_pow a three_pos,
       radical_pow b two_pos,
       natDegree_mul (mul_ne_zero a.radical_ne_zero b.radical_ne_zero) (radical_ne_zero _),
