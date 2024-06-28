@@ -1,4 +1,4 @@
-import Mathlib.RingTheory.Polynomial.Content
+import Mathlib.Algebra.Polynomial.Derivative
 
 noncomputable section
 
