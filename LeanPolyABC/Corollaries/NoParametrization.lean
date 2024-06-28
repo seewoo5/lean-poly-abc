@@ -35,7 +35,7 @@ theorem calcstep {n N m M : k[X]} (nz_M : M ≠ 0) (nz_N : N ≠ 0)
       rw [add_mul, div_mul_cancel₀ _ (pow_ne_zero 3 nz_rM), one_mul]
 
 theorem calcstep2 {m M n N : k[X]} (nz_M : M ≠ 0) (nz_N : N ≠ 0) (cp_mM : IsCoprime m M)
-    (cp_nN : IsCoprime n N) (nz_m : m ≠ 0) (nz_n : n ≠ 0)
+    (cp_nN : IsCoprime n N)
     (flat_eqn : n ^ 2 * M ^ 3 = (m ^ 3 + M ^ 3) * N ^ 2) :
     ∃ (w : k[X]) (u v : k[X]ˣ),
       w ≠ 0 ∧
