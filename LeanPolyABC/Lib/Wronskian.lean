@@ -6,7 +6,7 @@ open scoped Polynomial Classical
 
 open Polynomial
 
-variable {k : Type _} [Field k]
+variable {k : Type _} [CommRing k]
 
 /-- Wronskian: W(a, b) = ab' - a'b. -/
 def wronskian (a b : k[X]) : k[X] :=
@@ -55,11 +55,22 @@ theorem wronskian.degree_lt_add {a b : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) :
     (wronskian a b).degree ≤ max (a * derivative b).degree (derivative a * b).degree :=
       Polynomial.degree_sub_le _ _
     _ < a.degree + b.degree := by
-      rw [max_lt_iff]; constructor <;> rw [degree_mul]
-      · rw [WithBot.add_lt_add_iff_left (degree_ne_bot ha)]
+      rw [max_lt_iff]
+      constructor
+      case left => .
+      {
+        apply lt_of_le_of_lt
+        exact degree_mul_le a (derivative b)
+        rw [WithBot.add_lt_add_iff_left (degree_ne_bot ha)]
         exact Polynomial.degree_derivative_lt hb
-      · rw [WithBot.add_lt_add_iff_right (degree_ne_bot hb)]
+      }
+      case right => .
+      {
+        apply lt_of_le_of_lt
+        exact degree_mul_le (derivative a) b
+        rw [WithBot.add_lt_add_iff_right (degree_ne_bot hb)]
         exact Polynomial.degree_derivative_lt ha
+      }
 
 -- Note: the following is false!
 -- Counterexample: b = a = 1 →
