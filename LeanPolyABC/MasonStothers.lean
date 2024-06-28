@@ -98,7 +98,7 @@ private theorem rot3_mul {a b c : k[X]} : a * b * c = b * c * a := by ring_nf
 
 theorem Polynomial.abc {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hab : IsCoprime a b)
     (hbc : IsCoprime b c) (hca : IsCoprime c a) (hsum : a + b + c = 0) :
-    max₃ a.natDegree b.natDegree c.natDegree + 1 ≤ (a * b * c).radical.natDegree ∨
+    Nat.max₃ a.natDegree b.natDegree c.natDegree + 1 ≤ (a * b * c).radical.natDegree ∨
       derivative a = 0 ∧ derivative b = 0 ∧ derivative c = 0 :=
   by
   -- Utility assertions
@@ -132,7 +132,7 @@ theorem Polynomial.abc {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 
     cases' hbc.wronskian_eq_zero_iff.mp wbc.symm with _ gc
     refine' ⟨ga, gb, gc⟩
   · left
-    rw [← max₃_add_add_right, max₃_le_iff]
+    rw [Nat.max₃_add_distrib_right, Nat.max₃_le]
     refine' ⟨_, _, _⟩
     · rw [rot3_mul] at abc_dr_dvd_w ⊢
       apply abc_subcall wbc <;> assumption

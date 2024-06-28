@@ -58,6 +58,16 @@ private theorem rot3_add {α : Type _} [AddCommMonoid α] {a b c : α} : a + b +
 private theorem mul3_add {α : Type _} [CommMonoid α] {a b c : α} : a * b * c = b * c * a := by
   rw [mul_comm (b * c) a]; exact mul_assoc _ _ _
 
+lemma weighted_average_le_max₃ {p q r a b c : Nat} :
+    p * a + q * b + r * c ≤ (p + q + r) * Nat.max₃ a b c :=
+  by
+  rw [add_mul, add_mul]
+  apply Nat.add_le_add
+  apply Nat.add_le_add
+  exact Nat.mul_le_mul (Nat.le_refl _) (Nat.le_max₃_left _ _ _)
+  exact Nat.mul_le_mul (Nat.le_refl _) (Nat.le_max₃_middle _ _ _)
+  exact Nat.mul_le_mul (Nat.le_refl _) (Nat.le_max₃_right _ _ _)
+
 theorem Polynomial.flt_catalan_deriv {p q r : ℕ} (hp : 0 < p) (hq : 0 < q) (hr : 0 < r)
     (hineq : q * r + r * p + p * q ≤ p * q * r) (chp : ¬ringChar k ∣ p) (chq : ¬ringChar k ∣ q)
     (chr : ¬ringChar k ∣ r) {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
