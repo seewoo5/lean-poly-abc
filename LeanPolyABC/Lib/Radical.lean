@@ -8,17 +8,14 @@ open scoped Classical
 
 open Polynomial UniqueFactorizationMonoid
 
-variable {k : Type _} [Field k]
-variable {α : Type _} [CancelCommMonoidWithZero α] [NormalizationMonoid α] [UniqueFactorizationMonoid α]
+variable {k : Type*} [Field k]
+variable {α : Type*} [CancelCommMonoidWithZero α] [UniqueFactorizationMonoid α]  [NormalizationMonoid α]
 
-theorem degree_ne_bot {a : k[X]} (ha : a ≠ 0) : a.degree ≠ ⊥ := by
-  intro h; rw [degree_eq_bot] at h; exact ha h
-
-/-- Prime factors of a polynomial `a` are monic factors of `a` without duplication. -/
+/-- Prime factors of `a` are monic factors of `a` without duplication. -/
 def primeFactors (a : α) : Finset α :=
   (normalizedFactors a).toFinset
 
-/-- Radical of a polynomial `a` is a product of prime factors of `a`. -/
+/-- Radical of `a` is a product of prime factors of `a`. -/
 def radical (a : α) : α :=
   (primeFactors a).prod id
 

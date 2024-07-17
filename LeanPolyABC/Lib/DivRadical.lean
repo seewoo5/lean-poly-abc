@@ -4,11 +4,7 @@ import LeanPolyABC.Lib.Radical
 import LeanPolyABC.Lib.Wronskian
 
 /-
-On `a.divRadical = a / a.radical`. The purpose of this file is to prove our "main lemma" that `a.divRadical` divides `a'` for any nonzero polynomial `a`.
-The proof is based on induction (`UniqueFactorizationMonoid.induction_on_coprime`).
--/
-/-
-On `a.divRadical = a / a.radical`. The purpose of this file is to prove our "main lemma" that `a.divRadical` divides `a'` for any nonzero polynomial `a`.
+On `a.divRadical = a / radical a`. The purpose of this file is to prove our "main lemma" that `a.divRadical` divides `a'` for any nonzero polynomial `a`.
 The proof is based on induction (`UniqueFactorizationMonoid.induction_on_coprime`).
 -/
 noncomputable section
@@ -22,7 +18,7 @@ open UniqueFactorizationMonoid
 variable {k : Type _} [Field k]
 
 /--
-For a given polynomial `a`, `a.divRadical` is `a` divided by its radical `a.radical`. This is the key to our implementation. -/
+For a given polynomial `a`, `a.divRadical` is `a` divided by its radical `radical a`. This is the key to our implementation. -/
 def divRadical (a : k[X]) : k[X] :=
   a / radical a
 
