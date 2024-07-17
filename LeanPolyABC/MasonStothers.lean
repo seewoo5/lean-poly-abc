@@ -68,12 +68,12 @@ protected theorem IsCoprime.divRadical {a b : k[X]} (h : IsCoprime a b) :
 
 private theorem abc_subcall {a b c w : k[X]} {hw : w ≠ 0} (wab : w = wronskian a b) (ha : a ≠ 0)
     (hb : b ≠ 0) (hc : c ≠ 0) (hab : IsCoprime a b) (hbc : IsCoprime b c) (hca : IsCoprime c a)
-    (abc_dr_dvd_w : (a * b * c).divRadical ∣ w) : c.natDegree + 1 ≤ (a * b * c).radical.natDegree :=
+    (abc_dr_dvd_w : (a * b * c).divRadical ∣ w) : c.natDegree + 1 ≤ (radical (a * b * c)).natDegree :=
   by
   have hab := mul_ne_zero ha hb
   have habc := mul_ne_zero hab hc
-  set abc_dr_nd := (a * b * c).divRadical.natDegree with def_abc_dr_nd
-  set abc_r_nd := (a * b * c).radical.natDegree with def_abc_r_nd
+  set abc_dr_nd := (divRadical (a * b * c)).natDegree with def_abc_dr_nd
+  set abc_r_nd := (radical (a * b * c)).natDegree with def_abc_r_nd
   have t11 : abc_dr_nd < a.natDegree + b.natDegree := by
     calc
       abc_dr_nd ≤ w.natDegree := Polynomial.natDegree_le_of_dvd abc_dr_dvd_w hw
@@ -82,11 +82,11 @@ private theorem abc_subcall {a b c w : k[X]} {hw : w ≠ 0} (wab : w = wronskian
     Nat.add_lt_add_right t11 abc_r_nd
   have t3 : abc_dr_nd + abc_r_nd = a.natDegree + b.natDegree + c.natDegree := by
     calc
-      abc_dr_nd + abc_r_nd = ((a * b * c).divRadical * (a * b * c).radical).natDegree := by
+      abc_dr_nd + abc_r_nd = ((divRadical (a * b * c)) * (radical (a * b * c))).natDegree := by
         rw [←
-          Polynomial.natDegree_mul (Polynomial.divRadical_ne_zero habc) (a * b * c).radical_ne_zero]
+          Polynomial.natDegree_mul (Polynomial.divRadical_ne_zero habc) (radical_ne_zero (a * b * c))]
       _ = (a * b * c).natDegree := by
-        rw [mul_comm _ (Polynomial.radical _)]; rw [(a * b * c).hMul_radical_divRadical]
+        rw [mul_comm _ (radical _)]; rw [hMul_radical_divRadical (a * b * c)]
       _ = a.natDegree + b.natDegree + c.natDegree := by
         rw [Polynomial.natDegree_mul hab hc, Polynomial.natDegree_mul ha hb]
   rw [t3] at t4
@@ -98,7 +98,7 @@ private theorem rot3_mul {a b c : k[X]} : a * b * c = b * c * a := by ring_nf
 
 theorem Polynomial.abc {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hab : IsCoprime a b)
     (hbc : IsCoprime b c) (hca : IsCoprime c a) (hsum : a + b + c = 0) :
-    Nat.max₃ a.natDegree b.natDegree c.natDegree + 1 ≤ (a * b * c).radical.natDegree ∨
+    Nat.max₃ a.natDegree b.natDegree c.natDegree + 1 ≤ (radical (a * b * c)).natDegree ∨
       derivative a = 0 ∧ derivative b = 0 ∧ derivative c = 0 :=
   by
   -- Utility assertions
