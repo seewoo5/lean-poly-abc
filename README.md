@@ -25,13 +25,15 @@ See `proof_sketch.md` for details.
 
 ## Installation
 
-After you install Lean 4 properly (see [here](https://leanprover-community.github.io/get_started.html) for details), run the following script:
+After you install Lean 4 properly (see [here](https://leanprover-community.github.io/get_started.html) for details), run the following commands (or their equivalents):
 
 ```sh
-leanproject get seewoo5/lean-poly-abc
+# clone the repository
+git clone https://github.com/seewoo5/lean-poly-abc.git
+cd lean-poly-abc
+# get mathlib4 cache
+lake exe cache get
 ```
-
-This script will clone this repository along with mathlib codes.
 
 ## Gitpod
 
