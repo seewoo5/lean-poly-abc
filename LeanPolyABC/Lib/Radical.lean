@@ -1,4 +1,6 @@
+import Mathlib.Algebra.Ring.Regular
 import Mathlib.RingTheory.Polynomial.Content
+import Mathlib.RingTheory.UniqueFactorizationDomain
 
 noncomputable section
 
@@ -7,46 +9,44 @@ open scoped Classical
 open Polynomial UniqueFactorizationMonoid
 
 variable {k : Type _} [Field k]
-
-namespace Polynomial
+variable {R : Type _} [CancelCommMonoidWithZero R] [NormalizationMonoid R] [UniqueFactorizationMonoid R]
+variable {R₁ : Type _} [CommRing R₁] [IsDomain R₁] [NormalizationMonoid R₁] [UniqueFactorizationMonoid R₁]
 
 theorem degree_ne_bot {a : k[X]} (ha : a ≠ 0) : a.degree ≠ ⊥ := by
   intro h; rw [degree_eq_bot] at h; exact ha h
 
 /-- Prime factors of a polynomial `a` are monic factors of `a` without duplication. -/
-def primeFactors (a : k[X]) : Finset k[X] :=
+def primeFactors (a : R) : Finset R :=
   (normalizedFactors a).toFinset
 
 /-- Radical of a polynomial `a` is a product of prime factors of `a`. -/
-def radical (a : k[X]) : k[X] :=
+def radical (a : R) : R :=
   (primeFactors a).prod id
 
-theorem radical_zero : radical (0 : k[X]) = 1 := by
+theorem radical_zero : radical (0 : R) = 1 := by
   rw [radical, primeFactors, normalizedFactors_zero, Multiset.toFinset_zero, Finset.prod_empty]
 
-theorem radical_one : radical (1 : k[X]) = 1 := by
+theorem radical_one : radical (1 : R) = 1 := by
   rw [radical, primeFactors, normalizedFactors_one, Multiset.toFinset_zero, Finset.prod_empty]
 
-theorem radical_associated {a b : k[X]} (h : Associated a b) : radical a = radical b :=
+theorem radical_associated {a b : R} (h : Associated a b) : radical a = radical b :=
   by
   rcases iff_iff_and_or_not_and_not.mp h.eq_zero_iff with (⟨rfl, rfl⟩ | ⟨ha, hb⟩)
   · rfl
   · simp_rw [radical, primeFactors]
     rw [(associated_iff_normalizedFactors_eq_normalizedFactors ha hb).mp h]
 
-theorem radical_isUnit {a : k[X]} (h : IsUnit a) : radical a = 1 :=
+theorem radical_isUnit {a : R} (h : IsUnit a) : radical a = 1 :=
   (radical_associated (associated_one_iff_isUnit.mpr h)).trans radical_one
 
-theorem radical_unit {u : k[X]ˣ} : radical (↑u : k[X]) = 1 :=
+theorem radical_unit {u : Rˣ} : radical (↑u : R) = 1 :=
   radical_isUnit u.isUnit
 
-theorem radical_unit_hMul {u : k[X]ˣ} {a : k[X]} : radical ((↑u : k[X]) * a) = radical a :=
+theorem radical_unit_hMul {u : Rˣ} {a : R} : radical ((↑u : R) * a) = radical a :=
   radical_associated (associated_unit_mul_left _ _ u.isUnit)
 
-end Polynomial
-
 /-- coprime polynomials have disjoint prime factors (as multisets). -/
-private theorem IsCoprime.disjoint_normalizedFactors {a b : k[X]} (hc : IsCoprime a b) :
+private theorem IsCoprime.disjoint_normalizedFactors {a b : R₁} (hc : IsCoprime a b) :
     (normalizedFactors a).Disjoint (normalizedFactors b) :=
   by
   intro x hxa hxb
@@ -56,11 +56,11 @@ private theorem IsCoprime.disjoint_normalizedFactors {a b : k[X]} (hc : IsCoprim
   exact xp.not_unit (hc.isUnit_of_dvd' x_dvd_a x_dvd_b)
 
 -- coprime polynomials have disjoint prime factors (as finsets)
-private theorem IsCoprime.disjoint_primeFactors {a b : k[X]} (hc : IsCoprime a b) :
+private theorem IsCoprime.disjoint_primeFactors {a b : R₁} (hc : IsCoprime a b) :
     Disjoint (primeFactors a) (primeFactors b) :=
   Multiset.disjoint_toFinset.mpr (hc.disjoint_normalizedFactors)
 
-private theorem IsCoprime.hMul_primeFactors_disjUnion {a b : k[X]} (ha : a ≠ 0) (hb : b ≠ 0)
+private theorem IsCoprime.hMul_primeFactors_disjUnion {a b : R₁} (ha : a ≠ 0) (hb : b ≠ 0)
     (hc : IsCoprime a b) :
     primeFactors (a * b) = (primeFactors a).disjUnion (primeFactors b) hc.disjoint_primeFactors :=
   by
@@ -68,14 +68,12 @@ private theorem IsCoprime.hMul_primeFactors_disjUnion {a b : k[X]} (ha : a ≠ 0
   simp_rw [primeFactors]
   rw [normalizedFactors_mul ha hb, Multiset.toFinset_add]
 
-namespace Polynomial
-
 -- possible TODO: the proof is unnecessarily long
 @[simp]
-theorem radical_neg_one : (-1 : k[X]).radical = 1 :=
+theorem radical_neg_one : radical (-1 : R₁) = 1 :=
   radical_isUnit isUnit_one.neg
 
-theorem radical_hMul {a b : k[X]} (hc : IsCoprime a b) : (a * b).radical = a.radical * b.radical :=
+theorem radical_hMul {a b : R₁} (hc : IsCoprime a b) : radical (a * b) = (radical a) * (radical b) :=
   by
   by_cases ha : a = 0
   · subst ha; rw [isCoprime_zero_left] at hc
@@ -87,20 +85,20 @@ theorem radical_hMul {a b : k[X]} (hc : IsCoprime a b) : (a * b).radical = a.rad
   rw [hc.hMul_primeFactors_disjUnion ha hb]
   rw [Finset.prod_disjUnion hc.disjoint_primeFactors]
 
-theorem radical_neg {a : k[X]} : (-a).radical = a.radical :=
+theorem radical_neg {a : R₁} : radical (-a) = radical a :=
   neg_one_mul a ▸ (radical_associated <| associated_unit_mul_left a (-1) isUnit_one.neg)
 
-theorem primeFactors_pow (a : k[X]) {n : ℕ} (hn : 0 < n) : primeFactors (a ^ n) = primeFactors a :=
+theorem primeFactors_pow (a : R) {n : ℕ} (hn : 0 < n) : primeFactors (a ^ n) = primeFactors a :=
   by
   simp_rw [primeFactors]
   simp only [normalizedFactors_pow]
   rw [Multiset.toFinset_nsmul]
   exact ne_of_gt hn
 
-theorem radical_pow (a : k[X]) {n : Nat} (hn : 0 < n) : (a ^ n).radical = a.radical := by
+theorem radical_pow (a : R) {n : Nat} (hn : 0 < n) : radical (a ^ n) = radical a := by
   simp_rw [radical, primeFactors_pow a hn]
 
-theorem radical_dvd_self (a : k[X]) : a.radical ∣ a :=
+theorem radical_dvd_self (a : R) : radical a ∣ a :=
   by
   by_cases ha : a = 0
   · rw [ha]
@@ -110,7 +108,7 @@ theorem radical_dvd_self (a : k[X]) : a.radical ∣ a :=
     rw [primeFactors, Multiset.toFinset_val]
     apply Multiset.dedup_le
 
-theorem radical_ne_zero (a : k[X]) : a.radical ≠ 0 :=
+theorem radical_ne_zero (a : R₁) : radical a ≠ 0 :=
   by
   rw [radical, ← Finset.prod_val]
   apply Multiset.prod_ne_zero
@@ -118,21 +116,23 @@ theorem radical_ne_zero (a : k[X]) : a.radical ≠ 0 :=
   simp only [Multiset.toFinset_val, Multiset.mem_dedup]
   exact zero_not_mem_normalizedFactors _
 
-theorem radical_prime {a : k[X]} (ha : Prime a) : a.radical = normalize a :=
+theorem radical_prime {a : R} (ha : Prime a) : radical a = normalize a :=
   by
   rw [radical, primeFactors]
   rw [normalizedFactors_irreducible ha.irreducible]
   simp only [Multiset.toFinset_singleton, id, Finset.prod_singleton]
 
-theorem radical_prime_pow {a : k[X]} (ha : Prime a) {n : ℕ} (hn : 1 ≤ n) :
-    (a ^ n).radical = normalize a := by
-  rw [a.radical_pow hn]
+theorem radical_prime_pow {a : R} (ha : Prime a) {n : ℕ} (hn : 1 ≤ n) :
+    radical (a ^ n) = normalize a := by
+  rw [radical_pow a hn]
   exact radical_prime ha
 
-theorem radical_degree_le {a : k[X]} (ha : a ≠ 0) : a.radical.degree ≤ a.degree :=
+namespace Polynomial
+
+theorem radical_degree_le {a : k[X]} (ha : a ≠ 0) : (radical a).degree ≤ a.degree :=
   degree_le_of_dvd (radical_dvd_self a) ha
 
-theorem radical_natDegree_le {a : k[X]} : a.radical.natDegree ≤ a.natDegree :=
+theorem radical_natDegree_le {a : k[X]} : (radical a).natDegree ≤ a.natDegree :=
   by
   by_cases ha : a = 0
   · rw [ha, radical_zero, natDegree_one, natDegree_zero]

@@ -24,31 +24,31 @@ variable {k : Type _} [Field k]
 /--
 For a given polynomial `a`, `a.divRadical` is `a` divided by its radical `a.radical`. This is the key to our implementation. -/
 def divRadical (a : k[X]) : k[X] :=
-  a / a.radical
+  a / radical a
 
-theorem hMul_radical_divRadical (a : k[X]) : a.radical * a.divRadical = a :=
+theorem hMul_radical_divRadical (a : k[X]) : (radical a) * (divRadical a) = a :=
   by
   rw [divRadical]
   rw [← EuclideanDomain.mul_div_assoc]
   refine' mul_div_cancel_left₀ _ _
-  exact a.radical_ne_zero
+  exact radical_ne_zero a
   exact radical_dvd_self a
 
-theorem divRadical_ne_zero {a : k[X]} (ha : a ≠ 0) : a.divRadical ≠ 0 :=
+theorem divRadical_ne_zero {a : k[X]} (ha : a ≠ 0) : divRadical a ≠ 0 :=
   by
   rw [← hMul_radical_divRadical a] at ha
   exact right_ne_zero_of_mul ha
 
-theorem divRadical_isUnit {u : k[X]} (hu : IsUnit u) : IsUnit u.divRadical := by
+theorem divRadical_isUnit {u : k[X]} (hu : IsUnit u) : IsUnit (divRadical u) := by
   rwa [divRadical, radical_isUnit hu, EuclideanDomain.div_one]
 
-theorem eq_divRadical {a x : k[X]} (h : a.radical * x = a) : x = a.divRadical :=
+theorem eq_divRadical {a x : k[X]} (h : (radical a) * x = a) : x = divRadical a :=
   by
-  apply EuclideanDomain.eq_div_of_mul_eq_left a.radical_ne_zero
+  apply EuclideanDomain.eq_div_of_mul_eq_left (radical_ne_zero a)
   rwa [mul_comm]
 
 theorem divRadical_hMul {a b : k[X]} (hc : IsCoprime a b) :
-    (a * b).divRadical = a.divRadical * b.divRadical :=
+    divRadical (a * b) = (divRadical a) * (divRadical b) :=
   by
   by_cases ha : a = 0
   · rw [ha, MulZeroClass.zero_mul, divRadical, EuclideanDomain.zero_div, MulZeroClass.zero_mul]
@@ -58,7 +58,7 @@ theorem divRadical_hMul {a b : k[X]} (hc : IsCoprime a b) :
   rw [radical_hMul hc]
   rw [mul_mul_mul_comm, hMul_radical_divRadical, hMul_radical_divRadical]
 
-theorem divRadical_dvd_self (a : k[X]) : a.divRadical ∣ a :=
+theorem divRadical_dvd_self (a : k[X]) : (divRadical a) ∣ a :=
   by
   rw [divRadical]
   apply EuclideanDomain.div_dvd_of_dvd
@@ -68,7 +68,7 @@ theorem divRadical_dvd_self (a : k[X]) : a.divRadical ∣ a :=
 Proof uses `induction_on_coprime` of `UniqueFactorizationMonoid`.
 -/
 
-theorem divRadical_dvd_derivative (a : k[X]) : a.divRadical ∣ (derivative a) :=
+theorem divRadical_dvd_derivative (a : k[X]) : (divRadical a) ∣ (derivative a) :=
   by
   induction a using induction_on_coprime
   . case h0 =>

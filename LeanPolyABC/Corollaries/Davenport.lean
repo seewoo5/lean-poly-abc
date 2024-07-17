@@ -51,8 +51,8 @@ theorem Polynomial.davenport {a b : k[X]} (hab : IsCoprime a b) (haderiv : deriv
     rw [natDegree_neg, Nat.max₃, max_eq_left (natDegree_sub_le _ _), neg_mul, neg_mul, radical_neg,
       radical_hMul (h1.mul_left h2), radical_hMul hab.pow, radical_pow a three_pos,
       radical_pow b two_pos,
-      natDegree_mul (mul_ne_zero a.radical_ne_zero b.radical_ne_zero) (radical_ne_zero _),
-      natDegree_mul a.radical_ne_zero b.radical_ne_zero, natDegree_pow, natDegree_pow, ←
+      natDegree_mul (mul_ne_zero (radical_ne_zero a) (radical_ne_zero b)) (radical_ne_zero _),
+      natDegree_mul (radical_ne_zero a) (radical_ne_zero b), natDegree_pow, natDegree_pow, ←
       max_add_add_right] at h
     replace h :=
       le_trans h
