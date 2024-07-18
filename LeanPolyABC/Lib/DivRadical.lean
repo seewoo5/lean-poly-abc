@@ -36,7 +36,7 @@ theorem divRadical_ne_zero {a : k[X]} (ha : a ≠ 0) : divRadical a ≠ 0 :=
   exact right_ne_zero_of_mul ha
 
 theorem divRadical_isUnit {u : k[X]} (hu : IsUnit u) : IsUnit (divRadical u) := by
-  rwa [divRadical, radical_isUnit hu, EuclideanDomain.div_one]
+  rwa [divRadical, radical_unit_eq_one hu, EuclideanDomain.div_one]
 
 theorem eq_divRadical {a x : k[X]} (h : (radical a) * x = a) : x = divRadical a :=
   by
