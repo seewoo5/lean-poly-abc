@@ -38,6 +38,39 @@ theorem radical_unit_eq_one {a : α} (h : IsUnit a) : radical a = 1 :=
 theorem radical_unit_hMul {u : αˣ} {a : α} : radical ((↑u : α) * a) = radical a :=
   radical_associated_eq (associated_unit_mul_left _ _ u.isUnit)
 
+theorem primeFactors_pow (a : α) {n : ℕ} (hn : 0 < n) : primeFactors (a ^ n) = primeFactors a :=
+  by
+  simp_rw [primeFactors]
+  simp only [normalizedFactors_pow]
+  rw [Multiset.toFinset_nsmul]
+  exact ne_of_gt hn
+
+theorem radical_pow (a : α) {n : Nat} (hn : 0 < n) : radical (a ^ n) = radical a := by
+  simp_rw [radical, primeFactors_pow a hn]
+
+theorem radical_dvd_self (a : α) : radical a ∣ a :=
+  by
+  by_cases ha : a = 0
+  · rw [ha]
+    apply dvd_zero
+  · rw [radical, ← Finset.prod_val, ← (normalizedFactors_prod ha).dvd_iff_dvd_right]
+    apply Multiset.prod_dvd_prod_of_le
+    rw [primeFactors, Multiset.toFinset_val]
+    apply Multiset.dedup_le
+
+theorem radical_prime {a : α} (ha : Prime a) : radical a = normalize a :=
+  by
+  rw [radical, primeFactors]
+  rw [normalizedFactors_irreducible ha.irreducible]
+  simp only [Multiset.toFinset_singleton, id, Finset.prod_singleton]
+
+theorem radical_prime_pow {a : α} (ha : Prime a) {n : ℕ} (hn : 1 ≤ n) :
+    radical (a ^ n) = normalize a := by
+  rw [radical_pow a hn]
+  exact radical_prime ha
+
+
+-- Theorems for commutative rings
 variable {R : Type _} [CommRing R] [IsDomain R] [NormalizationMonoid R] [UniqueFactorizationMonoid R]
 
 /-- coprime polynomials have disjoint prime factors (as multisets). -/
@@ -83,26 +116,7 @@ theorem radical_hMul {a b : R} (hc : IsCoprime a b) : radical (a * b) = (radical
 theorem radical_neg {a : R} : radical (-a) = radical a :=
   neg_one_mul a ▸ (radical_associated_eq <| associated_unit_mul_left a (-1) isUnit_one.neg)
 
-theorem primeFactors_pow (a : α) {n : ℕ} (hn : 0 < n) : primeFactors (a ^ n) = primeFactors a :=
-  by
-  simp_rw [primeFactors]
-  simp only [normalizedFactors_pow]
-  rw [Multiset.toFinset_nsmul]
-  exact ne_of_gt hn
-
-theorem radical_pow (a : α) {n : Nat} (hn : 0 < n) : radical (a ^ n) = radical a := by
-  simp_rw [radical, primeFactors_pow a hn]
-
-theorem radical_dvd_self (a : α) : radical a ∣ a :=
-  by
-  by_cases ha : a = 0
-  · rw [ha]
-    apply dvd_zero
-  · rw [radical, ← Finset.prod_val, ← (normalizedFactors_prod ha).dvd_iff_dvd_right]
-    apply Multiset.prod_dvd_prod_of_le
-    rw [primeFactors, Multiset.toFinset_val]
-    apply Multiset.dedup_le
-
+-- This actually holds for nontrivial monoids - do not need ring assumption.
 theorem radical_ne_zero (a : R) : radical a ≠ 0 :=
   by
   rw [radical, ← Finset.prod_val]
@@ -110,17 +124,6 @@ theorem radical_ne_zero (a : R) : radical a ≠ 0 :=
   rw [primeFactors]
   simp only [Multiset.toFinset_val, Multiset.mem_dedup]
   exact zero_not_mem_normalizedFactors _
-
-theorem radical_prime {a : R} (ha : Prime a) : radical a = normalize a :=
-  by
-  rw [radical, primeFactors]
-  rw [normalizedFactors_irreducible ha.irreducible]
-  simp only [Multiset.toFinset_singleton, id, Finset.prod_singleton]
-
-theorem radical_prime_pow {a : R} (ha : Prime a) {n : ℕ} (hn : 1 ≤ n) :
-    radical (a ^ n) = normalize a := by
-  rw [radical_pow a hn]
-  exact radical_prime ha
 
 namespace Polynomial
 
