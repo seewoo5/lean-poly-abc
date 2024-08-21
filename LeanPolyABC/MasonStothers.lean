@@ -92,16 +92,26 @@ private theorem abc_subcall {a b c w : k[X]} {hw : w ≠ 0} (wab : w = wronskian
   rw [t3] at t4
   exact Nat.lt_of_add_lt_add_left t4
 
-private theorem rot3_add {a b c : k[X]} : a + b + c = b + c + a := by ring_nf
+private theorem rot3_add {a b c : k[X]} : a + b + c = b + c + a := by ring
 
-private theorem rot3_mul {a b c : k[X]} : a * b * c = b * c * a := by ring_nf
+private theorem rot3_mul {a b c : k[X]} : a * b * c = b * c * a := by ring
 
-theorem Polynomial.abc {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hab : IsCoprime a b)
-    (hbc : IsCoprime b c) (hca : IsCoprime c a) (hsum : a + b + c = 0) :
+private theorem rot3_isCoprime {a b c : k[X]}
+    (h : a + b + c = 0) (hab : IsCoprime a b) : IsCoprime b c := by
+  rw [add_eq_zero_iff_neg_eq] at h
+  rw [←h, IsCoprime.neg_right_iff]
+  convert IsCoprime.add_mul_left_right hab.symm 1
+  rw [mul_one]
+
+theorem Polynomial.abc {a b c : k[X]}
+    (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
+    (hab : IsCoprime a b) (hsum : a + b + c = 0) :
     Nat.max₃ a.natDegree b.natDegree c.natDegree + 1 ≤ (radical (a * b * c)).natDegree ∨
       derivative a = 0 ∧ derivative b = 0 ∧ derivative c = 0 :=
   by
   -- Utility assertions
+  have hbc : IsCoprime b c := rot3_isCoprime hsum hab
+  have hca : IsCoprime c a := rot3_isCoprime (by rw [←rot3_add]; exact hsum) hbc
   have wbc := wronskian_eq_of_sum_zero hsum
   set w := wronskian a b with wab
   have wca : w = wronskian c a := by

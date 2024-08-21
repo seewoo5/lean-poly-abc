@@ -41,7 +41,10 @@ private theorem rot_coprime {p q r : ℕ} {a b c : k[X]} {u v w : k}
   rw [←IsCoprime.pow_iff hp hq, ←isCoprime_mul_units_left hu hv] at hab
   rw [←IsCoprime.pow_iff hq hr, ←isCoprime_mul_units_left hv hw]
 
-  sorry
+  rw [add_eq_zero_iff_neg_eq] at heq
+  rw [←heq, IsCoprime.neg_right_iff]
+  convert IsCoprime.add_mul_left_right hab.symm 1 using 2
+  rw [mul_one]
 
 private theorem rot3_add {α : Type _} [AddCommMonoid α] {a b c : α} : a + b + c = b + c + a := by
   rw [add_comm (b + c) a]; exact add_assoc _ _ _
