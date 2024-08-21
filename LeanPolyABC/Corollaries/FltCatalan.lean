@@ -68,10 +68,13 @@ lemma weighted_average_le_max₃ {p q r a b c : Nat} :
   exact Nat.mul_le_mul (Nat.le_refl _) (Nat.le_max₃_middle _ _ _)
   exact Nat.mul_le_mul (Nat.le_refl _) (Nat.le_max₃_right _ _ _)
 
-theorem Polynomial.flt_catalan_deriv {p q r : ℕ} (hp : 0 < p) (hq : 0 < q) (hr : 0 < r)
-    (hineq : q * r + r * p + p * q ≤ p * q * r) (chp : ¬ringChar k ∣ p) (chq : ¬ringChar k ∣ q)
-    (chr : ¬ringChar k ∣ r) {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
-    (hab : IsCoprime a b) {u v w : k[X]ˣ} (heq : ↑u * a ^ p + ↑v * b ^ q + ↑w * c ^ r = 0) :
+theorem Polynomial.flt_catalan_deriv
+    {p q r : ℕ} (hp : 0 < p) (hq : 0 < q) (hr : 0 < r)
+    (hineq : q * r + r * p + p * q ≤ p * q * r)
+    (chp : ¬ringChar k ∣ p) (chq : ¬ringChar k ∣ q) (chr : ¬ringChar k ∣ r)
+    {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
+    (hab : IsCoprime a b) {u v w : k} (hu : u ≠ 0) (hv : v ≠ 0) (hw : w ≠ 0)
+    (heq : C u * a ^ p + C v * b ^ q + C w * c ^ r = 0) :
     derivative a = 0 ∧ derivative b = 0 ∧ derivative c = 0 :=
   by
   have hbc : IsCoprime b c := by apply rot_coprime heq hab <;> assumption
@@ -143,10 +146,13 @@ private theorem is_coprime_of_expand {a b : k[X]} {n : ℕ} (hn : n ≠ 0) :
   rcases tt with ⟨zz, yy⟩; rw [eq_comm, expand_eq_C (zero_lt_iff.mpr hn), eq_comm] at yy
   refine' ⟨zz, yy⟩
 
-theorem Polynomial.flt_catalan_aux {p q r : ℕ} (hp : 0 < p) (hq : 0 < q) (hr : 0 < r)
-    (hineq : q * r + r * p + p * q ≤ p * q * r) (chp : ¬ringChar k ∣ p) (chq : ¬ringChar k ∣ q)
-    (chr : ¬ringChar k ∣ r) {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
-    (hab : IsCoprime a b) {u v w : k[X]ˣ} (heq : ↑u * a ^ p + ↑v * b ^ q + ↑w * c ^ r = 0) :
+theorem Polynomial.flt_catalan_aux
+    {p q r : ℕ} (hp : 0 < p) (hq : 0 < q) (hr : 0 < r)
+    (hineq : q * r + r * p + p * q ≤ p * q * r)
+    (chp : ¬ringChar k ∣ p) (chq : ¬ringChar k ∣ q) (chr : ¬ringChar k ∣ r)
+    {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hab : IsCoprime a b)
+    {u v w : k} (hu : u ≠ 0) (hv : v ≠ 0) (hw : w ≠ 0)
+    (heq : C u * a ^ p + C v * b ^ q + C w * c ^ r = 0) :
     a.natDegree = 0 :=
   by
   have hbc : IsCoprime b c := by
@@ -203,10 +209,13 @@ theorem Polynomial.flt_catalan_aux {p q r : ℕ} (hp : 0 < p) (hq : 0 < q) (hr :
       tauto
       omega
 
-  theorem Polynomial.flt_catalan {p q r : ℕ} (hp : 0 < p) (hq : 0 < q) (hr : 0 < r)
-      (hineq : q * r + r * p + p * q ≤ p * q * r) (chp : ¬ringChar k ∣ p) (chq : ¬ringChar k ∣ q)
-      (chr : ¬ringChar k ∣ r) {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
-      (hab : IsCoprime a b) {u v w : k[X]ˣ} (heq : ↑u * a ^ p + ↑v * b ^ q + ↑w * c ^ r = 0) :
+  theorem Polynomial.flt_catalan
+      {p q r : ℕ} (hp : 0 < p) (hq : 0 < q) (hr : 0 < r)
+      (hineq : q * r + r * p + p * q ≤ p * q * r)
+      (chp : ¬ringChar k ∣ p) (chq : ¬ringChar k ∣ q) (chr : ¬ringChar k ∣ r)
+      {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hab : IsCoprime a b)
+      {u v w : k} (hu : u ≠ 0) (hv : v ≠ 0) (hw : w ≠ 0)
+      (heq : C u * a ^ p + C v * b ^ q + C w * c ^ r = 0) :
       a.natDegree = 0 ∧ b.natDegree = 0 ∧ c.natDegree = 0 :=
     by
     -- WLOG argument: essentially three times flt_catalan_aux
