@@ -139,20 +139,3 @@ theorem Polynomial.abc {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 
     · rw [rot3_mul, rot3_mul] at abc_dr_dvd_w ⊢
       apply abc_subcall wca <;> assumption
     · apply abc_subcall wab <;> assumption
-
-theorem pow_derivative_eq_zero {n : ℕ} (chn : ¬ringChar k ∣ n) {a : k[X]} (ha : a ≠ 0) :
-    derivative (a ^ n) = 0 ↔ derivative a = 0 :=
-  by
-  constructor
-  · intro apd
-    rw [derivative_pow] at apd
-    simp only [C_eq_natCast, mul_eq_zero] at apd
-    have pnz : a ^ (n - 1) ≠ 0 := pow_ne_zero (n - 1) ha
-    have cn_neq_zero : (↑n : k[X]) ≠ 0 :=
-      by
-      -- simp only [Polynomial.C_eq_zero, ne_eq, algebraMap.lift_map_eq_zero_iff]
-      rw [←C_eq_natCast, ne_eq, Polynomial.C_eq_zero]
-      intro cn_eq_zero
-      exact chn (ringChar.dvd cn_eq_zero)
-    tauto
-  · intro hd; rw [derivative_pow, hd, MulZeroClass.mul_zero]
