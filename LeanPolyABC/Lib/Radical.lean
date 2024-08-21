@@ -58,6 +58,21 @@ theorem radical_dvd_self (a : α) : radical a ∣ a :=
     rw [primeFactors, Multiset.toFinset_val]
     apply Multiset.dedup_le
 
+theorem radical_mul_dvd_mul_radical (a b : α) : radical (a * b) ∣ (radical a) * (radical b) := by
+  by_cases ha : a = 0
+  . rw [ha]
+    simp only [zero_mul, dvd_mul_right]
+  by_cases hb : b = 0
+  . rw [hb]
+    simp only [mul_zero, dvd_mul_left]
+  rw [radical, primeFactors, normalizedFactors_mul ha hb, Multiset.toFinset_add]
+  rw [radical, primeFactors]
+  rw [radical, primeFactors]
+  refine ⟨?mult, ?tt⟩
+  swap
+  symm
+  convert Finset.prod_union_inter using 2
+
 theorem radical_prime {a : α} (ha : Prime a) : radical a = normalize a :=
   by
   rw [radical, primeFactors]

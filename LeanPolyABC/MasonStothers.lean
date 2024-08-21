@@ -96,12 +96,24 @@ private theorem rot3_add {a b c : k[X]} : a + b + c = b + c + a := by ring_nf
 
 private theorem rot3_mul {a b c : k[X]} : a * b * c = b * c * a := by ring_nf
 
-theorem Polynomial.abc {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hab : IsCoprime a b)
-    (hbc : IsCoprime b c) (hca : IsCoprime c a) (hsum : a + b + c = 0) :
+theorem Polynomial.abc {a b c : k[X]}
+    (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
+    (hab : IsCoprime a b) (hsum : a + b + c = 0) :
     Nat.max₃ a.natDegree b.natDegree c.natDegree + 1 ≤ (radical (a * b * c)).natDegree ∨
       derivative a = 0 ∧ derivative b = 0 ∧ derivative c = 0 :=
   by
   -- Utility assertions
+  have h' : c = -(a + b) := by
+    rw [←add_eq_zero_iff_eq_neg, add_comm, hsum]
+  have hbc : IsCoprime b c := by
+    rw [h', IsCoprime.neg_right_iff]
+    convert (IsCoprime.mul_add_left_right hab.symm 1) using 1
+    ring_nf
+  have hca : IsCoprime c a := by
+    rw [h', IsCoprime.neg_left_iff]
+    convert (IsCoprime.mul_add_left_left hab.symm 1) using 1
+    ring_nf
+  clear h'
   have wbc := wronskian_eq_of_sum_zero hsum
   set w := wronskian a b with wab
   have wca : w = wronskian c a := by
@@ -140,19 +152,78 @@ theorem Polynomial.abc {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 
       apply abc_subcall wca <;> assumption
     · apply abc_subcall wab <;> assumption
 
-theorem pow_derivative_eq_zero {n : ℕ} (chn : ¬ringChar k ∣ n) {a : k[X]} (ha : a ≠ 0) :
-    derivative (a ^ n) = 0 ↔ derivative a = 0 :=
+theorem Polynomial.abc_char0 [CharZero k] {a b c : k[X]}
+    (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
+    (hab : IsCoprime a b) (hsum : a + b + c = 0) :
+    Nat.max₃ a.natDegree b.natDegree c.natDegree + 1 ≤ (radical (a * b * c)).natDegree ∨
+      (a.natDegree = 0 ∧ b.natDegree = 0 ∧ c.natDegree = 0) := by
+  rcases Polynomial.abc ha hb hc hab hsum with _ | h
+  . tauto
+  . right
+    repeat (any_goals constructor)
+    all_goals (apply natDegree_eq_zero_of_derivative_eq_zero; tauto)
+
+-- Variant of Mason--Stothers not requiring coprimality of `a` and `b`
+theorem Polynomial.abc'_char0 [CharZero k]
+    {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hsum : a + b + c = 0) :
+    Nat.max₃ a.natDegree b.natDegree c.natDegree + 1 ≤
+      (radical a).natDegree + (radical b).natDegree + c.natDegree ∨
+      (a.natDegree = 0 ∧ b.natDegree = 0 ∧ c.natDegree = 0) :=
   by
-  constructor
-  · intro apd
-    rw [derivative_pow] at apd
-    simp only [C_eq_natCast, mul_eq_zero] at apd
-    have pnz : a ^ (n - 1) ≠ 0 := pow_ne_zero (n - 1) ha
-    have cn_neq_zero : (↑n : k[X]) ≠ 0 :=
-      by
-      -- simp only [Polynomial.C_eq_zero, ne_eq, algebraMap.lift_map_eq_zero_iff]
-      rw [←C_eq_natCast, ne_eq, Polynomial.C_eq_zero]
-      intro cn_eq_zero
-      exact chn (ringChar.dvd cn_eq_zero)
-    tauto
-  · intro hd; rw [derivative_pow, hd, MulZeroClass.mul_zero]
+    rcases gcd_dvd_left a b with ⟨a', eq_a'⟩
+    rcases gcd_dvd_right a b with ⟨b', eq_b'⟩
+    have hab : IsCoprime a' b' := by
+      rw [←gcd_isUnit_iff]
+      apply isUnit_gcd_of_eq_mul_gcd eq_a' eq_b'
+      apply gcd_ne_zero_of_right
+      assumption
+    rw [eq_a', mul_ne_zero_iff] at ha
+    rcases ha with ⟨hd, ha'⟩
+    rw [eq_b', mul_ne_zero_iff] at hb
+    rcases hb with ⟨_, hb'⟩
+    set d := gcd a b with def_d
+    set c' := -(a' + b') with def_c'
+    have eq_c' : c = d * c' := by
+      rw [def_c']
+      ring_nf
+      rw [←eq_a', ←eq_b', ←add_right_inj (-c)]
+      ring_nf
+      sorry
+    have hc' : c' ≠ 0 := by
+      rw [eq_c', mul_ne_zero_iff] at hc; tauto
+    have hsum' : a' + b' + c' = 0 := by sorry
+    rcases (Polynomial.abc_char0 ha' hb' hc' hab hsum') with hineq | heq
+    . left
+      rw [eq_a', eq_b', eq_c']
+      (repeat rw [mul_comm d _, Polynomial.natDegree_mul _ hd]) <;> try assumption
+      rw [←Nat.max₃_add_distrib_right _ _ _ _]
+      sorry
+    . by_cases hd' : (natDegree d) = 0
+      . right
+        rw [eq_a', eq_b', eq_c']
+        (repeat rw [Polynomial.natDegree_mul _ _]) <;> try assumption
+        simp only [hd', zero_add]
+        exact heq
+      .
+        simp only [Polynomial.natDegree_eq_zero] at heq
+        rcases heq with ⟨⟨ca', eq_ca'⟩, ⟨cb', eq_cb'⟩, ⟨cc', eq_cc'⟩⟩
+        simp only [eq_a', eq_b', eq_c', ←eq_ca', ←eq_cb', ←eq_cc']
+
+
+/--
+rw [eq_a', mul_ne_zero_iff] at ha
+    rcases ha with ⟨hd, ha'⟩
+    rw [eq_b', mul_ne_zero_iff] at hb
+    rcases hb with ⟨_, hb'⟩
+    set d := gcd a b with eq_d
+    set c' := -(a' + b') with def_c'
+    have hc' : c' ≠ 0 := by sorry
+    have eq_c' : c = d * c' := by sorry
+    rcases (Polynomial.abc_char0 ha' hb' hc' hab _) with hineq | heq
+    . left
+      rw [eq_a', eq_b', eq_c']
+      repeat rw [mul_comm d _, Polynomial.natDegree_mul _ hd] <;> try assumption
+      rw [←Nat.max₃_add_distrib_right _ _ _ _]
+      sorry
+    sorry
+-/
