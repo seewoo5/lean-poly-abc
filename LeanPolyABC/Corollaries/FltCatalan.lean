@@ -81,6 +81,12 @@ theorem derivative_pow_eq_zero_iff {n : ℕ} (chn : ¬ringChar k ∣ n) {a : k[X
     . exact goal
   · intro hd; rw [derivative_pow, hd, MulZeroClass.mul_zero]
 
+theorem mul_eq_zero_left_iff
+    {M₀ : Type*} [MulZeroClass M₀] [NoZeroDivisors M₀]
+    {a : M₀} {b : M₀}  (ha : a ≠ 0) : a * b = 0 ↔ b = 0 := by
+  rw [mul_eq_zero]
+  tauto
+
 theorem Polynomial.flt_catalan_deriv
     {p q r : ℕ} (hp : 0 < p) (hq : 0 < q) (hr : 0 < r)
     (hineq : q * r + r * p + p * q ≤ p * q * r)
@@ -104,7 +110,13 @@ theorem Polynomial.flt_catalan_deriv
   cases' Polynomial.abc hap hbp hcp habp hbcp hcap heq with ineq dr0
   case inr dr0 =>
     simp only [derivative_C_mul] at dr0
-    sorry
+    rw [mul_eq_zero_left_iff hu.C_ne_zero,
+        mul_eq_zero_left_iff hv.C_ne_zero,
+        mul_eq_zero_left_iff hw.C_ne_zero,
+        derivative_pow_eq_zero_iff chp,
+        derivative_pow_eq_zero_iff chq,
+        derivative_pow_eq_zero_iff chr] at dr0
+    exact dr0
   case inl ineq =>
     rw [Nat.add_one_le_iff] at ineq
     exfalso; apply not_le_of_lt ineq; clear ineq
