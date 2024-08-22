@@ -1,5 +1,6 @@
 import Mathlib.Algebra.CharP.Defs
 import Mathlib.Algebra.EuclideanDomain.Defs
+import Mathlib.Algebra.Polynomial.FieldDivision
 import LeanPolyABC.Lib.Wronskian
 import LeanPolyABC.Lib.DivRadical
 import LeanPolyABC.Lib.Max3
@@ -13,6 +14,12 @@ open Polynomial
 open UniqueFactorizationMonoid
 
 variable {k : Type _} [Field k]
+
+theorem Ne.isUnit_C {u : k} (hu : u ≠ 0) : IsUnit (C u) :=
+  isUnit_C.mpr hu.isUnit
+
+theorem Ne.C_ne_zero {u : k} (hu : u ≠ 0) : C u ≠ 0 :=
+  C_ne_zero.mpr hu
 
 @[simp]
 theorem dvd_derivative_iff {a : k[X]} : a ∣ derivative a ↔ derivative a = 0 :=
@@ -66,8 +73,10 @@ protected theorem IsCoprime.divRadical {a b : k[X]} (h : IsCoprime a b) :
   rw [← Polynomial.hMul_radical_divRadical b] at h
   exact h.of_mul_left_right.of_mul_right_right
 
-private theorem abc_subcall {a b c w : k[X]} {hw : w ≠ 0} (wab : w = wronskian a b) (ha : a ≠ 0)
-    (hb : b ≠ 0) (hc : c ≠ 0) (hab : IsCoprime a b) (hbc : IsCoprime b c) (hca : IsCoprime c a)
+private theorem abc_subcall
+    {a b c w : k[X]} {hw : w ≠ 0} (wab : w = wronskian a b)
+    (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
+    (hab : IsCoprime a b) (hbc : IsCoprime b c) (hca : IsCoprime c a)
     (abc_dr_dvd_w : (a * b * c).divRadical ∣ w) : c.natDegree + 1 ≤ (radical (a * b * c)).natDegree :=
   by
   have hab := mul_ne_zero ha hb
@@ -92,9 +101,16 @@ private theorem abc_subcall {a b c w : k[X]} {hw : w ≠ 0} (wab : w = wronskian
   rw [t3] at t4
   exact Nat.lt_of_add_lt_add_left t4
 
-private theorem rot3_add {a b c : k[X]} : a + b + c = b + c + a := by ring_nf
+private theorem rot3_add {a b c : k[X]} : a + b + c = b + c + a := by ring
 
-private theorem rot3_mul {a b c : k[X]} : a * b * c = b * c * a := by ring_nf
+private theorem rot3_mul {a b c : k[X]} : a * b * c = b * c * a := by ring
+
+private theorem rot3_isCoprime {a b c : k[X]}
+    (h : a + b + c = 0) (hab : IsCoprime a b) : IsCoprime b c := by
+  rw [add_eq_zero_iff_neg_eq] at h
+  rw [←h, IsCoprime.neg_right_iff]
+  convert IsCoprime.add_mul_left_right hab.symm 1
+  rw [mul_one]
 
 theorem Polynomial.abc {a b c : k[X]}
     (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
@@ -103,17 +119,8 @@ theorem Polynomial.abc {a b c : k[X]}
       derivative a = 0 ∧ derivative b = 0 ∧ derivative c = 0 :=
   by
   -- Utility assertions
-  have h' : c = -(a + b) := by
-    rw [←add_eq_zero_iff_eq_neg, add_comm, hsum]
-  have hbc : IsCoprime b c := by
-    rw [h', IsCoprime.neg_right_iff]
-    convert (IsCoprime.mul_add_left_right hab.symm 1) using 1
-    ring_nf
-  have hca : IsCoprime c a := by
-    rw [h', IsCoprime.neg_left_iff]
-    convert (IsCoprime.mul_add_left_left hab.symm 1) using 1
-    ring_nf
-  clear h'
+  have hbc : IsCoprime b c := rot3_isCoprime hsum hab
+  have hca : IsCoprime c a := rot3_isCoprime (by rw [←rot3_add]; exact hsum) hbc
   have wbc := wronskian_eq_of_sum_zero hsum
   set w := wronskian a b with wab
   have wca : w = wronskian c a := by
@@ -163,6 +170,19 @@ theorem Polynomial.abc_char0 [CharZero k] {a b c : k[X]}
     repeat (any_goals constructor)
     all_goals (apply natDegree_eq_zero_of_derivative_eq_zero; tauto)
 
+lemma isUnit_iff_natDegree_eq_zero {a : k[X]} (ha : a ≠ 0) :
+    IsUnit a ↔ a.natDegree = 0 := by
+  rw [isUnit_iff_degree_eq_zero, degree_eq_natDegree ha]
+  simp only [Nat.cast_eq_zero]
+
+lemma natDegree_radical_eq_zero_iff {a : k[X]} :
+    (radical a).natDegree = 0 ↔ a.natDegree = 0 := by
+  by_cases ha : a = 0
+  . rw [ha]
+    simp only [radical_zero_eq_one, natDegree_zero, natDegree_one, iff_true]
+  . rw [←isUnit_iff_natDegree_eq_zero ha, ←isUnit_iff_natDegree_eq_zero (radical_ne_zero _)]
+    rw [radical_isUnit_iff ha]
+
 -- Variant of Mason--Stothers not requiring coprimality of `a` and `b`
 theorem Polynomial.abc'_char0 [CharZero k]
     {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hsum : a + b + c = 0) :
@@ -184,46 +204,54 @@ theorem Polynomial.abc'_char0 [CharZero k]
     set d := gcd a b with def_d
     set c' := -(a' + b') with def_c'
     have eq_c' : c = d * c' := by
-      rw [def_c']
-      ring_nf
-      rw [←eq_a', ←eq_b', ←add_right_inj (-c)]
-      ring_nf
-      sorry
+      rw [def_c', mul_neg, eq_neg_iff_add_eq_zero,
+          mul_add, add_comm c _, ←eq_a', ←eq_b']
+      exact hsum
     have hc' : c' ≠ 0 := by
-      rw [eq_c', mul_ne_zero_iff] at hc; tauto
-    have hsum' : a' + b' + c' = 0 := by sorry
+      rw [eq_c', mul_ne_zero_iff] at hc; exact hc.right
+    have hsum' : a' + b' + c' = 0 := by
+      rw [eq_a', eq_b', eq_c', ←mul_add, ←mul_add, mul_eq_zero] at hsum
+      rcases hsum with dz | goal
+      . exfalso; exact hd dz
+      . exact goal
+    have hbc := rot3_isCoprime hsum' hab
+    have hca := rot3_isCoprime (by rw [←rot3_add]; exact hsum') hbc
     rcases (Polynomial.abc_char0 ha' hb' hc' hab hsum') with hineq | heq
     . left
       rw [eq_a', eq_b', eq_c']
       (repeat rw [mul_comm d _, Polynomial.natDegree_mul _ hd]) <;> try assumption
       rw [←Nat.max₃_add_distrib_right _ _ _ _]
-      sorry
+      rw [add_right_comm, ←add_assoc, Nat.add_le_add_iff_right]
+      have habc := hca.symm.mul_left hbc
+      rw [radical_hMul habc, natDegree_mul (radical_ne_zero _) (radical_ne_zero _)] at hineq
+      rw [radical_hMul hab, natDegree_mul (radical_ne_zero _) (radical_ne_zero _)] at hineq
+      apply le_trans hineq
+      apply add_le_add_three <;> apply natDegree_le_of_dvd
+      . exact radical_dvd_radical_self_mul hd
+      . exact radical_ne_zero _
+      . exact radical_dvd_radical_self_mul hd
+      . exact radical_ne_zero _
+      . exact radical_dvd_self _
+      . exact hc'
     . by_cases hd' : (natDegree d) = 0
       . right
         rw [eq_a', eq_b', eq_c']
         (repeat rw [Polynomial.natDegree_mul _ _]) <;> try assumption
         simp only [hd', zero_add]
         exact heq
-      .
+      . left
         simp only [Polynomial.natDegree_eq_zero] at heq
         rcases heq with ⟨⟨ca', eq_ca'⟩, ⟨cb', eq_cb'⟩, ⟨cc', eq_cc'⟩⟩
-        simp only [eq_a', eq_b', eq_c', ←eq_ca', ←eq_cb', ←eq_cc']
-
-
-/--
-rw [eq_a', mul_ne_zero_iff] at ha
-    rcases ha with ⟨hd, ha'⟩
-    rw [eq_b', mul_ne_zero_iff] at hb
-    rcases hb with ⟨_, hb'⟩
-    set d := gcd a b with eq_d
-    set c' := -(a' + b') with def_c'
-    have hc' : c' ≠ 0 := by sorry
-    have eq_c' : c = d * c' := by sorry
-    rcases (Polynomial.abc_char0 ha' hb' hc' hab _) with hineq | heq
-    . left
-      rw [eq_a', eq_b', eq_c']
-      repeat rw [mul_comm d _, Polynomial.natDegree_mul _ hd] <;> try assumption
-      rw [←Nat.max₃_add_distrib_right _ _ _ _]
-      sorry
-    sorry
--/
+        rw [eq_comm] at eq_ca' eq_cb' eq_cc'
+        rw [eq_a', eq_b', eq_c']
+        rw [natDegree_mul hd ha', natDegree_mul hd hb', natDegree_mul hd hc']
+        rw [←Nat.max₃_add_distrib_left _ _ _ _]
+        simp_rw [eq_ca', eq_cb', eq_cc', C_ne_zero] at ha' hb' hc' ⊢
+        simp only [Nat.max₃, natDegree_C, max_self, add_zero]
+        rw [add_comm _ 1, add_le_add_iff_right]
+        rw [radical_mul_unit_right ha'.isUnit_C,
+            radical_mul_unit_right hb'.isUnit_C]
+        revert hd'
+        rw [not_imp_comm]
+        simp only [not_le, Nat.lt_one_iff, add_eq_zero, and_self]
+        exact natDegree_radical_eq_zero_iff.mp
