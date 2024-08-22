@@ -101,7 +101,7 @@ theorem Polynomial.flt_catalan_deriv
   have hcap : IsCoprime (C w * c ^ r) (C u * a ^ p) :=
     (isCoprime_mul_units_left hw hu).mpr hca.pow
   have habcp := hcap.symm.mul_left hbcp
-  cases' Polynomial.abc hap hbp hcp habp hbcp hcap heq with ineq dr0
+  cases' Polynomial.abc hap hbp hcp habp heq with ineq dr0
   case inr dr0 =>
     simp only [derivative_C_mul] at dr0
     rw [mul_eq_zero_left_iff hu.C_ne_zero,
