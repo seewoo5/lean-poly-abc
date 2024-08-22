@@ -8,6 +8,9 @@ def max₃ (a b c : Nat) : Nat :=
 theorem max₃_mul_distrib_left (a b c d : Nat) : a * max₃ b c d = max₃ (a * b) (a * c) (a * d) := by
   rw [max₃, max₃, Nat.mul_max_mul_left, Nat.mul_max_mul_left]
 
+theorem max₃_add_distrib_left (a b c d : Nat) : d + max₃ a b c = max₃ (d + a) (d + b) (d + c) := by
+  rw [max₃, max₃, Nat.add_max_add_left, Nat.add_max_add_left]
+
 theorem max₃_add_distrib_right (a b c d : Nat) : max₃ a b c + d = max₃ (a + d) (b + d) (c + d) := by
   rw [max₃, max₃, Nat.add_max_add_right, Nat.add_max_add_right]
 

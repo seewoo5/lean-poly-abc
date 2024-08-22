@@ -17,12 +17,6 @@ open UniqueFactorizationMonoid
 
 variable {k : Type _} [Field k]
 
-private theorem Ne.isUnit_C {u : k} (hu : u ≠ 0) : IsUnit (C u) :=
-  isUnit_C.mpr hu.isUnit
-
-private theorem Ne.C_ne_zero {u : k} (hu : u ≠ 0) : C u ≠ 0 :=
-  C_ne_zero.mpr hu
-
 -- Multiplying units preserve coprimality
 private theorem isCoprime_mul_units_left {a b : k[X]} {u v : k} (hu : u ≠ 0) (hv : v ≠ 0) :
     IsCoprime (C u * a) (C v * b) ↔ IsCoprime a b :=
@@ -107,7 +101,7 @@ theorem Polynomial.flt_catalan_deriv
   have hcap : IsCoprime (C w * c ^ r) (C u * a ^ p) :=
     (isCoprime_mul_units_left hw hu).mpr hca.pow
   have habcp := hcap.symm.mul_left hbcp
-  cases' Polynomial.abc hap hbp hcp habp hbcp hcap heq with ineq dr0
+  cases' Polynomial.abc hap hbp hcp habp heq with ineq dr0
   case inr dr0 =>
     simp only [derivative_C_mul] at dr0
     rw [mul_eq_zero_left_iff hu.C_ne_zero,
