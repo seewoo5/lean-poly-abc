@@ -193,12 +193,12 @@ namespace Polynomial
 theorem radical_degree_le {a : k[X]} (ha : a ≠ 0) : (radical a).degree ≤ a.degree :=
   degree_le_of_dvd (radical_dvd_self a) ha
 
-theorem radical_natDegree_le {a : k[X]} : (radical a).natDegree ≤ a.natDegree := by
+theorem radical_natDegree_le (a : k[X]) : (radical a).natDegree ≤ a.natDegree := by
   by_cases ha : a = 0
   · rw [ha, radical_zero_eq_one, natDegree_one, natDegree_zero]
   · exact natDegree_le_of_dvd (radical_dvd_self a) ha
 
-theorem radical_natDegree_mul_le {a b : k[X]} :
+theorem radical_natDegree_mul_le (a b : k[X]) :
     (radical (a * b)).natDegree ≤ (radical a).natDegree + (radical b).natDegree := by
   rw [←natDegree_mul (radical_ne_zero _) (radical_ne_zero _)]
   apply natDegree_le_of_dvd (radical_mul_dvd_mul_radical a b)

@@ -115,8 +115,8 @@ private theorem rot3_isCoprime {a b c : k[X]}
 theorem Polynomial.abc {a b c : k[X]}
     (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
     (hab : IsCoprime a b) (hsum : a + b + c = 0) :
-    Nat.max₃ a.natDegree b.natDegree c.natDegree + 1 ≤ (radical (a * b * c)).natDegree ∨
-      derivative a = 0 ∧ derivative b = 0 ∧ derivative c = 0 :=
+    (derivative a = 0 ∧ derivative b = 0 ∧ derivative c = 0) ∨
+      Nat.max₃ a.natDegree b.natDegree c.natDegree + 1 ≤ (radical (a * b * c)).natDegree :=
   by
   -- Utility assertions
   have hbc : IsCoprime b c := rot3_isCoprime hsum hab
@@ -145,12 +145,12 @@ theorem Polynomial.abc {a b c : k[X]}
     rw [← Polynomial.divRadical_hMul _]
     exact hca.symm.mul_left hbc
   by_cases hw : w = 0
-  · right
+  · left
     rw [hw] at wab wbc
     cases' hab.wronskian_eq_zero_iff.mp wab.symm with ga gb
     cases' hbc.wronskian_eq_zero_iff.mp wbc.symm with _ gc
     refine' ⟨ga, gb, gc⟩
-  · left
+  · right
     rw [Nat.max₃_add_distrib_right, Nat.max₃_le]
     refine' ⟨_, _, _⟩
     · rw [rot3_mul] at abc_dr_dvd_w ⊢
@@ -162,13 +162,13 @@ theorem Polynomial.abc {a b c : k[X]}
 theorem Polynomial.abc_char0 [CharZero k] {a b c : k[X]}
     (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
     (hab : IsCoprime a b) (hsum : a + b + c = 0) :
-    Nat.max₃ a.natDegree b.natDegree c.natDegree + 1 ≤ (radical (a * b * c)).natDegree ∨
-      (a.natDegree = 0 ∧ b.natDegree = 0 ∧ c.natDegree = 0) := by
+    (a.natDegree = 0 ∧ b.natDegree = 0 ∧ c.natDegree = 0) ∨
+      Nat.max₃ a.natDegree b.natDegree c.natDegree + 1 ≤ (radical (a * b * c)).natDegree := by
   rcases Polynomial.abc ha hb hc hab hsum with _ | h
-  . tauto
-  . right
+  . left
     repeat (any_goals constructor)
     all_goals (apply natDegree_eq_zero_of_derivative_eq_zero; tauto)
+  . tauto
 
 lemma isUnit_iff_natDegree_eq_zero {a : k[X]} (ha : a ≠ 0) :
     IsUnit a ↔ a.natDegree = 0 := by
@@ -186,72 +186,71 @@ lemma natDegree_radical_eq_zero_iff {a : k[X]} :
 -- Variant of Mason--Stothers not requiring coprimality of `a` and `b`
 theorem Polynomial.abc'_char0 [CharZero k]
     {a b c : k[X]} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hsum : a + b + c = 0) :
-    Nat.max₃ a.natDegree b.natDegree c.natDegree + 1 ≤
-      (radical a).natDegree + (radical b).natDegree + c.natDegree ∨
-      (a.natDegree = 0 ∧ b.natDegree = 0 ∧ c.natDegree = 0) :=
-  by
-    rcases gcd_dvd_left a b with ⟨a', eq_a'⟩
-    rcases gcd_dvd_right a b with ⟨b', eq_b'⟩
-    have hab : IsCoprime a' b' := by
-      rw [←gcd_isUnit_iff]
-      apply isUnit_gcd_of_eq_mul_gcd eq_a' eq_b'
-      apply gcd_ne_zero_of_right
-      assumption
-    rw [eq_a', mul_ne_zero_iff] at ha
-    rcases ha with ⟨hd, ha'⟩
-    rw [eq_b', mul_ne_zero_iff] at hb
-    rcases hb with ⟨_, hb'⟩
-    set d := gcd a b with def_d
-    set c' := -(a' + b') with def_c'
-    have eq_c' : c = d * c' := by
-      rw [def_c', mul_neg, eq_neg_iff_add_eq_zero,
-          mul_add, add_comm c _, ←eq_a', ←eq_b']
-      exact hsum
-    have hc' : c' ≠ 0 := by
-      rw [eq_c', mul_ne_zero_iff] at hc; exact hc.right
-    have hsum' : a' + b' + c' = 0 := by
-      rw [eq_a', eq_b', eq_c', ←mul_add, ←mul_add, mul_eq_zero] at hsum
-      rcases hsum with dz | goal
-      . exfalso; exact hd dz
-      . exact goal
-    have hbc := rot3_isCoprime hsum' hab
-    have hca := rot3_isCoprime (by rw [←rot3_add]; exact hsum') hbc
-    rcases (Polynomial.abc_char0 ha' hb' hc' hab hsum') with hineq | heq
+    (a.natDegree = 0 ∧ b.natDegree = 0 ∧ c.natDegree = 0) ∨
+      Nat.max₃ a.natDegree b.natDegree c.natDegree + 1 ≤
+      (radical a).natDegree + (radical b).natDegree + c.natDegree := by
+  rcases gcd_dvd_left a b with ⟨a', eq_a'⟩
+  rcases gcd_dvd_right a b with ⟨b', eq_b'⟩
+  have hab : IsCoprime a' b' := by
+    rw [←gcd_isUnit_iff]
+    apply isUnit_gcd_of_eq_mul_gcd eq_a' eq_b'
+    apply gcd_ne_zero_of_right
+    assumption
+  rw [eq_a', mul_ne_zero_iff] at ha
+  rcases ha with ⟨hd, ha'⟩
+  rw [eq_b', mul_ne_zero_iff] at hb
+  rcases hb with ⟨_, hb'⟩
+  set d := gcd a b with def_d
+  set c' := -(a' + b') with def_c'
+  have eq_c' : c = d * c' := by
+    rw [def_c', mul_neg, eq_neg_iff_add_eq_zero,
+        mul_add, add_comm c _, ←eq_a', ←eq_b']
+    exact hsum
+  have hc' : c' ≠ 0 := by
+    rw [eq_c', mul_ne_zero_iff] at hc; exact hc.right
+  have hsum' : a' + b' + c' = 0 := by
+    rw [eq_a', eq_b', eq_c', ←mul_add, ←mul_add, mul_eq_zero] at hsum
+    rcases hsum with dz | goal
+    . exfalso; exact hd dz
+    . exact goal
+  have hbc := rot3_isCoprime hsum' hab
+  have hca := rot3_isCoprime (by rw [←rot3_add]; exact hsum') hbc
+  rcases (Polynomial.abc_char0 ha' hb' hc' hab hsum') with heq | hineq
+  . by_cases hd' : (natDegree d) = 0
     . left
       rw [eq_a', eq_b', eq_c']
-      (repeat rw [mul_comm d _, Polynomial.natDegree_mul _ hd]) <;> try assumption
-      rw [←Nat.max₃_add_distrib_right _ _ _ _]
-      rw [add_right_comm, ←add_assoc, Nat.add_le_add_iff_right]
-      have habc := hca.symm.mul_left hbc
-      rw [radical_hMul habc, natDegree_mul (radical_ne_zero _) (radical_ne_zero _)] at hineq
-      rw [radical_hMul hab, natDegree_mul (radical_ne_zero _) (radical_ne_zero _)] at hineq
-      apply le_trans hineq
-      apply add_le_add_three <;> apply natDegree_le_of_dvd
-      . exact radical_dvd_radical_self_mul hd
-      . exact radical_ne_zero _
-      . exact radical_dvd_radical_self_mul hd
-      . exact radical_ne_zero _
-      . exact radical_dvd_self _
-      . exact hc'
-    . by_cases hd' : (natDegree d) = 0
-      . right
-        rw [eq_a', eq_b', eq_c']
-        (repeat rw [Polynomial.natDegree_mul _ _]) <;> try assumption
-        simp only [hd', zero_add]
-        exact heq
-      . left
-        simp only [Polynomial.natDegree_eq_zero] at heq
-        rcases heq with ⟨⟨ca', eq_ca'⟩, ⟨cb', eq_cb'⟩, ⟨cc', eq_cc'⟩⟩
-        rw [eq_comm] at eq_ca' eq_cb' eq_cc'
-        rw [eq_a', eq_b', eq_c']
-        rw [natDegree_mul hd ha', natDegree_mul hd hb', natDegree_mul hd hc']
-        rw [←Nat.max₃_add_distrib_left _ _ _ _]
-        simp_rw [eq_ca', eq_cb', eq_cc', C_ne_zero] at ha' hb' hc' ⊢
-        simp only [Nat.max₃, natDegree_C, max_self, add_zero]
-        rw [add_comm _ 1, add_le_add_iff_right]
-        rw [radical_mul_unit_right ha'.isUnit_C,
-            radical_mul_unit_right hb'.isUnit_C]
-        revert hd'
-        rw [not_imp_comm]
-        simp only [not_le, Nat.lt_one_iff, add_eq_zero, and_self]
-        exact natDegree_radical_eq_zero_iff.mp
+      (repeat rw [Polynomial.natDegree_mul _ _]) <;> try assumption
+      simp only [hd', zero_add]
+      exact heq
+    . right
+      simp only [Polynomial.natDegree_eq_zero] at heq
+      rcases heq with ⟨⟨ca', eq_ca'⟩, ⟨cb', eq_cb'⟩, ⟨cc', eq_cc'⟩⟩
+      rw [eq_comm] at eq_ca' eq_cb' eq_cc'
+      rw [eq_a', eq_b', eq_c']
+      rw [natDegree_mul hd ha', natDegree_mul hd hb', natDegree_mul hd hc']
+      rw [←Nat.max₃_add_distrib_left _ _ _ _]
+      simp_rw [eq_ca', eq_cb', eq_cc', C_ne_zero] at ha' hb' hc' ⊢
+      simp only [Nat.max₃, natDegree_C, max_self, add_zero]
+      rw [add_comm _ 1, add_le_add_iff_right]
+      rw [radical_mul_unit_right ha'.isUnit_C,
+          radical_mul_unit_right hb'.isUnit_C]
+      revert hd'
+      rw [not_imp_comm]
+      simp only [not_le, Nat.lt_one_iff, add_eq_zero, and_self]
+      exact natDegree_radical_eq_zero_iff.mp
+  . right
+    rw [eq_a', eq_b', eq_c']
+    (repeat rw [mul_comm d _, Polynomial.natDegree_mul _ hd]) <;> try assumption
+    rw [←Nat.max₃_add_distrib_right _ _ _ _]
+    rw [add_right_comm, ←add_assoc, Nat.add_le_add_iff_right]
+    have habc := hca.symm.mul_left hbc
+    rw [radical_hMul habc, natDegree_mul (radical_ne_zero _) (radical_ne_zero _)] at hineq
+    rw [radical_hMul hab, natDegree_mul (radical_ne_zero _) (radical_ne_zero _)] at hineq
+    apply le_trans hineq
+    apply add_le_add_three <;> apply natDegree_le_of_dvd
+    . exact radical_dvd_radical_self_mul hd
+    . exact radical_ne_zero _
+    . exact radical_dvd_radical_self_mul hd
+    . exact radical_ne_zero _
+    . exact radical_dvd_self _
+    . exact hc'

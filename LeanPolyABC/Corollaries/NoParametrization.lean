@@ -112,7 +112,7 @@ theorem calcstep2 {m M n N : k[X]} (nz_M : M ≠ 0) (nz_N : N ≠ 0) (cp_mM : Is
       w ≠ 0 ∧
         ↑u * w ^ 2 = M ∧
           ↑v * w ^ 3 = N ∧
-            IsCoprime m w ∧ ↑(u ^ 3) * n ^ 2 = ↑(v ^ 2) * m ^ 3 + ↑(v ^ 2 * u ^ 3) * w ^ 6 :=
+            IsCoprime m w ∧ (↑u) ^ 3 * n ^ 2 = (↑v) ^ 2 * m ^ 3 + (↑v) ^ 2 * (↑u) ^ 3 * w ^ 6 :=
   by
   have assoc_M3_N2 : Associated (M ^ 3) (N ^ 2) :=
     by
@@ -132,7 +132,6 @@ theorem calcstep2 {m M n N : k[X]} (nz_M : M ≠ 0) (nz_N : N ≠ 0) (cp_mM : Is
   simp_rw [← eq_Mw, ← eq_Nw, mul_pow, ← pow_mul, ← mul_assoc] at flat_eqn
   simp only [Nat.reduceMul, mul_eq_mul_right_iff, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
     pow_eq_zero_iff] at flat_eqn
-  simp only [Units.val_pow_eq_pow_val, Units.val_mul]
   constructor
   . rw [← eq_Mw, isCoprime_mul_unit_left_right u.isUnit, IsCoprime.pow_right_iff] at cp_mM
     exact cp_mM; decide
@@ -179,15 +178,24 @@ theorem no_parametrization_y2_x3_1 (chk : ¬ringChar k ∣ 6) {x y : RatFunc k}
       w ≠ 0 ∧
         ↑u * w ^ 2 = M ∧
           ↑v * w ^ 3 = N ∧
-            IsCoprime m w ∧ ↑(u ^ 3) * n ^ 2 = ↑(v ^ 2) * m ^ 3 + ↑(v ^ 2 * u ^ 3) * w ^ 6 :=
+            IsCoprime m w ∧ (↑u) ^ 3 * n ^ 2 = (↑v) ^ 2 * m ^ 3 + (↑v) ^ 2 * (↑u) ^ 3 * w ^ 6 :=
     by apply calcstep2 <;> assumption
   clear flat_eqn
   rcases eqn2 with ⟨w, u, v, nz_w, eq_M, eq_N, cp_mw, eqn2⟩
   have chk2 : ¬ringChar k ∣ 2 := by intro h; apply chk; apply h.trans; use 3; norm_num
   have chk3 : ¬ringChar k ∣ 3 := by intro h; apply chk; apply h.trans; use 2; norm_num
-  rw [eq_comm, ← sub_eq_zero, sub_eq_add_neg, ← neg_mul, ← Units.val_neg] at eqn2
+  rw [eq_comm, ← sub_eq_zero, sub_eq_add_neg, ← neg_mul] at eqn2
+  obtain ⟨u0, hu0, eq_u0⟩ := Polynomial.isUnit_iff.mp u.isUnit
+  obtain ⟨v0, hv0, eq_v0⟩ := Polynomial.isUnit_iff.mp v.isUnit
+  rw [isUnit_iff_ne_zero] at hu0 hv0
+  simp_rw [← eq_u0, ← eq_v0, ← map_pow, ← map_mul, ← map_neg] at eqn2
   have deriv_eq_zero := Polynomial.flt_catalan
-    (by decide) (by decide) (by decide) (by decide) chk3 chk chk2 nz_m nz_w nz_n cp_mw eqn2
+    (by decide) (by decide) (by decide) (by decide)
+    chk3 chk chk2 nz_m nz_w nz_n cp_mw ?nz0 ?nz1 ?nz2
+    (by convert eqn2)
+  case nz0 := pow_ne_zero 2 hv0
+  case nz1 := mul_ne_zero (pow_ne_zero 2 hv0) (pow_ne_zero 3 hu0)
+  case nz2 := neg_ne_zero.mpr (pow_ne_zero 3 hu0)
   rcases deriv_eq_zero with ⟨eq_dm, eq_dw, eq_dn⟩
   constructor
   · rw [Polynomial.eq_C_of_natDegree_eq_zero eq_dm]

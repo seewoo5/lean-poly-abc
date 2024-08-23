@@ -101,8 +101,8 @@ theorem Polynomial.flt_catalan_deriv
   have hcap : IsCoprime (C w * c ^ r) (C u * a ^ p) :=
     (isCoprime_mul_units_left hw hu).mpr hca.pow
   have habcp := hcap.symm.mul_left hbcp
-  cases' Polynomial.abc hap hbp hcp habp heq with ineq dr0
-  case inr dr0 =>
+  cases' Polynomial.abc hap hbp hcp habp heq with dr0 ineq
+  case inl dr0 =>
     simp only [derivative_C_mul] at dr0
     rw [mul_eq_zero_left_iff hu.C_ne_zero,
         mul_eq_zero_left_iff hv.C_ne_zero,
@@ -111,7 +111,7 @@ theorem Polynomial.flt_catalan_deriv
         derivative_pow_eq_zero_iff chq,
         derivative_pow_eq_zero_iff chr] at dr0
     exact dr0
-  case inl ineq =>
+  case inr ineq =>
     rw [Nat.add_one_le_iff] at ineq
     exfalso; apply not_le_of_lt ineq; clear ineq
     -- work on lhs
@@ -258,10 +258,8 @@ theorem Polynomial.flt
   have hone : (1 : k[X]) = C 1 := by rfl
   have hneg_one : (-1 : k[X]) = C (-1) := by simp only [map_neg, map_one]
   simp_rw [hneg_one, hone] at heq
-  apply Polynomial.flt_catalan hn' hn' hn' _ chn chn chn ha hb hc hab _ _ _ heq
+  apply Polynomial.flt_catalan hn' hn' hn' _
+    chn chn chn ha hb hc hab one_ne_zero one_ne_zero (neg_ne_zero.mpr one_ne_zero) heq
   have eq_lhs : n * n + n * n + n * n = 3 * n * n := by ring_nf
   rw [eq_lhs]; rw [mul_assoc, mul_assoc]
   apply Nat.mul_le_mul_right (n * n); exact hn
-  simp
-  simp
-  simp
