@@ -14,8 +14,7 @@ variable {k : Type _} [Field k]
 
 /-- Davenport's theorem
 
-For any nonzero polynomial a, b ∈ k[t] with k of characteristic zero,
-deg(a) + 2 ≤ 2 * deg(a^3 - b^2).
+For any nonzero polynomial a, b ∈ k[t] with k of characteristic zero, deg(a) + 2 ≤ 2 * deg(a^3 - b^2).
 
 Proof) Apply ABC for (-a^3, b^2, a^3 - b^2).
 -/
@@ -48,8 +47,7 @@ theorem Polynomial.davenport [CharZero k] {a b : k[X]}
 
 /-- Davenport's theorem for general field k of any characteristic
 
-For any coprime polynomial a, b ∈ k[t] with nonzero derivatives,
-deg(a) + 2 ≤ 2 * deg(a^3 - b^2).
+For any coprime polynomial a, b ∈ k[t] with nonzero derivatives, deg(a) + 2 ≤ 2 * deg(a^3 - b^2).
 Proof) Apply ABC for (-a^3, b^2, a^3 - b^2).
 -/
 theorem Polynomial.davenport' {a b : k[X]} (hab : IsCoprime a b) (haderiv : derivative a ≠ 0)
