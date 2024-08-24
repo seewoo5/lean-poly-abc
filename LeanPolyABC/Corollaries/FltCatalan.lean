@@ -121,7 +121,7 @@ theorem Polynomial.flt_catalan_deriv
         radical_mul_unit_left hw.isUnit_C]
     rw [radical_pow a hp, radical_pow b hq, radical_pow c hr]
     rw [← radical_hMul hab, ← radical_hMul (hca.symm.mul_left hbc)]
-    apply le_trans radical_natDegree_le
+    apply le_trans <| radical_natDegree_le _
     rw [natDegree_mul (mul_ne_zero ha hb) hc]
     rw [natDegree_mul ha hb]
     -- work on rhs
