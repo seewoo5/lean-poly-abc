@@ -35,15 +35,15 @@ theorem Polynomial.davenport [CharZero k] {a b : k[X]}
     nlinarith only [hineq.1, hineq.2, radical_natDegree_le a, radical_natDegree_le b]
 
 -- Auxiliary lemma to remove nonzero hypothesis using coprimality and a' ≠ 0.
- theorem isCoprime_nonzero_c {a b : k[X]} (h : IsCoprime a b) (ha : derivative a ≠ 0) :
-     a ^ 3 - b ^ 2 ≠ 0 := by
-   by_contra h_eq_zero
-   rw [sub_eq_zero] at h_eq_zero
-   have hp : IsCoprime (a ^ 3) (b ^ 2) := h.pow
-   rw [← h_eq_zero, isCoprime_self, isUnit_pow_iff, isUnit_iff] at hp
-   rcases hp with ⟨r, r_unit, eq_a⟩
-   rw [← eq_a] at ha; exact ha derivative_C
-   norm_num
+theorem isCoprime_nonzero_c {a b : k[X]} (h : IsCoprime a b) (ha : derivative a ≠ 0) :
+    a ^ 3 - b ^ 2 ≠ 0 := by
+  by_contra h_eq_zero
+  rw [sub_eq_zero] at h_eq_zero
+  have hp : IsCoprime (a ^ 3) (b ^ 2) := h.pow
+  rw [← h_eq_zero, isCoprime_self, isUnit_pow_iff, isUnit_iff] at hp
+  rcases hp with ⟨r, r_unit, eq_a⟩
+  rw [← eq_a] at ha; exact ha derivative_C
+  norm_num
 
 /-- Davenport's theorem for general field k of any characteristic
 
