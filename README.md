@@ -43,6 +43,10 @@ Using [Gitpod](https://www.gitpod.io/), you can compile the codes on your browse
 gitpod.io/#https://github.com/seewoo5/lean-poly-abc
 ```
 
+## Paper
+
+arXiv version of the paper can be found here: [link](https://arxiv.org/abs/2408.15180)
+
 ## Acknowledgement
 
 Thanks to Kevin Buzzard ([@kbuzzard](https://github.com/kbuzzard)) for recommending this project, and also Thomas Browning ([@tb65536](https://github.com/tb65536)) for helping us to get start with and answer many questions.
