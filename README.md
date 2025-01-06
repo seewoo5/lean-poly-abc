@@ -1,3 +1,7 @@
+Mason-Stothers theorem and polynomial FLT are now fully integrated into [mathlib4](https://github.com/leanprover-community/mathlib4): see [#15706](https://github.com/leanprover-community/mathlib4/pull/15706) and [#18882](https://github.com/leanprover-community/mathlib4/pull/18882).
+
+----
+
 # Formalization of Polynomial ABC and FLT
 
 [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/seewoo5/lean-poly-abc/)
